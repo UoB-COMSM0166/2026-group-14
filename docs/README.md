@@ -28,12 +28,17 @@ VIDEO. Include a demo video of your game here (you don't have to wait until the 
 ![Group photo](./images/group-photo.png)
 
 
-- Group member 1, name, email, role
-- Group member 2, name, email, role
-- Group member 3, name, email, role
-- Group member 4, name, email, role
-- Group member 5, name, email, role
-- Group member 6, name, email, role
+## Team Members
+
+| Name          | Email | Role |
+|---------------|-------|------|
+| Jiaxi You     | <fl25387@bristol.ac.uk> | TBD |
+| Shasha Tang   | <wj25162@bristol.ac.uk> | TBD |
+| Junjie Wang   | <da25293@bristol.ac.uk> | TBD |
+| Jingjing Liu  | <bd25907@bristol.ac.uk> | TBD |
+| Zejun Zhang   | <tc25992@bristol.ac.uk> | TBD |
+| Mingshu Zhang | <so25258@bristol.ac.uk> | TBD |
+
 
 ## Project Report
 
