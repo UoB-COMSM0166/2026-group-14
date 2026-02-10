@@ -48,7 +48,7 @@ VIDEO. Include a demo video of your game here (you don't have to wait until the 
 - Describe your game, what is based on, what makes it novel? (what's the "twist"?) 
 
 ### Requirements 
-We use a GitHub Kanban board to track our progress; you can access it via the link below.
+We use a GitHub Kanban board to track our progress; you can access it via the link here.
 https://github.com/orgs/UoB-COMSM0166/projects/168
 
 - 15% ~750 words
