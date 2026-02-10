@@ -48,6 +48,8 @@ VIDEO. Include a demo video of your game here (you don't have to wait until the 
 - Describe your game, what is based on, what makes it novel? (what's the "twist"?) 
 
 ### Requirements 
+We use a GitHub Kanban board to track our progress; you can access it via the link below.
+https://github.com/orgs/UoB-COMSM0166/projects/168
 
 - 15% ~750 words
 - Early stages design. Ideation process. How did you decide as a team what to develop? Use case diagrams, user stories. 
