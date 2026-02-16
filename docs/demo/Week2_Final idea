@@ -2,12 +2,20 @@
 
 Our game, *Defend Britain*, is a tower defense strategy game set in a medieval world where players take on the role of a knight sworn to protect the British Isles.
 
-The game features a map of the United Kingdom, with each major city representing a unique level. Each city has its own terrain layout, enemy types, and difficulty curve, starting the player with a set amount of initial gold to place their first defensive towers along the critical paths.
+The game features a map of the United Kingdom, with each major city representing a unique level.
+Each city has its own terrain layout, enemy types, and difficulty curve.
+Starting the player with a set amount of initial gold to place their first defensive towers along the critical paths.
 
-As waves of monsters advance, players earn gold by defeating enemies, which can be used to upgrade existing towers—boosting their firepower, range, or special abilities—or purchase new, more powerful towers.
+As waves of monsters advance, players earn gold by defeating enemies.
+This gold can be used to upgrade existing towers—boosting their firepower, range, or special abilities.
+It can also be used to purchase new, more powerful towers.
 
-Unlike traditional tower defense games, we are introducing a **random event system** to enhance replayability and strategic depth, such as sudden weather changes, temporary resource boosts, or special enemy ambushes, ensuring each playthrough feels fresh and dynamic. We are still actively brainstorming innovative mechanics for our defensive towers to offer players more diverse tactical options.
+Unlike traditional tower defense games, we are introducing a **random event system** to enhance replayability and strategic depth.
+Examples include sudden weather changes, temporary resource boosts, or special enemy ambushes.
+This ensures each playthrough feels fresh and dynamic.
+We are still actively brainstorming innovative mechanics for our defensive towers to offer players more diverse tactical options.
 
-The core objective of each level is to defend the castle at the end of the path from being overrun before the countdown timer expires. Successfully completing a level rewards the player with a diamond representing that city.
+The core objective of each level is to defend the castle at the end of the path from being overrun before the countdown timer expires.
+Successfully completing a level rewards the player with a diamond representing that city.
 
 Collecting all the city diamonds will crown the knight as the true defender of Britain, completing his noble quest to safeguard the kingdom.
