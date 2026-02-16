@@ -55,6 +55,7 @@ https://github.com/orgs/UoB-COMSM0166/projects/168
 - Early stages design. Ideation process. How did you decide as a team what to develop? Use case diagrams, user stories.
 
 Reflection:
+
 At this stage of the project, our team has been focusing on the preparation work for developing a tower defense game. Through this process, we have gained a basic understanding of Epics, User Stories, Acceptance Criteria, and their roles in the project.
 
 At first, we regarded Epics as broad and abstract goals, and User Stories simply as a list of scattered features. Through group discussion and practice, we gradually realized that Epics represent the core value of the game, while User Stories serve as a critical bridge to translate these high-level values into user-centered and actionable tasks.
