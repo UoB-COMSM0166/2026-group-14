@@ -1,8 +1,88 @@
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
+  overflow: hidden;
+  /* 防止出现滚动条 */
+  font-family: 'Georgia', serif;
+  /* 使用一个更古典的字体，或导入中世纪风格字体 */
+  background-color: #6699FF;
+  /* 提供一个明亮的默认背景色，以防图片加载失败 */
 }
 
 canvas {
   display: block;
+  /* 确保画布独占一行，消除下方空白 */
+}
+
+/* p5.js createButton() 创建的按钮样式 */
+.menu-button {
+  background-color: #F7DC6F;
+  /* 柔和的黄色/金色，不灰暗 */
+  border: 3px solid #D4AC02;
+  /* 边框更明显 */
+  color: #8B4513;
+  /* 深棕色文字，与金色背景形成对比 */
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 28px;
+  /* 字体大一点 */
+  margin: 10px 0;
+  /* 垂直间距 */
+  cursor: pointer;
+  border-radius: 12px;
+  /* 圆角更大 */
+  transition-duration: 0.3s;
+  /* 鼠标悬停动画 */
+  outline: none;
+  /* 移除点击时的蓝色边框 */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  /* 增加一点阴影，让按钮有立体感 */
+  font-weight: bold;
+  /* 字体加粗 */
+}
+
+.menu-button:hover {
+  background-color: #FAD7A0;
+  /* 悬停时颜色更浅 */
+  border: 3px solid #B8860B;
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.4);
+  /* 悬停时阴影更明显 */
+  transform: translateY(-2px);
+  /* 悬停时轻微上浮 */
+}
+
+/* 标题样式，如果需要自定义 */
+h1 {
+  color: #FFFFFF;
+  text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.7);
+  /* 给标题加阴影，更突出 */
+}
+
+#github-link {
+  position: absolute;
+  right: 20px;
+  /* 距离右边 20px */
+  bottom: 20px;
+  /* 距离底部 20px */
+  z-index: 9999;
+  /* 确保它在最顶层，不会被 p5 按钮挡住 */
+  transition: transform 0.2s;
+  /* 增加一点动效 */
+}
+
+#github-link:hover {
+  transform: scale(1.1);
+  /* 鼠标悬停时放大 10% */
+}
+
+#github-icon {
+  width: 100px;
+  /* 宽度 */
+  height: 100px;
+  /* 高度 */
+  display: block;
+  cursor: pointer;
 }
