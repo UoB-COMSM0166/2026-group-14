@@ -11,6 +11,7 @@ class GameManager {
     this.landmark = null;
     this.towers = [];
     this.enemies = [];
+  this.ui = new UIHUD(this);
 
     this.levelConfigs = {
       1: {
@@ -120,25 +121,30 @@ class GameManager {
   render() {
     switch (this.state) {
       case GameState.MENU:
-        this.drawMenu();
+        this.ui.drawMainMenu();
         break;
       case GameState.PLAYING:
         this.drawGame();
+        this.ui.drawHUD();
+        break;
+      case GameState.SETTINGS:
+        this.ui.drawSettings();
         break;
       case GameState.PAUSED:
-        this.drawGame();       
-        this.drawPaused();    
+        this.drawGame();
+        this.ui.drawPauseScreen();
         break;
       case GameState.WIN:
-        this.drawGame();      
-        this.drawWin();        
+        this.drawGame();
+        this.ui.drawWinScreen();
         break;
       case GameState.LOSE:
-        this.drawGame();      
-        this.drawLose();       
+        this.drawGame();
+        this.ui.drawLoseScreen();
         break;
     }
-}
+  }
+
 
 
   drawGame() {
