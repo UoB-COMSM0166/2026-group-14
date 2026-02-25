@@ -24,10 +24,13 @@
   <script src="js/GameMap.js"></script>
   <script src="js/WaveManager.js"></script>
 
-  <!-- 4. Game engine (uses all above) -->
+  <!-- 4. UI system (must be before GameManager, because GameManager creates UIHUD) -->
+  <script src="js/UIHUD.js"></script>
+
+  <!-- 5. Game engine (uses all above) -->
   <script src="js/GameManager.js"></script>
 
-  <!-- 5. P5.js entry point (must be last) -->
+  <!-- 6. P5.js entry point (must be last) -->
   <script src="sketch.js"></script>
 </body>
 </html>
