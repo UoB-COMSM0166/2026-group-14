@@ -7,7 +7,6 @@ let medievalFont; // 可能的自定义字体
 let closeSettingsBtn; // 交互按钮对象
 let musicSlider, brightnessSlider, musicSelect
 let backBtn;
-let isBold = false;
 
 function hideSettingsUI() {
   musicSlider.hide();
