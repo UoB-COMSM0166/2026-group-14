@@ -3,8 +3,8 @@
 // ========================================
 
 // --- 画布设置 ---
-const CANVAS_WIDTH = 1200;
-const CANVAS_HEIGHT = 800;
+const CANVAS_WIDTH = window.innerWidth;
+const CANVAS_HEIGHT = window.innerHeight;
 const FPS = 60;
 
 // --- 网格设置 ---

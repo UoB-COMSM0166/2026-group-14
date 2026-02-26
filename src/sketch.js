@@ -2,8 +2,8 @@ let game;
 let _bgImage, _settingsBgImg;
 
 function preload() {
-  _bgImage = loadImage('assets/magic_background.png');
-  _settingsBgImg = loadImage('assets/PNG/panelInset_brown.png');
+  _bgImage = loadImage('../src/assets/magic_background.png');
+  _settingsBgImg = loadImage('../src/assets/PNG/panelInset_brown.png');
 }
 
 function setup() {
