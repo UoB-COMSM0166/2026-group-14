@@ -24,7 +24,7 @@ const GameState = {
 
 // --- 经济系统 ---
 const INITIAL_GOLD = 200;        // 开局金币
-const ENEMY_KILL_REWARD = {      // 击杀奖励
+export const ENEMY_KILL_REWARD = {      // 击杀奖励
   basic: 10,
   fast: 15,
   tank: 20,
@@ -40,7 +40,21 @@ const TOWER_COST = {
 
 // --- 地标（被保护的建筑） ---
 const LANDMARK_MAX_HP = 100;      // 地标总血量
-const ENEMY_REACH_DAMAGE = 20;    // 怪物到达终点扣 1 滴血
+export const ENEMY_REACH_DAMAGE = 20;    // 怪物到达终点扣 1 滴血
 
 // --- 关卡设置 ---
 const TOTAL_LEVELS = 3;
+
+// --- Enenmy Part --
+export const ENEMY_SPAWN_INTERVAL = 1000;    //敌人出生间隔
+// 波次配置
+export const WAVES = [                     
+    //wave 1
+    [{type: 'basic', count: 5}],
+    //wave 2
+    [{type: 'basic', count: 8}, {type: 'fast', count: 3}],
+    //wave 3
+    [{type: 'fast', count: 2}, {type: 'basic', count: 10}],
+    //wave 4
+    [{type: 'boss', count: 1}]
+];
