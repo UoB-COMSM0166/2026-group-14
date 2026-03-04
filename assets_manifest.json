@@ -1,0 +1,88 @@
+{
+  "images": {
+    "landmarks": {
+      "bigben": "assets/art/landmarks/bigben.png",
+      "londoneye": "assets/art/landmarks/londoneye.png",
+      "towerbridge": "assets/art/landmarks/towerbridge.png"
+    },
+    "logo": {
+      "main": "assets/art/logo/logo.png"
+    },
+    "map": {
+      "tiles": {
+        "grass": "assets/art/map/tiles/grass_tile.png",
+        "stone": "assets/art/map/tiles/stone_tile.png"
+      }
+    },
+    "towers": {
+      "cannon": {
+        "lv1": "assets/art/towers/cannon/lv1.png",
+        "lv2": "assets/art/towers/cannon/lv2.png",
+        "lv3": "assets/art/towers/cannon/lv3.png"
+      },
+      "slow": {
+        "lv1": "assets/art/towers/slow/lv1.png",
+        "lv2": "assets/art/towers/slow/lv2.png",
+        "lv3": "assets/art/towers/slow/lv3.png"
+      },
+      "tesla": {
+        "lv1": "assets/art/towers/tesla/lv1.png",
+        "lv2": "assets/art/towers/tesla/lv2.png",
+        "lv3": "assets/art/towers/tesla/lv3.png"
+      }
+    },
+    "enemies": {
+      "runner": {
+        "walk_000": "assets/art/enemies/runner/walk_000.png",
+        "walk_001": "assets/art/enemies/runner/walk_001.png"
+      }
+    },
+    "ui": {
+      "buttons": {
+        "pause_normal": "assets/art/ui/buttons/pause_normal.png",
+        "pause_hover": "assets/art/ui/buttons/pause_hover.png",
+        "pause_pressed": "assets/art/ui/buttons/pause_pressed.png",
+        "play_normal": "assets/art/ui/buttons/play_normal.png",
+        "speed1_normal": "assets/art/ui/buttons/speed1_normal.png",
+        "speed2_normal": "assets/art/ui/buttons/speed2_normal.png",
+        "build_normal": "assets/art/ui/buttons/build_normal.png",
+        "upgrade_normal": "assets/art/ui/buttons/upgrade_normal.png",
+        "sell_normal": "assets/art/ui/buttons/sell_normal.png"
+      },
+      "icons": {
+        "coin": "assets/art/ui/icons/coin.png",
+        "heart": "assets/art/ui/icons/heart.png",
+        "wave": "assets/art/ui/icons/wave.png",
+        "gear": "assets/art/ui/icons/gear.png",
+        "tower_cannon": "assets/art/ui/icons/tower_cannon.png",
+        "tower_tesla": "assets/art/ui/icons/tower_tesla.png",
+        "tower_slow": "assets/art/ui/icons/tower_slow.png"
+      },
+      "panels": {
+        "hud_bar": "assets/art/ui/panels/hud_bar.png",
+        "build_panel": "assets/art/ui/panels/build_panel.png",
+        "upgrade_panel": "assets/art/ui/panels/upgrade_panel.png",
+        "pause_menu": "assets/art/ui/panels/pause_menu.png",
+        "win_screen": "assets/art/ui/panels/win_screen.png",
+        "lose_screen": "assets/art/ui/panels/lose_screen.png"
+      }
+    },
+    "vfx": {
+      "bullet": "assets/art/vfx/bullet.png",
+      "hit_000": "assets/art/vfx/hit_000.png"
+    }
+  },
+  "audio": {
+    "bgm": {
+      "london_theme": "assets/audio/bgm/london_theme.mp3"
+    },
+    "sfx": {
+      "click": "assets/audio/sfx/click.wav",
+      "coin": "assets/audio/sfx/coin.wav",
+      "enemy_die": "assets/audio/sfx/enemt_die.wav",
+      "lose": "assets/audio/sfx/lose.wav",
+      "tower_shot": "assets/audio/sfx/tower_shot.wav",
+      "win": "assets/audio/sfx/win.wav"
+    }
+  }
+}

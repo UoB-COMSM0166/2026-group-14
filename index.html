@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Defend London - p5.js</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js"></script>
+  <style>
+    :root { --max-width: 980px; }
+    body { margin: 0; font-family: Arial, sans-serif; background: #f6f6f6; color: #222; }
+    header { max-width: var(--max-width); margin: 24px auto 12px; padding: 0 16px; }
+    h1 { font-size: 20px; margin: 0 0 8px; }
+    .hint { font-size: 13px; opacity: 0.85; line-height: 1.4; }
+    main { max-width: var(--max-width); margin: 0 auto 24px; padding: 0 16px; }
+    #canvas-holder { background: #fff; border: 1px solid #ddd; border-radius: 12px; padding: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); display: inline-block; }
+    footer { max-width: var(--max-width); margin: 12px auto 24px; padding: 0 16px; font-size: 12px; opacity: 0.75; }
+    code { background: rgba(0,0,0,0.06); padding: 2px 6px; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Defend London (p5.js)</h1>
+    <div class="hint">
+      Run with Live Server. Open DevTools Console if the canvas doesn't show.<br />
+      Quick keys: <code>L</code> toggle asset preview, <code>T</code> run tests.
+    </div>
+  </header>
+  <main>
+    <div id="canvas-holder"></div>
+  </main>
+  <footer>
+    If you see a blank page: check Console for errors.
+  </footer>
+<script type="module" src="./sketch.js"></script>
+</body>
+</html>
