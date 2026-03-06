@@ -1,7 +1,7 @@
 // ========================================
 // Enemy — Enemy behaviour (stub for teammate)
 // ========================================
-import { ENEMY_KILL_REWARD, ENEMY_REACH_DAMAGE } from './constants.js';
+// import { ENEMY_KILL_REWARD, ENEMY_REACH_DAMAGE } from './constants.js';
 
 class Enemy {
     constructor(health, speed, type, path){

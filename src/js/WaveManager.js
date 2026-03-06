@@ -1,5 +1,5 @@
-import { WAVES, ENEMY_SPAWN_INTERVAL } from './constants.js';
-import { BasicEnemy, FastEnemy, TankEnemy, BossEnemy } from './Enemy.js';
+// import { WAVES, ENEMY_SPAWN_INTERVAL } from './constants.js';
+// import { BasicEnemy, FastEnemy, TankEnemy, BossEnemy } from './Enemy.js';
 
 class WaveManager {
   constructor(game) {
@@ -51,4 +51,4 @@ class WaveManager {
     }
 }
 
-export{ WaveManager};
+// export{ WaveManager};
