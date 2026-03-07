@@ -26,6 +26,7 @@ class WaveManager {
 
     this.allWavesComplete     = false;
     this._waveClearedThisFrame = false;
+    this._stopped = false;
   }
 
   // ----------------------------------------
@@ -36,7 +37,7 @@ class WaveManager {
   update(enemies, path) {
     this._waveClearedThisFrame = false;
 
-    if (this.allWavesComplete) return;
+    if (this._stopped || this.allWavesComplete) return;
 
     let wave = this.waves[this.currentWaveIndex];
 
@@ -129,5 +130,10 @@ class WaveManager {
 
   isFinished() {
     return this.allWavesComplete;
+  }
+
+  stop() {
+    this._stopped = true;
+    this.waveState = 'stopped';
   }
 }
