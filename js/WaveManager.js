@@ -25,6 +25,7 @@ class WaveManager {
     this.waitTimer            = 180;
 
     this.allWavesComplete     = false;
+    this._waveClearedThisFrame = false;
   }
 
   // ----------------------------------------
@@ -33,6 +34,8 @@ class WaveManager {
   // @param {Path}    path    - current level path
   // ----------------------------------------
   update(enemies, path) {
+    this._waveClearedThisFrame = false;
+
     if (this.allWavesComplete) return;
 
     let wave = this.waves[this.currentWaveIndex];
@@ -72,6 +75,7 @@ class WaveManager {
       let remaining = enemies.filter(e => !e.isDead() && !e.reachedEnd());
 
       if (remaining.length === 0) {
+        this._waveClearedThisFrame = true;
         this.currentWaveIndex++;
 
         if (this.currentWaveIndex >= this.waves.length) {
@@ -87,6 +91,12 @@ class WaveManager {
         }
       }
     }
+  }
+
+  consumeWaveClearEvent() {
+    let wasCleared = this._waveClearedThisFrame;
+    this._waveClearedThisFrame = false;
+    return wasCleared;
   }
 
   // ----------------------------------------

@@ -28,6 +28,9 @@ class UIHUD {
 
     // 亮度值
     this.brightnessValue = 200;
+
+    this.waveBonusMessage = '';
+    this.waveBonusUntilFrame = 0;
   }
 
   // ========================================
@@ -289,7 +292,19 @@ class UIHUD {
 
     // 操作提示
     fill(130);
-    text("K=kill all  T=damage  P=pause  R=restart", 1020, 25); // TODO: TESTING ONLY
+    text("T=damage  P=pause  R=restart", 1040, 25);
+
+    if (this.waveBonusMessage && frameCount <= this.waveBonusUntilFrame) {
+      textAlign(CENTER, CENTER);
+      textSize(22);
+      fill(255, 230, 120);
+      text(this.waveBonusMessage, CANVAS_WIDTH / 2, 78);
+    }
+  }
+
+  showWaveBonus(message, durationFrames = WAVE_BONUS_DISPLAY_FRAMES) {
+    this.waveBonusMessage = message;
+    this.waveBonusUntilFrame = frameCount + durationFrames;
   }
 
   /**

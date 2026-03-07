@@ -107,7 +107,13 @@ class GameManager {
     if (this.state !== GameState.PLAYING) return;
 
     // Wave manager runs first so newly spawned enemies are available this frame
-    if (this.waveManager) this.waveManager.update(this.enemies, this.path);
+    if (this.waveManager) {
+      this.waveManager.update(this.enemies, this.path);
+      if (this.waveManager.consumeWaveClearEvent()) {
+        this.economy.addGold(WAVE_CLEAR_BONUS_GOLD);
+        this.ui.showWaveBonus(`+${WAVE_CLEAR_BONUS_GOLD} Wave Bonus!`);
+      }
+    }
 
     for (let i = this.enemies.length - 1; i >= 0; i--) {
       let enemy = this.enemies[i];
@@ -291,18 +297,6 @@ class GameManager {
       this.restart();
       return;
     }
-  }
-
-
-  // TODO: TESTING ONLY
-  // Instantly clear all enemies currently on the map.
-  killAllEnemies() {
-    for (let enemy of this.enemies) {
-      if (!enemy.isDead() && !enemy.reachedEnd()) {
-        enemy.takeDamage(enemy.hp);
-      }
-    }
-    console.log("Testing shortcut: killed all active enemies");
   }
 
   tryPlaceTower(towerType, x, y) {
