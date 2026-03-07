@@ -31,6 +31,8 @@ class UIHUD {
 
     this.waveBonusMessage = '';
     this.waveBonusUntilFrame = 0;
+
+    this.endScreenButtons = [];
   }
 
   // ========================================
@@ -156,6 +158,8 @@ class UIHUD {
    * 引擎在 GameState.MENU 时自动调用这个方法
    */
   drawMainMenu() {
+    this.endScreenButtons = [];
+
     // 背景图
     if (this.bgImage) {
       image(this.bgImage, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -184,6 +188,8 @@ class UIHUD {
    * 引擎在 GameState.SETTINGS 时自动调用
    */
   drawSettings() {
+    this.endScreenButtons = [];
+
     // 背景
     if (this.bgImage) {
       image(this.bgImage, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -234,6 +240,7 @@ class UIHUD {
    */
   drawHUD() {
     this.hideAll();
+    this.endScreenButtons = [];
 
     // 从引擎获取数据
     let gold = this.game.economy ? this.game.economy.getGold() : 0;
@@ -314,36 +321,55 @@ class UIHUD {
    */
   drawWinScreen() {
     this.hideAll();
+    this.endScreenButtons = [];
+    cursor(ARROW);
 
-    fill(0, 0, 0, 150);
+    let stats = this._getEndStats();
+
+    fill(0, 70, 30, 170);
     noStroke();
     rectMode(CORNER);
     rect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-    fill(255, 215, 0);
+    fill(255);
     textAlign(CENTER, CENTER);
-    textSize(80);
-    textStyle(BOLD);
-    text("VICTORY!", CANVAS_WIDTH / 2, CANVAS_HEIGHT / 3);
-
     textSize(48);
-    text("⭐ ⭐ ⭐", CANVAS_WIDTH / 2, CANVAS_HEIGHT / 3 + 70);
+    textStyle(BOLD);
+    text("🏆 VICTORY!", CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 - 220);
 
     textStyle(NORMAL);
-    fill(255);
+    fill(170, 255, 190);
     textSize(24);
-    let gold = this.game.economy ? this.game.economy.getGold() : 0;
-    text("Remaining Gold: " + gold, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 30);
+    text("London is saved!", CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 - 175);
 
-    if (this.game.landmark) {
-      text("Landmark HP: " + this.game.landmark.hp + "/" + this.game.landmark.maxHp,
-        CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 65);
-    }
+    let panelW = 440;
+    let panelH = 180;
+    let panelX = CANVAS_WIDTH / 2 - panelW / 2;
+    let panelY = CANVAS_HEIGHT / 2 - 120;
+    fill(0, 0, 0, 120);
+    stroke(180, 255, 200, 220);
+    strokeWeight(2);
+    rect(panelX, panelY, panelW, panelH, 12);
+    noStroke();
 
-    fill(200);
-    textSize(20);
-    text("Press N → Next Level    Press R → Replay",
-      CANVAS_WIDTH / 2, CANVAS_HEIGHT - 100);
+    fill(235);
+    textAlign(LEFT, CENTER);
+    textSize(24);
+    let lineX = panelX + 24;
+    text(`Landmark HP: ${stats.landmarkHp}/${stats.landmarkMaxHp}`, lineX, panelY + 35);
+    text(`Enemies Defeated: ${stats.totalKills}`, lineX, panelY + 75);
+    text(`Gold Remaining: ${stats.goldRemaining}`, lineX, panelY + 115);
+    text(`Waves Survived: ${stats.waveSurvived}/${stats.totalWaves}`, lineX, panelY + 155);
+
+    let buttonY = panelY + panelH + 35;
+    this._drawEndScreenButton(
+      { label: "Play Again", x: CANVAS_WIDTH / 2 - 160, y: buttonY, w: 140, h: 46, action: "restart" },
+      { r: 40, g: 130, b: 70 }
+    );
+    this._drawEndScreenButton(
+      { label: "Main Menu", x: CANVAS_WIDTH / 2 + 20, y: buttonY, w: 140, h: 46, action: "menu" },
+      { r: 95, g: 80, b: 50 }
+    );
   }
 
   /**
@@ -352,27 +378,54 @@ class UIHUD {
    */
   drawLoseScreen() {
     this.hideAll();
+    this.endScreenButtons = [];
+    cursor(ARROW);
 
-    fill(100, 0, 0, 150);
+    let stats = this._getEndStats();
+
+    fill(90, 0, 0, 175);
     noStroke();
     rectMode(CORNER);
     rect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-    fill(255, 50, 50);
+    fill(255);
     textAlign(CENTER, CENTER);
-    textSize(80);
+    textSize(48);
     textStyle(BOLD);
-    text("DEFEATED!", CANVAS_WIDTH / 2, CANVAS_HEIGHT / 3);
+    text("💀 GAME OVER", CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 - 220);
 
     textStyle(NORMAL);
-    textSize(32);
-    fill(255, 150, 150);
-    let name = this.game.landmark ? this.game.landmark.name : "Landmark";
-    text(name + " has fallen...", CANVAS_WIDTH / 2, CANVAS_HEIGHT / 3 + 70);
+    textSize(24);
+    fill(255, 170, 170);
+    text("Big Ben has fallen...", CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 - 175);
 
-    fill(200);
-    textSize(20);
-    text("Press R → Retry", CANVAS_WIDTH / 2, CANVAS_HEIGHT - 100);
+    let panelW = 440;
+    let panelH = 145;
+    let panelX = CANVAS_WIDTH / 2 - panelW / 2;
+    let panelY = CANVAS_HEIGHT / 2 - 105;
+    fill(0, 0, 0, 120);
+    stroke(255, 155, 155, 210);
+    strokeWeight(2);
+    rect(panelX, panelY, panelW, panelH, 12);
+    noStroke();
+
+    fill(235);
+    textAlign(LEFT, CENTER);
+    textSize(24);
+    let lineX = panelX + 24;
+    text(`Waves Survived: ${stats.waveSurvived}/${stats.totalWaves}`, lineX, panelY + 35);
+    text(`Enemies Defeated: ${stats.totalKills}`, lineX, panelY + 75);
+    text(`Gold Remaining: ${stats.goldRemaining}`, lineX, panelY + 115);
+
+    let buttonY = panelY + panelH + 35;
+    this._drawEndScreenButton(
+      { label: "Try Again", x: CANVAS_WIDTH / 2 - 160, y: buttonY, w: 140, h: 46, action: "restart" },
+      { r: 135, g: 45, b: 45 }
+    );
+    this._drawEndScreenButton(
+      { label: "Main Menu", x: CANVAS_WIDTH / 2 + 20, y: buttonY, w: 140, h: 46, action: "menu" },
+      { r: 95, g: 80, b: 50 }
+    );
   }
 
   /**
@@ -381,6 +434,7 @@ class UIHUD {
    */
   drawPauseScreen() {
     this.hideAll();
+    this.endScreenButtons = [];
 
     fill(0, 0, 0, 150);
     noStroke();
@@ -468,5 +522,51 @@ class UIHUD {
   hideAll() {
     this.hideMenuButtons();
     this.hideSettingsUI();
+  }
+
+  handleEndScreenClick(mx, my) {
+    for (let button of this.endScreenButtons) {
+      if (mx >= button.x && mx <= button.x + button.w &&
+          my >= button.y && my <= button.y + button.h) {
+        if (button.action === 'restart') this.game.restart();
+        if (button.action === 'menu') this.game.returnToMenu();
+        return true;
+      }
+    }
+    return false;
+  }
+
+  _getEndStats() {
+    let finalStats = this.game.finalStats || {};
+    let totalWaves = finalStats.totalWaves || (this.game.waveManager ? this.game.waveManager.waves.length : 0);
+    return {
+      landmarkHp: finalStats.landmarkHp ?? (this.game.landmark ? Math.max(0, this.game.landmark.hp) : 0),
+      landmarkMaxHp: finalStats.landmarkMaxHp ?? (this.game.landmark ? this.game.landmark.maxHp : 0),
+      totalKills: finalStats.totalKills ?? this.game.totalKills,
+      goldRemaining: finalStats.goldRemaining ?? (this.game.economy ? this.game.economy.getGold() : 0),
+      waveSurvived: finalStats.waveSurvived ?? this.game.waveSurvived,
+      totalWaves
+    };
+  }
+
+  _drawEndScreenButton(button, baseColor) {
+    let hovering = mouseX >= button.x && mouseX <= button.x + button.w &&
+                   mouseY >= button.y && mouseY <= button.y + button.h;
+
+    this.endScreenButtons.push(button);
+    stroke(255, 235, 170);
+    strokeWeight(2);
+    if (hovering) {
+      fill(baseColor.r + 20, baseColor.g + 20, baseColor.b + 20);
+      cursor(HAND);
+    } else {
+      fill(baseColor.r, baseColor.g, baseColor.b);
+    }
+    rect(button.x, button.y, button.w, button.h, 8);
+    noStroke();
+    fill(255);
+    textAlign(CENTER, CENTER);
+    textSize(22);
+    text(button.label, button.x + button.w / 2, button.y + button.h / 2);
   }
 }

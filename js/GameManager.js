@@ -13,6 +13,11 @@ class GameManager {
     this.enemies = [];
     this.path = null;
     this.ui = new UIHUD(this);
+    this.waveManager = null;
+
+    this.totalKills = 0;
+    this.waveSurvived = 0;
+    this.finalStats = null;
 
     this.levelConfigs = {
       1: {
@@ -97,6 +102,9 @@ class GameManager {
     };
     let waveFn = waveFns[levelId] || getLevel1Waves;
     this.waveManager = new WaveManager(waveFn());
+    this.totalKills = 0;
+    this.waveSurvived = 0;
+    this.finalStats = null;
 
     this.setState(GameState.PLAYING);
   }
@@ -110,6 +118,7 @@ class GameManager {
     if (this.waveManager) {
       this.waveManager.update(this.enemies, this.path);
       if (this.waveManager.consumeWaveClearEvent()) {
+        this.waveSurvived++;
         this.economy.addGold(WAVE_CLEAR_BONUS_GOLD);
         this.ui.showWaveBonus(`+${WAVE_CLEAR_BONUS_GOLD} Wave Bonus!`);
       }
@@ -126,6 +135,7 @@ class GameManager {
       }
 
       if (enemy.isDead()) {
+        this.totalKills++;
         this.economy.addGold(enemy.reward);
         this.enemies.splice(i, 1);
       }
@@ -139,19 +149,41 @@ class GameManager {
   }
 
   checkWinLose() {
+    if (this.state !== GameState.PLAYING) return;
+
     if (this.landmark && this.landmark.isDestroyed()) {
       console.log("Landmark destroyed — GAME OVER");
+      if (this.waveManager) this.waveManager.stop();
+      this.recordFinalStats(GameState.LOSE);
       this.setState(GameState.LOSE);
       return;
     }
     // Win: all waves spawned, and no live enemies remain on the field
-    if (this.waveManager && this.waveManager.allWavesComplete) {
+    if (this.landmark && this.landmark.hp > 0 && this.waveManager && this.waveManager.allWavesComplete) {
       let liveEnemies = this.enemies.filter(e => !e.isDead() && !e.reachedEnd());
       if (liveEnemies.length === 0) {
         console.log("All waves cleared — VICTORY");
+        this.recordFinalStats(GameState.WIN);
         this.setState(GameState.WIN);
       }
     }
+  }
+
+  recordFinalStats(resultState) {
+    let totalWaves = this.waveManager ? this.waveManager.waves.length : 0;
+    let currentGold = this.economy ? this.economy.getGold() : 0;
+    let landmarkHp = this.landmark ? Math.max(0, this.landmark.hp) : 0;
+    let landmarkMaxHp = this.landmark ? this.landmark.maxHp : 0;
+
+    this.finalStats = {
+      resultState,
+      waveSurvived: this.waveSurvived,
+      totalWaves,
+      totalKills: this.totalKills,
+      goldRemaining: currentGold,
+      landmarkHp,
+      landmarkMaxHp
+    };
   }
 
   // --- Rendering ---
@@ -292,9 +324,9 @@ class GameManager {
       return;
     }
 
-    // ===== 胜利/失败状态：点击任意位置重新开始 =====
+    // ===== 胜利/失败状态：点击结算按钮 =====
     if (this.state === GameState.WIN || this.state === GameState.LOSE) {
-      this.restart();
+      this.ui.handleEndScreenClick(mx, my);
       return;
     }
   }
@@ -335,12 +367,25 @@ class GameManager {
     this.startLevel(this.currentLevel);
   }
 
+  returnToMenu() {
+    this.towers = [];
+    this.enemies = [];
+    this.path = null;
+    this.waveManager = null;
+    this.economy = null;
+    this.landmark = null;
+    this.totalKills = 0;
+    this.waveSurvived = 0;
+    this.finalStats = null;
+    this.setState(GameState.MENU);
+  }
+
   nextLevel() {
     if (this.currentLevel < TOTAL_LEVELS) {
       this.startLevel(this.currentLevel + 1);
     } else {
       console.log("All levels complete!");
-      this.setState(GameState.MENU);
+      this.returnToMenu();
     }
   }
 
