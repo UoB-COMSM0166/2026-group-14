@@ -6,6 +6,7 @@
 const CANVAS_WIDTH = window.innerWidth;
 const CANVAS_HEIGHT = window.innerHeight;
 const FPS = 60;
+const HUD_HEIGHT = 45;  // 顶部 HUD 栏高度，此区域不可放塔
 
 // --- 网格设置 ---
 const GRID_SIZE = 60;  // 每个格子 60×60 像素

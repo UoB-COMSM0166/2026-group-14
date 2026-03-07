@@ -5,6 +5,19 @@ let gameImages = {};
 function preload() {
   _bgImage = loadImage('assets/magic_background.png');
   _settingsBgImg = loadImage('assets/PNG/panelInset_brown.png');
+  gameImages.mainBackground = loadImage('assets/main_background.png');
+  gameImages.btnStart = loadImage('assets/start.png',
+    () => console.log('✅ start.png loaded'),
+    () => console.log('❌ start.png FAILED')
+  );
+  gameImages.btnSettings = loadImage('assets/settings.png',
+    () => console.log('✅ settings.png loaded'),
+    () => console.log('❌ settings.png FAILED')
+  );
+  gameImages.btnExit = loadImage('assets/exit.png',
+    () => console.log('✅ exit.png loaded'),
+    () => console.log('❌ exit.png FAILED')
+  );
 
   gameImages.bigben          = loadImage('assets/bigben.png');
   gameImages.gherkin         = loadImage('assets/gherkin.png');
