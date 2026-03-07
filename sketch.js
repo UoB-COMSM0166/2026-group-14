@@ -37,6 +37,7 @@ function keyPressed() {
   if (state === GameState.PLAYING) {
     if (key === 'p' || key === 'P') game.pause();
     if (key === 'r' || key === 'R') game.restart();
+    if (key === 'e' || key === 'E') game.spawnEnemy('basic');   // test: spawn enemy
     if (key === 't' || key === 'T') {
       if (game.landmark) {
         game.landmark.takeDamage(ENEMY_REACH_DAMAGE);

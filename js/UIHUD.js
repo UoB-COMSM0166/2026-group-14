@@ -277,7 +277,7 @@ class UIHUD {
     // 操作提示
     textSize(13);
     fill(150);
-    text("T=test damage  P=pause  R=restart", 960, 25);
+    text("E=spawn  T=damage  P=pause  R=restart", 960, 25);
   }
 
   /**
