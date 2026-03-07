@@ -33,11 +33,52 @@ const ENEMY_KILL_REWARD = {      // 击杀奖励
 const WAVE_CLEAR_BONUS_GOLD = 50;
 const WAVE_BONUS_DISPLAY_FRAMES = 120; // 2 seconds @ 60 FPS
 
-// --- 塔的价格 ---
+// --- 塔类型配置（统一集中管理） ---
+const TOWER_TYPES = {
+  basic: {
+    name: "Basic Tower",
+    cost: 50,
+    range: 100,
+    damage: 25,
+    fireRate: 60,
+    color: [70, 130, 230],
+    description: "Balanced tower. Reliable damage.",
+    bulletColor: [255, 255, 0],
+    size: 18
+  },
+  slow: {
+    name: "Slow Tower",
+    cost: 75,
+    range: 90,
+    damage: 10,
+    fireRate: 80,
+    color: [70, 200, 120],
+    description: "Slows enemies. Low damage.",
+    bulletColor: [100, 200, 255],
+    size: 18,
+    slowEffect: 0.5,
+    slowDuration: 90
+  },
+  area: {
+    name: "Area Tower",
+    cost: 120,
+    range: 130,
+    damage: 15,
+    fireRate: 90,
+    color: [220, 80, 60],
+    description: "Damages all enemies in range.",
+    bulletColor: [255, 150, 50],
+    size: 22,
+    splashRadius: 60
+  }
+};
+const TOWER_PANEL_HEIGHT = 90;
+const TOWER_PANEL_TOP = CANVAS_HEIGHT - TOWER_PANEL_HEIGHT;
+const TOWER_SHORTCUT_ORDER = ['basic', 'slow', 'area'];
 const TOWER_COST = {
-  basic: 50,       // 基础塔
-  slow: 100,       // 减速塔
-  area: 150        // 范围塔
+  basic: TOWER_TYPES.basic.cost,
+  slow: TOWER_TYPES.slow.cost,
+  area: TOWER_TYPES.area.cost
 };
 
 // --- 地标（被保护的建筑） ---

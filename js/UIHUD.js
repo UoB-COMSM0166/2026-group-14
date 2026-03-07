@@ -33,6 +33,7 @@ class UIHUD {
     this.waveBonusUntilFrame = 0;
 
     this.endScreenButtons = [];
+    this.towerPanelTabs = [];
   }
 
   // ========================================
@@ -241,6 +242,7 @@ class UIHUD {
   drawHUD() {
     this.hideAll();
     this.endScreenButtons = [];
+    cursor(ARROW);
 
     // 从引擎获取数据
     let gold = this.game.economy ? this.game.economy.getGold() : 0;
@@ -299,7 +301,7 @@ class UIHUD {
 
     // 操作提示
     fill(130);
-    text("T=damage  P=pause  R=restart", 1040, 25);
+    text("1/2/3 select tower  T=damage  P=pause  R=restart", 930, 25);
 
     if (this.waveBonusMessage && frameCount <= this.waveBonusUntilFrame) {
       textAlign(CENTER, CENTER);
@@ -307,6 +309,8 @@ class UIHUD {
       fill(255, 230, 120);
       text(this.waveBonusMessage, CANVAS_WIDTH / 2, 78);
     }
+
+    this.drawTowerPanel();
   }
 
   showWaveBonus(message, durationFrames = WAVE_BONUS_DISPLAY_FRAMES) {
@@ -522,6 +526,118 @@ class UIHUD {
   hideAll() {
     this.hideMenuButtons();
     this.hideSettingsUI();
+  }
+
+  getTowerPanelTabs() {
+    let panelY = TOWER_PANEL_TOP;
+    let gap = 16;
+    let tabW = 180;
+    let tabH = 62;
+    let totalWidth = tabW * 3 + gap * 2;
+    let startX = (CANVAS_WIDTH - totalWidth) / 2;
+    let y = panelY + (TOWER_PANEL_HEIGHT - tabH) / 2;
+    let tabs = [];
+    for (let i = 0; i < TOWER_SHORTCUT_ORDER.length; i++) {
+      let type = TOWER_SHORTCUT_ORDER[i];
+      tabs.push({
+        type,
+        x: startX + i * (tabW + gap),
+        y,
+        w: tabW,
+        h: tabH
+      });
+    }
+    return tabs;
+  }
+
+  drawTowerPanel() {
+    this.towerPanelTabs = this.getTowerPanelTabs();
+
+    fill(0, 0, 0, 170);
+    noStroke();
+    rectMode(CORNER);
+    rect(0, TOWER_PANEL_TOP, CANVAS_WIDTH, TOWER_PANEL_HEIGHT);
+
+    let currentGold = this.game.economy ? this.game.economy.getGold() : 0;
+    for (let tab of this.towerPanelTabs) {
+      let cfg = TOWER_TYPES[tab.type];
+      let affordable = currentGold >= cfg.cost;
+      let selected = this.game.selectedTowerType === tab.type;
+      let hovering = mouseX >= tab.x && mouseX <= tab.x + tab.w &&
+                     mouseY >= tab.y && mouseY <= tab.y + tab.h;
+
+      let bgAlpha = affordable ? 180 : 90;
+      fill(25, 35, 35, bgAlpha);
+      if (selected) {
+        stroke(255, 215, 90);
+        strokeWeight(3);
+      } else {
+        stroke(130, 140, 140, 160);
+        strokeWeight(1.5);
+      }
+      rect(tab.x, tab.y, tab.w, tab.h, 10);
+
+      let [r, g, b] = cfg.color;
+      noStroke();
+      fill(r, g, b, affordable ? 255 : 100);
+      ellipse(tab.x + 24, tab.y + tab.h / 2, 24, 24);
+
+      fill(255, 255, 255, affordable ? 255 : 120);
+      textAlign(LEFT, CENTER);
+      textSize(16);
+      let shortName = cfg.name.split(' ')[0];
+      text(shortName, tab.x + 44, tab.y + 23);
+      textSize(14);
+      text(`$${cfg.cost}`, tab.x + 44, tab.y + 43);
+
+      if (hovering && affordable) cursor(HAND);
+    }
+  }
+
+  handleTowerPanelClick(mx, my) {
+    if (my < TOWER_PANEL_TOP) return false;
+    let tabs = this.getTowerPanelTabs();
+    let currentGold = this.game.economy ? this.game.economy.getGold() : 0;
+
+    for (let tab of tabs) {
+      if (mx >= tab.x && mx <= tab.x + tab.w && my >= tab.y && my <= tab.y + tab.h) {
+        let cfg = TOWER_TYPES[tab.type];
+        if (currentGold >= cfg.cost) {
+          this.game.setSelectedTowerType(tab.type);
+        }
+        return true;
+      }
+    }
+    return true;
+  }
+
+  drawTowerPlacementPreview() {
+    if (this.game.state !== GameState.PLAYING) return;
+    if (!this.game.selectedTowerType) return;
+    if (mouseY < 50 || mouseY > TOWER_PANEL_TOP) return;
+
+    let cfg = TOWER_TYPES[this.game.selectedTowerType] || TOWER_TYPES.basic;
+    let currentGold = this.game.economy ? this.game.economy.getGold() : 0;
+    let canAfford = currentGold >= cfg.cost;
+    let [r, g, b] = cfg.color;
+
+    let gridX = Math.floor(mouseX / GRID_SIZE) * GRID_SIZE + GRID_SIZE / 2;
+    let gridY = Math.floor(mouseY / GRID_SIZE) * GRID_SIZE + GRID_SIZE / 2;
+
+    noFill();
+    stroke(r, g, b, canAfford ? 110 : 45);
+    strokeWeight(this.game.selectedTowerType === 'area' ? 2.2 : 1.5);
+    ellipse(gridX, gridY, cfg.range * 2, cfg.range * 2);
+
+    if (this.game.selectedTowerType === 'area') {
+      stroke(r, g, b, canAfford ? 65 : 30);
+      strokeWeight(1);
+      ellipse(gridX, gridY, (cfg.range + 10) * 2, (cfg.range + 10) * 2);
+    }
+
+    noStroke();
+    fill(r, g, b, canAfford ? 130 : 60);
+    ellipse(gridX, gridY, cfg.size + 6, cfg.size + 6);
   }
 
   handleEndScreenClick(mx, my) {

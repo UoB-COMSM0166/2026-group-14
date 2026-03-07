@@ -35,6 +35,9 @@ function keyPressed() {
     return;
   }
   if (state === GameState.PLAYING) {
+    if (key === '1') game.setSelectedTowerType('basic');
+    if (key === '2') game.setSelectedTowerType('slow');
+    if (key === '3') game.setSelectedTowerType('area');
     if (key === 'p' || key === 'P') game.pause();
     if (key === 'r' || key === 'R') game.restart();
     if (key === 't' || key === 'T') {

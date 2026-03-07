@@ -18,6 +18,7 @@ class GameManager {
     this.totalKills = 0;
     this.waveSurvived = 0;
     this.finalStats = null;
+    this.selectedTowerType = 'basic';
 
     this.levelConfigs = {
       1: {
@@ -105,6 +106,7 @@ class GameManager {
     this.totalKills = 0;
     this.waveSurvived = 0;
     this.finalStats = null;
+    this.selectedTowerType = 'basic';
 
     this.setState(GameState.PLAYING);
   }
@@ -246,6 +248,10 @@ class GameManager {
       this.landmark.draw();
     }
 
+    if (this.state === GameState.PLAYING) {
+      this.ui.drawTowerPlacementPreview();
+    }
+
     this.drawHUD();
   }
 
@@ -299,8 +305,11 @@ class GameManager {
 
     // ===== 游戏中：点击放塔 =====
     if (this.state === GameState.PLAYING) {
+      if (this.ui.handleTowerPanelClick(mx, my)) return;
+
       // 不允许在 HUD 区域放塔（顶部 50 像素）
       if (my < 50) return;
+      if (my > TOWER_PANEL_TOP) return;
 
       // 不允许在地标附近放塔
       if (this.landmark) {
@@ -320,7 +329,7 @@ class GameManager {
         }
       }
 
-      this.tryPlaceTower('basic', gridX, gridY);
+      this.tryPlaceTower(this.selectedTowerType, gridX, gridY);
       return;
     }
 
@@ -332,11 +341,12 @@ class GameManager {
   }
 
   tryPlaceTower(towerType, x, y) {
-    let cost = TOWER_COST[towerType];
-    if (!cost) {
+    let config = TOWER_TYPES[towerType];
+    if (!config) {
       console.log(`Unknown tower type: ${towerType}`);
       return false;
     }
+    let cost = config.cost;
 
     if (!this.economy.canAfford(cost)) {
       console.log(`Not enough gold! Need ${cost}, have ${this.economy.getGold()}`);
@@ -349,6 +359,11 @@ class GameManager {
     this.towers.push(tower);
     console.log(`Placed ${towerType} tower at (${x}, ${y})`);
     return true;
+  }
+
+  setSelectedTowerType(towerType) {
+    if (!TOWER_TYPES[towerType]) return;
+    this.selectedTowerType = towerType;
   }
 
   pause() {
@@ -377,6 +392,7 @@ class GameManager {
     this.totalKills = 0;
     this.waveSurvived = 0;
     this.finalStats = null;
+    this.selectedTowerType = 'basic';
     this.setState(GameState.MENU);
   }
 
