@@ -32,6 +32,9 @@ class Tower {
     this.isFiring = false;
     this.fireAnimTimer = 0;
     this.fireAnimDuration = 10;
+
+    // Hit-effect particles: { x, y, timer, maxTimer, type, maxRadius? }
+    this.hitEffects = [];
   }
 
   // ----------------------------------------
@@ -65,6 +68,12 @@ class Tower {
       this.fireAnimTimer--;
       if (this.fireAnimTimer <= 0) this.isFiring = false;
     }
+
+    // Tick hit effects down and cull expired ones
+    for (let i = this.hitEffects.length - 1; i >= 0; i--) {
+      this.hitEffects[i].timer--;
+      if (this.hitEffects[i].timer <= 0) this.hitEffects.splice(i, 1);
+    }
   }
 
   updateProjectileAttack(enemies) {
@@ -93,7 +102,8 @@ class Tower {
         y: this.y,
         targetEnemy: this.target,
         speed: this.bulletSpeed,  // uses per-tower speed from TOWER_TYPES config
-        alive: true
+        alive: true,
+        trail: []                 // recent positions for the visual trail
       });
       this.fireTimer = this.fireRate;
       this.isFiring = true;
@@ -102,6 +112,11 @@ class Tower {
 
     for (let proj of this.projectiles) {
       if (!proj.alive) continue;
+
+      // Record trail position before moving
+      proj.trail.push({ x: proj.x, y: proj.y });
+      if (proj.trail.length > 5) proj.trail.shift();
+
       if (proj.targetEnemy.isDead() || proj.targetEnemy.reachedEnd()) {
         proj.alive = false;
         continue;
@@ -116,6 +131,13 @@ class Tower {
         if (this.type === 'slow') {
           proj.targetEnemy.applySlow(this.slowEffect, this.slowDuration);
         }
+        // Spawn a hit flash at impact position
+        let maxT = this.type === 'slow' ? 8 : 5;
+        this.hitEffects.push({
+          x: proj.x, y: proj.y,
+          timer: maxT, maxTimer: maxT,
+          type: this.type
+        });
         proj.alive = false;
       } else {
         proj.x += (dx / d) * proj.speed;
@@ -139,6 +161,14 @@ class Tower {
     for (let enemy of targets) {
       enemy.takeDamage(this.damage);
     }
+
+    // Spawn expanding AOE explosion effect
+    this.hitEffects.push({
+      x: this.x, y: this.y,
+      timer: 15, maxTimer: 15,
+      type: 'area',
+      maxRadius: this.splashRadius
+    });
 
     this.areaPulseTimer = this.areaPulseDuration;
     this.fireTimer = this.fireRate;
@@ -172,6 +202,7 @@ class Tower {
     this.drawTowerBody();
     this.drawAttackEffects();
     this.drawProjectiles();
+    this.drawHitEffects();
 
     pop();
   }
@@ -247,11 +278,89 @@ class Tower {
   }
 
   drawProjectiles() {
-    let [br, bg, bb] = this.bulletColor;
-    noStroke();
-    fill(br, bg, bb);
     for (let proj of this.projectiles) {
-      ellipse(proj.x, proj.y, 6, 6);
+      // ── Trail (drawn first so it renders behind the bullet) ──────
+      let trailLen = proj.trail.length;
+      for (let t = 0; t < trailLen; t++) {
+        let tp = proj.trail[t];
+        let frac = (t + 1) / (trailLen + 1);  // 0→1 as we approach the bullet
+
+        if (this.type === 'basic') {
+          noStroke();
+          fill(255, 140, 0, frac * 140);
+          ellipse(tp.x, tp.y, 12 * frac * 0.65, 12 * frac * 0.65);
+        } else if (this.type === 'slow') {
+          noStroke();
+          fill(180, 225, 255, frac * 140);
+          ellipse(tp.x, tp.y, 12 * frac * 0.65, 12 * frac * 0.65);
+        } else if (this.type === 'area') {
+          // flame gradient: orange near bullet, red at tail
+          let r = lerp(200, 255, frac);
+          let g = lerp(30, 100, frac);
+          noStroke();
+          fill(r, g, 0, frac * 160);
+          ellipse(tp.x, tp.y, 16 * frac * 0.7, 16 * frac * 0.7);
+        }
+      }
+
+      // ── Main bullet ──────────────────────────────────────────────
+      if (this.type === 'basic') {
+        stroke(204, 136, 0);
+        strokeWeight(2);
+        fill(255, 215, 0);
+        ellipse(proj.x, proj.y, 12, 12);
+      } else if (this.type === 'slow') {
+        stroke(255, 255, 255);
+        strokeWeight(2);
+        fill(102, 204, 255);
+        ellipse(proj.x, proj.y, 12, 12);
+        // Orbiting snow particles (visual only — no collision change)
+        noStroke();
+        fill(255, 255, 255, 200);
+        let t = frameCount * 0.12;
+        for (let i = 0; i < 3; i++) {
+          let angle = t + (i * TWO_PI / 3);
+          ellipse(proj.x + cos(angle) * 8, proj.y + sin(angle) * 8, 3, 3);
+        }
+      } else if (this.type === 'area') {
+        stroke(204, 51, 0);
+        strokeWeight(2);
+        fill(255, 102, 51);
+        ellipse(proj.x, proj.y, 16, 16);
+      }
+    }
+    noStroke();
+  }
+
+  drawHitEffects() {
+    for (let fx of this.hitEffects) {
+      let progress = 1 - fx.timer / fx.maxTimer;  // 0 at start → 1 at end
+      let alpha    = (fx.timer / fx.maxTimer) * 255;
+
+      if (fx.type === 'basic') {
+        let r = 20 * progress;
+        noStroke();
+        fill(255, 255, 255, alpha);
+        ellipse(fx.x, fx.y, r * 2, r * 2);
+      } else if (fx.type === 'slow') {
+        let r = 25 * progress;
+        noStroke();
+        fill(102, 204, 255, alpha * 0.85);
+        ellipse(fx.x, fx.y, r * 2, r * 2);
+      } else if (fx.type === 'area') {
+        let maxR = fx.maxRadius || 120;
+        let r    = maxR * progress;
+        // Filled core (semi-transparent)
+        noStroke();
+        fill(255, 80, 0, alpha * 0.25);
+        ellipse(fx.x, fx.y, r * 2, r * 2);
+        // Expanding ring
+        noFill();
+        stroke(255, 100 + 80 * (1 - progress), 0, alpha);
+        strokeWeight(3);
+        ellipse(fx.x, fx.y, r * 2, r * 2);
+        noStroke();
+      }
     }
   }
 }

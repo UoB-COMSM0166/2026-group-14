@@ -21,6 +21,10 @@ class GameManager {
     this.finalStats = null;
     this.selectedTowerType = 'basic';
 
+    // Prevents click-through when an HTML button callback changes state in the
+    // same event that also triggers the canvas mousePressed handler.
+    this.stateJustChanged = false;
+
     this.debugMode = false;  // toggled by 'D' key — shows tile grid overlay
 
     this.levelConfigs = {
@@ -65,6 +69,7 @@ class GameManager {
   setState(newState) {
     console.log(`State: ${this.state} -> ${newState}`);
     this.state = newState;
+    this.stateJustChanged = true;
   }
 
   // --- Level management ---
@@ -126,6 +131,9 @@ class GameManager {
   // --- Per-frame update ---
 
   update() {
+    // Reset click-through guard each frame so normal clicks work next frame
+    this.stateJustChanged = false;
+
     if (this.state !== GameState.PLAYING) return;
 
     // Wave manager runs first so newly spawned enemies are available this frame
@@ -283,6 +291,10 @@ class GameManager {
     if (row < 0 || row >= this.mapGrid.length)    return false;
     if (col < 0 || col >= this.mapGrid[0].length) return false;
 
+    // HUD 区域（y: 0 到 HUD_HEIGHT）不可放塔
+    let cellCenterY = row * GRID_SIZE + GRID_SIZE / 2;
+    if (cellCenterY < HUD_HEIGHT) return false;
+
     // Tile must be exactly GRASS
     if (this.mapGrid[row][col] !== TILE_TYPES.GRASS) return false;
 
@@ -377,50 +389,21 @@ class GameManager {
   }
 
   drawHUD() {
-    fill(0, 0, 0, 180);
-    noStroke();
-    rect(0, 0, CANVAS_WIDTH, 50);
-
-    fill(255);
-    textSize(20);
-    textAlign(LEFT, CENTER);
-
-    let gold = this.economy ? this.economy.getGold() : 0;
-    text("Gold: " + gold, 20, 25);
-
-    if (this.landmark) {
-      let hpPercent = this.landmark.getHpPercent();
-      if (hpPercent > 0.6) fill(100, 255, 100);
-      else if (hpPercent > 0.3) fill(255, 255, 100);
-      else fill(255, 100, 100);
-      text(this.landmark.name + ": " + this.landmark.hp + "/" + this.landmark.maxHp, 250, 25);
-    }
-
-    fill(255);
-    text("Level: " + this.currentLevel, 550, 25);
-
-    text("Enemies: " + this.enemies.length, 750, 25);
-
-    textSize(14);
-    fill(180);
-    text("T=damage  P=pause  R=restart", 950, 25);
+    // 顶部 HUD 由 UIHUD.drawTopHUDBar / drawHUD 绘制
+    // 此处保留空实现，避免与 UIHUD 重复绘制
   }
 
   // --- Player actions ---
 
   handleClick(mx, my) {
-    // ===== 主菜单状态：点击开始按钮 =====
-    if (this.state === GameState.MENU) {
-      // 检查是否点击了"START GAME"按钮
-      let btnX = CANVAS_WIDTH / 2;
-      let btnY = CANVAS_HEIGHT / 2 + 40;
-      let btnW = 280;
-      let btnH = 60;
+    // Guard against click-through: if state just changed this same event
+    // (e.g. an HTML button callback already fired startLevel/setState),
+    // drop this canvas-level click entirely.
+    if (this.stateJustChanged) return;
 
-      if (mx > btnX - btnW/2 && mx < btnX + btnW/2 &&
-          my > btnY - btnH/2 && my < btnY + btnH/2) {
-        this.startLevel(1);
-      }
+    // ===== 主菜单状态：点击图片按钮 =====
+    if (this.state === GameState.MENU) {
+      this.ui.handleMenuClick(mx, my);
       return;
     }
 
@@ -428,7 +411,7 @@ class GameManager {
     if (this.state === GameState.PLAYING) {
       // ── Panel / HUD click → handled first ────────────────────────
       if (this.ui.handleTowerPanelClick(mx, my)) return;
-      if (my < 50) return;  // top HUD bar
+      if (my < HUD_HEIGHT) return;  // top HUD bar
 
       // ── Unified col/row from pixel ─────────────────────────────
       let col  = Math.floor(mx / GRID_SIZE);

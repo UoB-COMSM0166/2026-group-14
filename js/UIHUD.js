@@ -51,37 +51,27 @@ class UIHUD {
   }
 
   createMenuButtons() {
-    let buttonWidth = 220;
-    let buttonHeight = 70;
-    let centerX = CANVAS_WIDTH / 2 - buttonWidth / 2;
-    let startY = CANVAS_HEIGHT / 2 - buttonHeight * 1.5;
+    // 主菜单按钮改为图片绘制，不再创建 HTML 按钮
+    this.playButton = null;
+    this.settingsButton = null;
+    this.exitButton = null;
+  }
 
-    // --- Start 按钮 ---
-    this.playButton = createButton('Start');
-    this.playButton.position(centerX, startY);
-    this.playButton.size(buttonWidth, buttonHeight);
-    this.playButton.addClass('menu-button');
-    this.playButton.mousePressed(() => {
-      this.game.startLevel(1);
-    });
-
-    // --- Settings 按钮 ---
-    this.settingsButton = createButton('Settings');
-    this.settingsButton.position(centerX, startY + buttonHeight + 25);
-    this.settingsButton.size(buttonWidth, buttonHeight);
-    this.settingsButton.addClass('menu-button');
-    this.settingsButton.mousePressed(() => {
-      this.game.setState(GameState.SETTINGS);
-    });
-
-    // --- Exit 按钮 ---
-    this.exitButton = createButton('Exit');
-    this.exitButton.position(centerX, startY + (buttonHeight + 25) * 2);
-    this.exitButton.size(buttonWidth, buttonHeight);
-    this.exitButton.addClass('menu-button');
-    this.exitButton.mousePressed(() => {
-      window.location.href = 'about:blank';
-    });
+  /**
+   * 返回主菜单三个图片按钮的点击区域（用于 handleClick 检测）
+   * 与 drawMainMenu 中的绘制位置保持一致
+   */
+  getMenuButtonRects() {
+    const BW = 180;
+    const BH = 50;
+    const GAP = 15;
+    const startCenterY = CANVAS_HEIGHT * 0.52;
+    const cx = CANVAS_WIDTH / 2;
+    return [
+      { id: 'start', x: cx - BW / 2, y: startCenterY - BH / 2, w: BW, h: BH, action: 'start' },
+      { id: 'settings', x: cx - BW / 2, y: startCenterY + BH / 2 + GAP, w: BW, h: BH, action: 'settings' },
+      { id: 'exit', x: cx - BW / 2, y: startCenterY + BH / 2 + GAP + BH + GAP, w: BW, h: BH, action: 'exit' }
+    ];
   }
 
   createSettingsUI() {
@@ -165,8 +155,10 @@ class UIHUD {
   drawMainMenu() {
     this.endScreenButtons = [];
 
-    // 背景图
-    if (this.bgImage) {
+    // 背景图（主菜单专用，已包含 "Defend London" 标题）
+    if (typeof gameImages !== 'undefined' && gameImages.mainBackground && gameImages.mainBackground.width > 0) {
+      image(gameImages.mainBackground, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    } else if (this.bgImage) {
       image(this.bgImage, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
     } else {
       background(20, 60, 20);
@@ -175,17 +167,103 @@ class UIHUD {
     // 亮度遮罩
     this.applyBrightness();
 
-    // 显示菜单按钮，隐藏其他
     this.hideSettingsUI();
-    this.showMenuButtons();
+    this.hideMenuButtons();
 
-    // 标题
-    fill(255);
-    textAlign(CENTER, CENTER);
-    textSize(72);
-    textStyle(BOLD);
-    text('Defend London', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 4.5);
-    textStyle(NORMAL);
+    // 绘制图片按钮（或 fallback 文字按钮）
+    this.drawMenuButtons();
+  }
+
+  /**
+   * 绘制主菜单按钮（图片或 fallback 文字）
+   */
+  drawMenuButtons() {
+    const BW = 180;
+    const BH = 50;
+    const GAP = 15;
+    const startCenterY = CANVAS_HEIGHT * 0.52;
+    const cx = CANVAS_WIDTH / 2;
+
+    const imgs = typeof gameImages !== 'undefined' ? gameImages : {};
+    const hasStart = imgs.btnStart && imgs.btnStart.width > 0;
+    const hasSettings = imgs.btnSettings && imgs.btnSettings.width > 0;
+    const hasExit = imgs.btnExit && imgs.btnExit.width > 0;
+    const useImages = hasStart && hasSettings && hasExit;
+
+    // 调试：首次进入时输出（避免每帧刷屏）
+    if (!this._menuBtnDebugLogged) {
+      this._menuBtnDebugLogged = true;
+      console.log('Drawing menu buttons, btnStart exists:', !!imgs.btnStart,
+        'width:', imgs.btnStart ? imgs.btnStart.width : 0,
+        'useImages:', useImages);
+    }
+
+    const centerYs = [
+      startCenterY,
+      startCenterY + BH + GAP,
+      startCenterY + 2 * BH + 2 * GAP
+    ];
+
+    for (let i = 0; i < 3; i++) {
+      const cy = centerYs[i];
+      const rect = this.getMenuButtonRects()[i];
+      const hovered = mouseX >= rect.x && mouseX <= rect.x + rect.w &&
+                      mouseY >= rect.y && mouseY <= rect.y + rect.h;
+      const pressed = hovered && mouseIsPressed;
+
+      let scaleFactor = 1;
+      if (pressed) scaleFactor = 0.95;
+      else if (hovered) scaleFactor = 1.08;
+
+      push();
+      translate(cx, cy);
+      scale(scaleFactor);
+      translate(-cx, -cy);
+
+      if (useImages) {
+        const img = i === 0 ? imgs.btnStart : (i === 1 ? imgs.btnSettings : imgs.btnExit);
+        imageMode(CENTER);
+        image(img, cx, cy, BW, BH);
+        imageMode(CORNER);
+      } else {
+        // Fallback: 深色圆角矩形 + 白色文字
+        noStroke();
+        fill(60, 50, 40, 230);
+        rect(rect.x, rect.y, rect.w, rect.h, 10);
+        stroke(180, 160, 120);
+        strokeWeight(2);
+        noFill();
+        rect(rect.x, rect.y, rect.w, rect.h, 10);
+        noStroke();
+        fill(255);
+        textAlign(CENTER, CENTER);
+        textSize(18);
+        textStyle(BOLD);
+        const labels = ['Start', 'Settings', 'Exit'];
+        text(labels[i], cx, cy);
+        textStyle(NORMAL);
+      }
+
+      pop();
+
+      if (hovered) cursor(HAND);
+    }
+  }
+
+  /**
+   * 处理主菜单按钮点击，返回 true 表示已处理
+   */
+  handleMenuClick(mx, my) {
+    const rects = this.getMenuButtonRects();
+    for (const r of rects) {
+      if (mx >= r.x && mx <= r.x + r.w && my >= r.y && my <= r.y + r.h) {
+        if (r.action === 'start') this.game.startLevel(1);
+        else if (r.action === 'settings') this.game.setState(GameState.SETTINGS);
+        else if (r.action === 'exit') window.location.href = 'about:blank';
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
@@ -237,88 +315,161 @@ class UIHUD {
   }
 
   /**
-   * 游戏内 HUD（顶部信息栏）
+   * 绘制顶部 HUD 栏（45px 高）
+   * 与底部面板风格统一的深色木质/中世纪风格
+   * @param {boolean} showPaused - 是否在中央显示 "⏸ PAUSED" 标记
+   */
+  drawTopHUDBar(showPaused = false) {
+    const H = HUD_HEIGHT;
+    const leftX = 15;
+
+    // 背景：深色半透明
+    noStroke();
+    fill(30, 25, 18, 224);  // rgba(30, 25, 18, 0.88) ≈ 224
+    rectMode(CORNER);
+    rect(0, 0, CANVAS_WIDTH, H);
+
+    // 底部金色分隔线
+    stroke(200, 168, 78);  // #C8A84E
+    strokeWeight(2);
+    line(0, H, CANVAS_WIDTH, H);
+    noStroke();
+
+    // ── 左侧：金币 ─────────────────────────────────────────────
+    let gold = this.game.economy ? Math.floor(this.game.economy.getGold()) : 0;
+    let coinCX = leftX + 11;
+    let coinCY = H / 2;
+
+    // 金币图标：金色圆形 + $ 符号
+    fill(255, 210, 0);
+    ellipse(coinCX, coinCY, 22, 22);
+    fill(180, 140, 0);  // 深黄色 $
+    textAlign(CENTER, CENTER);
+    textSize(12);
+    textStyle(BOLD);
+    text('$', coinCX, coinCY);
+    textStyle(NORMAL);
+
+    // 金币数量（图标右侧 8px）
+    fill(255, 215, 0);  // #FFD700
+    textAlign(LEFT, CENTER);
+    textSize(20);
+    textStyle(BOLD);
+    text(String(gold), leftX + 22 + 8, coinCY);
+    textStyle(NORMAL);
+
+    // ── 中间：地标血量（水平居中）────────────────────────────────
+    let hp = this.game.landmark ? Math.floor(this.game.landmark.hp) : 0;
+    let maxHp = this.game.landmark ? Math.floor(this.game.landmark.maxHp) : 0;
+    let name = this.game.landmark ? this.game.landmark.name : 'Landmark';
+    let hpPercent = maxHp > 0 ? hp / maxHp : 0;
+
+    let centerX = CANVAS_WIDTH / 2;
+    let barW = 160;
+    let barH = 14;
+    let barX = centerX - barW / 2;
+    let barY = 24;
+
+    // 地标名称（第一行）
+    fill(255, 255, 255, 204);  // rgba(255,255,255,0.8)
+    textAlign(CENTER, CENTER);
+    textSize(13);
+    text(name, centerX, 10);
+
+    // 血条背景
+    fill(60, 60, 60, 204);
+    rect(barX, barY, barW, barH, 7);
+
+    // 血条填充（根据血量变色）
+    if (hpPercent > 0.6) {
+      fill(76, 175, 80);  // #4CAF50
+      // 渐变效果用两个色块近似
+    } else if (hpPercent > 0.3) {
+      fill(255, 193, 7);  // #FFC107
+    } else {
+      fill(244, 67, 54);  // #F44336
+    }
+    rect(barX, barY, barW * hpPercent, barH, 7);
+
+    // 血条上方文字 "80 / 100"（居中叠加，带阴影）
+    let hpText = `${hp} / ${maxHp}`;
+    textSize(10);
+    textStyle(BOLD);
+    textAlign(CENTER, CENTER);
+    fill(0, 0, 0, 150);
+    text(hpText, centerX + 1, barY + barH / 2 + 1);
+    fill(255);
+    text(hpText, centerX, barY + barH / 2);
+    textStyle(NORMAL);
+
+    // ── 右侧：波次信息（距右边缘 15px）──────────────────────────
+    let rightEdge = CANVAS_WIDTH - 15;
+    let waveDisplay = '';
+    let waveState = '';
+    let currWave = 1;
+    let totalWaves = 1;
+    if (this.game.waveManager) {
+      waveDisplay = this.game.waveManager.getCurrentWaveDisplay();
+      waveState = this.game.waveManager.getWaveStateText();
+      currWave = Math.min(this.game.waveManager.currentWaveIndex + 1, this.game.waveManager.waves.length);
+      totalWaves = this.game.waveManager.waves.length;
+    }
+    // 波次标题（第一行）
+    fill(255, 255, 255, 204);
+    textSize(13);
+    textAlign(RIGHT, CENTER);
+    text('Wave', rightEdge, 10);
+    // 波次数字 "Wave 1 / 3" — 1 金色，/ 3 白色，右对齐
+    textSize(18);
+    textStyle(BOLD);
+    let suffix = ' / ' + totalWaves;
+    let currStr = String(currWave);
+    fill(255);
+    text(suffix, rightEdge, 31);
+    fill(255, 215, 0);
+    text(currStr, rightEdge - textWidth(suffix), 31);
+    textStyle(NORMAL);
+    // 波次间歇期小字
+    if (waveState && (waveState.indexOf('Next wave') !== -1 || waveState.indexOf('incoming') !== -1)) {
+      fill(255, 200, 100, 179);
+      textSize(10);
+      textAlign(RIGHT, CENTER);
+      text('Next wave incoming...', rightEdge, 40);
+    }
+
+    // 暂停标记（可选）
+    if (showPaused) {
+      fill(255, 215, 0, 220);
+      textAlign(CENTER, CENTER);
+      textSize(14);
+      textStyle(BOLD);
+      text('⏸ PAUSED', centerX, 22);
+      textStyle(NORMAL);
+    }
+  }
+
+  /**
+   * 游戏内 HUD（顶部信息栏 + 底部塔选择面板）
    * 引擎在 GameState.PLAYING 时自动调用
-   * 
-   * 你可以自由美化这个 HUD！
-   * 通过 this.game 可以获取所有游戏数据
    */
   drawHUD() {
     this.hideAll();
     this.endScreenButtons = [];
     cursor(ARROW);
 
-    // 从引擎获取数据
-    let gold = this.game.economy ? this.game.economy.getGold() : 0;
-    let hp = this.game.landmark ? this.game.landmark.hp : 0;
-    let maxHp = this.game.landmark ? this.game.landmark.maxHp : 0;
-    let name = this.game.landmark ? this.game.landmark.name : "Landmark";
-    let level = this.game.currentLevel;
-    let enemies = this.game.enemies ? this.game.enemies.length : 0;
-
-    // 半透明背景条
-    fill(0, 0, 0, 180);
-    noStroke();
-    rectMode(CORNER);
-    rect(0, 0, CANVAS_WIDTH, 50);
-
-    // 金币
-    fill(255, 215, 0);
-    textSize(20);
-    textAlign(LEFT, CENTER);
-    text("💰 " + gold, 20, 25);
-
-    // 地标血量（颜色随血量变化）
-    let hpPercent = maxHp > 0 ? hp / maxHp : 0;
-    if (hpPercent > 0.6) fill(100, 255, 100);
-    else if (hpPercent > 0.3) fill(255, 255, 100);
-    else fill(255, 100, 100);
-    text("🏰 " + name + ": " + hp + "/" + maxHp, 200, 25);
-
-    // 血条
-    let barX = 480;
-    let barW = 120;
-    fill(60);
-    rect(barX, 15, barW, 20, 5);
-    if (hpPercent > 0.6) fill(100, 255, 100);
-    else if (hpPercent > 0.3) fill(255, 255, 100);
-    else fill(255, 100, 100);
-    rect(barX, 15, barW * hpPercent, 20, 5);
-
-    // 关卡
-    fill(255);
-    text("Lv: " + level, 650, 25);
-
-    // 波次信息（从 WaveManager 获取）
-    let waveDisplay = '';
-    let waveState   = '';
-    if (this.game.waveManager) {
-      waveDisplay = this.game.waveManager.getCurrentWaveDisplay(); // "Wave 1 / 3"
-      waveState   = this.game.waveManager.getWaveStateText();      // "Next wave in 3s"
-    }
-    fill(200, 220, 255);
-    text(waveDisplay, 750, 25);
-
-    fill(180);
-    textSize(13);
-    text(waveState, 880, 25);
-
-    // 操作提示
-    fill(130);
-    text("1/2/3 select tower  T=damage  P=pause  R=restart", 930, 25);
+    this.drawTopHUDBar(false);
 
     if (this.waveBonusMessage && frameCount <= this.waveBonusUntilFrame) {
       textAlign(CENTER, CENTER);
       textSize(22);
       fill(255, 230, 120);
-      text(this.waveBonusMessage, CANVAS_WIDTH / 2, 78);
+      text(this.waveBonusMessage, CANVAS_WIDTH / 2, HUD_HEIGHT + 33);
     }
 
     if (this.placementMessage && frameCount <= this.placementMessageUntilFrame) {
       textAlign(CENTER, CENTER);
       textSize(18);
       fill(255, 80, 80);
-      // Semi-transparent pill background
       let msgW = 240, msgH = 34;
       let msgX = CANVAS_WIDTH / 2 - msgW / 2;
       let msgY = CANVAS_HEIGHT / 2 - msgH / 2;
@@ -460,15 +611,20 @@ class UIHUD {
   /**
    * 暂停画面
    * 引擎在 GameState.PAUSED 时自动调用
+   * HUD 栏保持可见，中央显示 PAUSED 标记
    */
   drawPauseScreen() {
     this.hideAll();
     this.endScreenButtons = [];
 
+    // 先绘制顶部 HUD 栏（带 PAUSED 标记），确保可见
+    this.drawTopHUDBar(true);
+
+    // 半透明遮罩（不覆盖 HUD 区域）
     fill(0, 0, 0, 150);
     noStroke();
     rectMode(CORNER);
-    rect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    rect(0, HUD_HEIGHT, CANVAS_WIDTH, CANVAS_HEIGHT - HUD_HEIGHT);
 
     fill(255);
     textAlign(CENTER, CENTER);
@@ -758,7 +914,7 @@ class UIHUD {
   drawTowerPlacementPreview() {
     if (this.game.state !== GameState.PLAYING) return;
     if (!this.game.selectedTowerType) return;
-    if (mouseY < 50 || mouseY > TOWER_PANEL_TOP) return;
+    if (mouseY < HUD_HEIGHT || mouseY > TOWER_PANEL_TOP) return;
 
     let type = this.game.selectedTowerType;
     let cfg  = TOWER_TYPES[type] || TOWER_TYPES.basic;
