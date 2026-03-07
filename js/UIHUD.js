@@ -110,7 +110,7 @@ class UIHUD {
 
     // 关闭按钮（X 图标）
     this.closeSettingsBtn = createButton('');
-    this.closeSettingsBtn.style('background', "url('../src/assets/PNG/iconCross_brown.png') no-repeat center center");
+    this.closeSettingsBtn.style('background', "url('assets/PNG/iconCross_brown.png') no-repeat center center");
     this.closeSettingsBtn.style('background-size', 'contain');
     this.closeSettingsBtn.style('border', 'none');
     this.closeSettingsBtn.style('width', '30px');

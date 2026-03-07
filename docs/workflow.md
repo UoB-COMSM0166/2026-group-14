@@ -85,6 +85,4 @@ ENEMY_REACH_DAMAGE // Damage when enemy reaches landmark
 
 ---
 
-## Questions?
 
-If you have any questions, feel free to reach out to the project lead anytime!
