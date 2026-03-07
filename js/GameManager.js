@@ -11,7 +11,8 @@ class GameManager {
     this.landmark = null;
     this.towers = [];
     this.enemies = [];
-  this.ui = new UIHUD(this);
+    this.path = null;
+    this.ui = new UIHUD(this);
 
     this.levelConfigs = {
       1: {
@@ -78,6 +79,16 @@ class GameManager {
     );
     this.towers = [];
     this.enemies = [];
+
+    // Build the path for this level (defined in Path.js)
+    const waypointFns = {
+      1: getLevel1Waypoints,
+      2: getLevel2Waypoints,
+      3: getLevel3Waypoints
+    };
+    let waypointFn = waypointFns[levelId] || getLevel1Waypoints;
+    this.path = new Path(waypointFn());
+
     this.setState(GameState.PLAYING);
   }
 
@@ -161,6 +172,9 @@ class GameManager {
     }
     noStroke();
 
+    // Path (drawn beneath towers and enemies)
+    if (this.path) this.path.draw();
+
     for (let tower of this.towers) {
       tower.draw();
     }
@@ -203,7 +217,7 @@ class GameManager {
 
     textSize(14);
     fill(180);
-    text("T=damage  P=pause  R=restart", 950, 25);
+    text("E=spawn  T=damage  P=pause  R=restart", 950, 25);
   }
 
   // --- Player actions ---
@@ -258,6 +272,22 @@ class GameManager {
     }
   }
 
+
+  // --- Enemy spawning ---
+
+  /**
+   * Spawn a new enemy at the start of the current path.
+   * @param {string} type - 'basic' | 'fast' | 'tank' | 'boss'
+   */
+  spawnEnemy(type = 'basic') {
+    if (!this.path) {
+      console.log("No path defined — cannot spawn enemy");
+      return;
+    }
+    let enemy = new Enemy(this.path, type);
+    this.enemies.push(enemy);
+    console.log(`Spawned ${type} enemy (total: ${this.enemies.length})`);
+  }
 
   tryPlaceTower(towerType, x, y) {
     let cost = TOWER_COST[towerType];

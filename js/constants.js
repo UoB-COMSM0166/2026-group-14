@@ -44,3 +44,11 @@ const ENEMY_REACH_DAMAGE = 20;    // 怪物到达终点扣 1 滴血
 
 // --- 关卡设置 ---
 const TOTAL_LEVELS = 3;
+
+// --- 敌人属性 ---
+const ENEMY_STATS = {
+  basic: { hp: 100, speed: 2,   reward: ENEMY_KILL_REWARD.basic },
+  fast:  { hp:  60, speed: 4,   reward: ENEMY_KILL_REWARD.fast  },
+  tank:  { hp: 250, speed: 1,   reward: ENEMY_KILL_REWARD.tank  },
+  boss:  { hp: 500, speed: 0.8, reward: ENEMY_KILL_REWARD.boss  }
+};
