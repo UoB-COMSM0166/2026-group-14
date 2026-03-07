@@ -19,7 +19,10 @@ class Enemy {
     this.maxHp  = (config.hp    !== undefined) ? config.hp    : preset.hp;
     this.hp     = this.maxHp;
     this.speed  = (config.speed !== undefined) ? config.speed : preset.speed;
+    this.baseSpeed = this.speed;
     this.reward = preset.reward;
+    this.slowTimer = 0;
+    this.isSlowed = false;
 
     // Visual body diameter varies by type
     const SIZES = { basic: 20, fast: 16, tank: 28, boss: 34 };
@@ -43,6 +46,14 @@ class Enemy {
   // ----------------------------------------
   update() {
     if (!this._alive || this._reachedEnd) return;
+
+    if (this.slowTimer > 0) {
+      this.slowTimer--;
+      if (this.slowTimer <= 0) {
+        this.speed = this.baseSpeed;
+        this.isSlowed = false;
+      }
+    }
 
     // All waypoints visited → enemy reached the landmark
     if (this.currentWaypointIndex >= this.path.count()) {
@@ -78,6 +89,12 @@ class Enemy {
     push();
 
     // --- Enemy body (size varies by type) ---
+    if (this.isSlowed) {
+      noStroke();
+      fill(130, 210, 255, 90);
+      ellipse(this.x, this.y, this.bodySize + 12, this.bodySize + 12);
+    }
+
     noStroke();
     let bodyColor = this._bodyColor();
     fill(bodyColor.r, bodyColor.g, bodyColor.b);
@@ -128,6 +145,13 @@ class Enemy {
 
   reachedEnd() {
     return this._reachedEnd;
+  }
+
+  applySlow(slowEffect, duration) {
+    if (this.isSlowed || this._reachedEnd || !this._alive) return;
+    this.speed = this.baseSpeed * slowEffect;
+    this.slowTimer = duration;
+    this.isSlowed = true;
   }
 
   // ----------------------------------------
