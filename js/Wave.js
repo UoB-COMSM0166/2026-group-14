@@ -23,6 +23,14 @@ function _enemies(count, type, hp, speed) {
   return Array.from({ length: count }, () => ({ type, hp, speed }));
 }
 
+function _buildEnemyList(groups) {
+  let list = [];
+  for (let group of groups) {
+    list.push(..._enemies(group.count, group.type, group.hp, group.speed));
+  }
+  return list;
+}
+
 // ========================================
 // Wave definitions per level
 // ========================================
@@ -31,27 +39,13 @@ function _enemies(count, type, hp, speed) {
  * Level 1 — 3 waves, escalating difficulty
  */
 function getLevel1Waves() {
-  return [
-    new Wave(1,
-      _enemies(5, 'basic', 100, 2),
-      60   // 1 enemy per second
-    ),
-    new Wave(2,
-      [
-        ..._enemies(5, 'basic', 100, 2),
-        ..._enemies(3, 'fast',   60, 3.5)
-      ],
-      50
-    ),
-    new Wave(3,
-      [
-        ..._enemies(6, 'basic', 100, 2  ),
-        ..._enemies(3, 'fast',   60, 3.5),
-        ..._enemies(3, 'tank',  250, 1.2)
-      ],
-      40
-    )
-  ];
+  return LEVEL_1_WAVE_CONFIGS.map(config => {
+    return new Wave(
+      config.waveNumber,
+      _buildEnemyList(config.enemies),
+      config.spawnInterval
+    );
+  });
 }
 
 /**
