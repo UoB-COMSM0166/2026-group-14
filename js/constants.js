@@ -23,7 +23,7 @@ const GameState = {
 };
 
 // --- 经济系统 ---
-const INITIAL_GOLD = 200;        // 开局金币
+const INITIAL_GOLD = 9999;       // TODO: TESTING ONLY
 const ENEMY_KILL_REWARD = {      // 击杀奖励
   basic: 10,
   fast: 15,

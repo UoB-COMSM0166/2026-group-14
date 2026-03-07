@@ -4,19 +4,26 @@
 
 class Enemy {
   /**
-   * @param {Path}   path - The path this enemy will follow
-   * @param {string} type - One of: 'basic', 'fast', 'tank', 'boss'
+   * @param {Path}   path   - The path this enemy will follow
+   * @param {Object} config - { type, hp, speed }
+   *                          Any missing field falls back to ENEMY_STATS preset.
    */
-  constructor(path, type = 'basic') {
+  constructor(path, config = {}) {
     this.path = path;
-    this.type = type;
 
-    // --- Stats (from constants.js ENEMY_STATS) ---
-    let stats = ENEMY_STATS[type] || ENEMY_STATS.basic;
-    this.maxHp  = stats.hp;
-    this.hp     = stats.hp;
-    this.speed  = stats.speed;
-    this.reward = stats.reward;
+    // Resolve type (default: 'basic')
+    let type   = config.type || 'basic';
+    let preset = ENEMY_STATS[type] || ENEMY_STATS.basic;
+
+    this.type   = type;
+    this.maxHp  = (config.hp    !== undefined) ? config.hp    : preset.hp;
+    this.hp     = this.maxHp;
+    this.speed  = (config.speed !== undefined) ? config.speed : preset.speed;
+    this.reward = preset.reward;
+
+    // Visual body diameter varies by type
+    const SIZES = { basic: 20, fast: 16, tank: 28, boss: 34 };
+    this.bodySize = SIZES[type] || 20;
 
     // --- Position: start at the first waypoint ---
     let start = path.getWaypoint(0);
@@ -70,23 +77,23 @@ class Enemy {
   draw() {
     push();
 
-    // --- Enemy body ---
+    // --- Enemy body (size varies by type) ---
     noStroke();
     let bodyColor = this._bodyColor();
     fill(bodyColor.r, bodyColor.g, bodyColor.b);
-    ellipse(this.x, this.y, 24, 24);
+    ellipse(this.x, this.y, this.bodySize, this.bodySize);
 
     // --- Outline ---
     stroke(0, 0, 0, 120);
     strokeWeight(1.5);
     noFill();
-    ellipse(this.x, this.y, 24, 24);
+    ellipse(this.x, this.y, this.bodySize, this.bodySize);
 
-    // --- HP bar (above the body) ---
-    let barW  = 30;
+    // --- HP bar (above the body, width scales with bodySize) ---
+    let barW  = this.bodySize + 10;
     let barH  = 5;
     let barX  = this.x - barW / 2;
-    let barY  = this.y - 20;
+    let barY  = this.y - this.bodySize / 2 - 8;
     let ratio = this.hp / this.maxHp;
 
     noStroke();
