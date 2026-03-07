@@ -51,46 +51,41 @@ class Landmark {
     }
   
     /**
-     * 在画布上绘制地标和血条
-     * 
-     * 这里先用简单的图形代替，后面再换成正式美术素材
+     * Draw only the HP bar above Big Ben's location in the background image.
+     * The Big Ben sprite itself is already part of map_bg_level1.png — we do
+     * NOT draw bigben.png on top of it to avoid double-rendering.
+     *
+     * HP bar position: centred on this.x, placed ~100 px above this.y so that
+     * the bar sits near the top of the tower in the background artwork.
+     * Adjust the BAR_OFFSET_Y value if the bar doesn't line up with the image.
      */
     draw() {
       push();
-      rectMode(CENTER);
 
-      // Building body
-      fill(139, 119, 101);
-      rect(this.x, this.y, 60, 80);
+      const BAR_W         = 90;   // bar width in pixels
+      const BAR_H         = 8;    // bar height in pixels
+      const BAR_OFFSET_Y  = 100;  // how many pixels above this.y to place bar
 
-      // Roof
-      fill(178, 34, 34);
-      triangle(
-        this.x - 40, this.y - 40,
-        this.x + 40, this.y - 40,
-        this.x, this.y - 80
-      );
-
-      // Name label
-      fill(255);
-      textAlign(CENTER);
-      textSize(14);
-      text(this.name, this.x, this.y + 60);
-
-      // HP bar background
-      fill(100);
-      rect(this.x, this.y - 90, 80, 10);
-
-      // HP bar fill (green -> yellow -> red)
       let hpPercent = this.getHpPercent();
-      if (hpPercent > 0.6) {
-        fill(0, 200, 0);
-      } else if (hpPercent > 0.3) {
-        fill(255, 200, 0);
-      } else {
-        fill(255, 0, 0);
-      }
-      rect(this.x - 40 * (1 - hpPercent), this.y - 90, 80 * hpPercent, 10);
+      let barX = this.x - BAR_W / 2;
+      let barY = this.y - BAR_OFFSET_Y;
+
+      // Background track
+      noStroke();
+      fill(30, 30, 30, 210);
+      rect(barX, barY, BAR_W, BAR_H, 3);
+
+      // Coloured fill: green → yellow → red
+      if (hpPercent > 0.6)      fill(50, 210, 50);
+      else if (hpPercent > 0.3) fill(240, 200, 0);
+      else                      fill(230, 50, 50);
+      rect(barX, barY, BAR_W * hpPercent, BAR_H, 3);
+
+      // Thin white border so bar stands out against any background colour
+      noFill();
+      stroke(255, 255, 255, 120);
+      strokeWeight(1);
+      rect(barX, barY, BAR_W, BAR_H, 3);
 
       pop();
     }

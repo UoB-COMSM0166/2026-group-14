@@ -1,9 +1,24 @@
 let game;
 let _bgImage, _settingsBgImg;
+let gameImages = {};
 
 function preload() {
   _bgImage = loadImage('assets/magic_background.png');
   _settingsBgImg = loadImage('assets/PNG/panelInset_brown.png');
+
+  gameImages.bigben          = loadImage('assets/bigben.png');
+  gameImages.gherkin         = loadImage('assets/gherkin.png');
+  gameImages.towerBasic      = loadImage('assets/tower_basic.png');
+  gameImages.towerBasicFire  = loadImage('assets/tower_basic_fire.png');
+  gameImages.towerSlow       = loadImage('assets/tower_slow.png');
+  gameImages.towerSlowActive = loadImage('assets/tower_slow_active.png');
+  gameImages.towerAreaFire   = loadImage('assets/tower_area_fire.png');
+  gameImages.enemyGuard      = loadImage('assets/enemy_guard.png');
+  gameImages.enemyPigeon     = loadImage('assets/enemy_pigeon.png');
+  gameImages.enemyHedgehog   = loadImage('assets/enemy_hedgehog.png');
+  gameImages.mapLevel1       = loadImage('assets/map_bg_level1.png');
+  gameImages.englandShield   = loadImage('assets/ui_england_shield.png');
+  gameImages.panelBottom     = loadImage('assets/ui_panel_bottom.png');
 }
 
 function setup() {
@@ -27,6 +42,12 @@ function mousePressed() {
 
 function keyPressed() {
   let state = game.getState();
+
+  // 'D' toggles debug grid overlay in any game state
+  if (key === 'd' || key === 'D') {
+    game.toggleDebugMode();
+    return;
+  }
 
   if (state === GameState.MENU) {
     if (key === '1') game.startLevel(1);

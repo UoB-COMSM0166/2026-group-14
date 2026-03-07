@@ -38,9 +38,10 @@ const TOWER_TYPES = {
   basic: {
     name: "Basic Tower",
     cost: 50,
-    range: 100,
+    range: 150,       // increased from 100 — wider path coverage
     damage: 25,
     fireRate: 60,
+    bulletSpeed: 5,
     color: [70, 130, 230],
     description: "Balanced tower. Reliable damage.",
     bulletColor: [255, 255, 0],
@@ -49,9 +50,10 @@ const TOWER_TYPES = {
   slow: {
     name: "Slow Tower",
     cost: 75,
-    range: 90,
+    range: 130,       // increased from 90 — wider path coverage
     damage: 10,
     fireRate: 80,
+    bulletSpeed: 5,
     color: [70, 200, 120],
     description: "Slows enemies. Low damage.",
     bulletColor: [100, 200, 255],
@@ -62,14 +64,16 @@ const TOWER_TYPES = {
   area: {
     name: "Area Tower",
     cost: 120,
-    range: 130,
-    damage: 15,
+    range: 200,         // increased from 130 — AOE coverage for wide paths
+    damage: 12,         // reduced from 15 — balance offset for larger range
     fireRate: 90,
+    bulletSpeed: 10,    // 2× faster than basic/slow
     color: [220, 80, 60],
     description: "Damages all enemies in range.",
     bulletColor: [255, 150, 50],
     size: 22,
-    splashRadius: 60
+    splashRadius: 120,  // increased from 60
+    areaPulseDuration: 9  // halved from 18 — faster pulse animation
   }
 };
 const TOWER_PANEL_HEIGHT = 90;
@@ -92,7 +96,7 @@ const TOTAL_LEVELS = 3;
 const ENEMY_STATS = {
   basic: { hp: 100, speed: 2,   reward: ENEMY_KILL_REWARD.basic },
   fast:  { hp:  60, speed: 3,   reward: ENEMY_KILL_REWARD.fast  },
-  tank:  { hp: 250, speed: 1,   reward: ENEMY_KILL_REWARD.tank  },
+  tank:  { hp: 300, speed: 1,   reward: ENEMY_KILL_REWARD.tank  }, // increased from 250
   boss:  { hp: 500, speed: 0.8, reward: ENEMY_KILL_REWARD.boss  }
 };
 
@@ -102,7 +106,7 @@ const LEVEL_1_WAVE_CONFIGS = [
     waveNumber: 1,
     spawnInterval: 60,
     enemies: [
-      { type: 'basic', count: 5, hp: 80, speed: 1.5 }
+      { type: 'basic', count: 5, hp: 96, speed: 1.5 } // hp +20% (was 80)
     ]
   },
   {
@@ -119,7 +123,7 @@ const LEVEL_1_WAVE_CONFIGS = [
     enemies: [
       { type: 'basic', count: 5, hp: 120, speed: 2 },
       { type: 'fast', count: 4, hp: 60, speed: 3.5 },
-      { type: 'tank', count: 3, hp: 250, speed: 1 }
+      { type: 'tank', count: 3, hp: 300, speed: 1 } // hp increased from 250
     ]
   }
 ];

@@ -32,8 +32,12 @@ class UIHUD {
     this.waveBonusMessage = '';
     this.waveBonusUntilFrame = 0;
 
+    this.placementMessage = '';
+    this.placementMessageUntilFrame = 0;
+
     this.endScreenButtons = [];
     this.towerPanelTabs = [];
+    this._panelLogged = false;  // print tab rects once to console
   }
 
   // ========================================
@@ -310,12 +314,33 @@ class UIHUD {
       text(this.waveBonusMessage, CANVAS_WIDTH / 2, 78);
     }
 
+    if (this.placementMessage && frameCount <= this.placementMessageUntilFrame) {
+      textAlign(CENTER, CENTER);
+      textSize(18);
+      fill(255, 80, 80);
+      // Semi-transparent pill background
+      let msgW = 240, msgH = 34;
+      let msgX = CANVAS_WIDTH / 2 - msgW / 2;
+      let msgY = CANVAS_HEIGHT / 2 - msgH / 2;
+      fill(0, 0, 0, 160);
+      noStroke();
+      rect(msgX, msgY, msgW, msgH, 8);
+      fill(255, 90, 90);
+      text(this.placementMessage, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
+    }
+
     this.drawTowerPanel();
   }
 
   showWaveBonus(message, durationFrames = WAVE_BONUS_DISPLAY_FRAMES) {
     this.waveBonusMessage = message;
     this.waveBonusUntilFrame = frameCount + durationFrames;
+  }
+
+  /** Show a "Can't build here!" style placement error for ~1.5 s. */
+  showPlacementError(message, durationFrames = 90) {
+    this.placementMessage = message;
+    this.placementMessageUntilFrame = frameCount + durationFrames;
   }
 
   /**
@@ -528,87 +553,206 @@ class UIHUD {
     this.hideSettingsUI();
   }
 
+  /**
+   * Calculate the clickable rect for each tower-select tab.
+   * Tabs are centred on the panel, laid out with equal spacing.
+   * Tab layout (vertical, top→bottom): thumbnail → name → price.
+   *
+   * Returned objects: { type, x, y, w, h }
+   * These EXACTLY match both the visual rendering and the click detection —
+   * they are computed once and shared by both drawTowerPanel() and
+   * handleTowerPanelClick().
+   */
   getTowerPanelTabs() {
-    let panelY = TOWER_PANEL_TOP;
-    let gap = 16;
-    let tabW = 180;
-    let tabH = 62;
-    let totalWidth = tabW * 3 + gap * 2;
-    let startX = (CANVAS_WIDTH - totalWidth) / 2;
-    let y = panelY + (TOWER_PANEL_HEIGHT - tabH) / 2;
-    let tabs = [];
-    for (let i = 0; i < TOWER_SHORTCUT_ORDER.length; i++) {
-      let type = TOWER_SHORTCUT_ORDER[i];
-      tabs.push({
-        type,
-        x: startX + i * (tabW + gap),
-        y,
-        w: tabW,
-        h: tabH
-      });
-    }
-    return tabs;
+    const BTN_W  = 130;
+    const BTN_H  = 70;
+    const BTN_GAP = 25;
+    const totalW  = BTN_W * 3 + BTN_GAP * 2;
+    const startX  = Math.floor((CANVAS_WIDTH - totalW) / 2);
+    const tabY    = TOWER_PANEL_TOP + Math.floor((TOWER_PANEL_HEIGHT - BTN_H) / 2);
+
+    return TOWER_SHORTCUT_ORDER.map((type, i) => ({
+      type,
+      x: startX + i * (BTN_W + BTN_GAP),
+      y: tabY,
+      w: BTN_W,
+      h: BTN_H
+    }));
   }
 
   drawTowerPanel() {
-    this.towerPanelTabs = this.getTowerPanelTabs();
+    let tabs = this.getTowerPanelTabs();
+    this.towerPanelTabs = tabs;
 
-    fill(0, 0, 0, 170);
+    let imgs = (typeof gameImages !== 'undefined') ? gameImages : {};
+    const PY = TOWER_PANEL_TOP;
+    const PH = TOWER_PANEL_HEIGHT;
+    const panelCY = PY + PH / 2;
+
+    // ── Background: dark brown, code-drawn ───────────────────────
     noStroke();
+    fill(40, 30, 20, 235);
     rectMode(CORNER);
-    rect(0, TOWER_PANEL_TOP, CANVAS_WIDTH, TOWER_PANEL_HEIGHT);
+    rect(0, PY, CANVAS_WIDTH, PH);
+
+    // Gold separator line at top
+    stroke(200, 168, 78, 220);
+    strokeWeight(2);
+    line(0, PY, CANVAS_WIDTH, PY);
+    noStroke();
 
     let currentGold = this.game.economy ? this.game.economy.getGold() : 0;
-    for (let tab of this.towerPanelTabs) {
+
+    // ── Left side: coin icon + gold amount ───────────────────────
+    let leftEdge = tabs[0].x;
+    let coinCX   = Math.floor(leftEdge / 2);
+    let coinCY   = panelCY;
+
+    // Coin circle
+    fill(255, 210, 0);
+    ellipse(coinCX - 22, coinCY, 24, 24);
+    fill(180, 130, 0);
+    textAlign(CENTER, CENTER);
+    textSize(13);
+    textStyle(BOLD);
+    text('$', coinCX - 22, coinCY);
+    textStyle(NORMAL);
+
+    // Amount
+    fill(255, 225, 70);
+    textAlign(LEFT, CENTER);
+    textSize(20);
+    textStyle(BOLD);
+    text(currentGold, coinCX - 8, coinCY);
+    textStyle(NORMAL);
+
+    // ── Right side: England shield ───────────────────────────────
+    if (imgs.englandShield && imgs.englandShield.width > 0) {
+      noTint();
+      imageMode(CORNER);
+      let sh = PH - 12;
+      let sw = sh;
+      image(imgs.englandShield, CANVAS_WIDTH - sw - 8, PY + 6, sw, sh);
+    }
+
+    // ── Tower buttons ─────────────────────────────────────────────
+    const thumbImgMap = {
+      basic: imgs.towerBasic,
+      slow:  imgs.towerSlow,
+      area:  imgs.towerAreaFire
+    };
+    const THUMB      = 40;
+    const THUMB_CX_OFF = 8 + THUMB / 2;  // px from button left edge to thumb centre
+
+    for (let i = 0; i < tabs.length; i++) {
+      let tab = tabs[i];
       let cfg = TOWER_TYPES[tab.type];
       let affordable = currentGold >= cfg.cost;
-      let selected = this.game.selectedTowerType === tab.type;
-      let hovering = mouseX >= tab.x && mouseX <= tab.x + tab.w &&
-                     mouseY >= tab.y && mouseY <= tab.y + tab.h;
+      let selected   = this.game.selectedTowerType === tab.type;
+      let hovering   = mouseX >= tab.x && mouseX <= tab.x + tab.w &&
+                       mouseY >= tab.y && mouseY <= tab.y + tab.h;
 
-      let bgAlpha = affordable ? 180 : 90;
-      fill(25, 35, 35, bgAlpha);
+      // ── Button background ──
+      rectMode(CORNER);
       if (selected) {
-        stroke(255, 215, 90);
-        strokeWeight(3);
-      } else {
-        stroke(130, 140, 140, 160);
+        fill(85, 68, 40, 240);
+        stroke(200, 168, 78);
+        strokeWeight(2);
+      } else if (hovering && affordable) {
+        fill(68, 56, 36, 225);
+        stroke(180, 150, 60, 210);
         strokeWeight(1.5);
+      } else {
+        fill(60, 50, 35, 210);
+        stroke(100, 80, 40, 150);
+        strokeWeight(1);
       }
-      rect(tab.x, tab.y, tab.w, tab.h, 10);
-
-      let [r, g, b] = cfg.color;
+      rect(tab.x, tab.y, tab.w, tab.h, 8);
       noStroke();
-      fill(r, g, b, affordable ? 255 : 100);
-      ellipse(tab.x + 24, tab.y + tab.h / 2, 24, 24);
 
-      fill(255, 255, 255, affordable ? 255 : 120);
+      // ── Thumbnail (left 1/3 of button) ──
+      let thumbCX = tab.x + THUMB_CX_OFF;
+      let thumbCY = tab.y + tab.h / 2;
+      let thumb   = thumbImgMap[tab.type];
+
+      if (thumb && thumb.width > 0) {
+        tint(255, affordable ? 255 : 100);
+        imageMode(CENTER);
+        image(thumb, thumbCX, thumbCY, THUMB, THUMB);
+        noTint();
+      } else {
+        let [r, g, b] = cfg.color;
+        fill(r, g, b, affordable ? 220 : 90);
+        ellipse(thumbCX, thumbCY, 32, 32);
+      }
+
+      // ── Text area (right 2/3 of button) ──
+      let textX  = tab.x + THUMB_CX_OFF + THUMB / 2 + 8;
+      let nameY  = tab.y + tab.h / 2 - 10;
+      let priceY = tab.y + tab.h / 2 + 11;
+
+      // Tower name
+      fill(255, 255, 255, affordable ? 240 : 130);
       textAlign(LEFT, CENTER);
-      textSize(16);
-      let shortName = cfg.name.split(' ')[0];
-      text(shortName, tab.x + 44, tab.y + 23);
       textSize(14);
-      text(`$${cfg.cost}`, tab.x + 44, tab.y + 43);
+      textStyle(BOLD);
+      text(cfg.name.split(' ')[0], textX, nameY);
+      textStyle(NORMAL);
+
+      // Price
+      fill(255, 215, 0, affordable ? 255 : 110);
+      textSize(13);
+      text(`$${cfg.cost}`, textX, priceY);
+
+      // Keyboard shortcut badge (top-right corner)
+      fill(160, 140, 80, affordable ? 200 : 90);
+      textAlign(RIGHT, TOP);
+      textSize(11);
+      text(`[${i + 1}]`, tab.x + tab.w - 5, tab.y + 4);
+
+      // ── Affordability dim overlay ──
+      if (!affordable) {
+        noStroke();
+        fill(0, 0, 0, 120);
+        rectMode(CORNER);
+        rect(tab.x, tab.y, tab.w, tab.h, 8);
+      }
 
       if (hovering && affordable) cursor(HAND);
+    }
+
+    // ── One-time console log of button bounds ─────────────────────
+    if (!this._panelLogged) {
+      this._panelLogged = true;
+      console.log('=== Tower Panel Button Bounds ===');
+      for (let tab of tabs) {
+        console.log(
+          `${tab.type}: x=${tab.x.toFixed(0)} y=${tab.y.toFixed(0)} ` +
+          `w=${tab.w} h=${tab.h} | right=${(tab.x + tab.w).toFixed(0)} ` +
+          `bottom=${(tab.y + tab.h).toFixed(0)}`
+        );
+      }
     }
   }
 
   handleTowerPanelClick(mx, my) {
+    // Clicks at or below the panel top are always consumed (never place tower)
     if (my < TOWER_PANEL_TOP) return false;
+
     let tabs = this.getTowerPanelTabs();
     let currentGold = this.game.economy ? this.game.economy.getGold() : 0;
 
     for (let tab of tabs) {
-      if (mx >= tab.x && mx <= tab.x + tab.w && my >= tab.y && my <= tab.y + tab.h) {
+      if (mx >= tab.x && mx <= tab.x + tab.w &&
+          my >= tab.y && my <= tab.y + tab.h) {
         let cfg = TOWER_TYPES[tab.type];
         if (currentGold >= cfg.cost) {
           this.game.setSelectedTowerType(tab.type);
         }
-        return true;
+        break;
       }
     }
-    return true;
+    return true; // always block map placement when click is in panel area
   }
 
   drawTowerPlacementPreview() {
@@ -616,28 +760,77 @@ class UIHUD {
     if (!this.game.selectedTowerType) return;
     if (mouseY < 50 || mouseY > TOWER_PANEL_TOP) return;
 
-    let cfg = TOWER_TYPES[this.game.selectedTowerType] || TOWER_TYPES.basic;
+    let type = this.game.selectedTowerType;
+    let cfg  = TOWER_TYPES[type] || TOWER_TYPES.basic;
     let currentGold = this.game.economy ? this.game.economy.getGold() : 0;
-    let canAfford = currentGold >= cfg.cost;
-    let [r, g, b] = cfg.color;
+    let canAfford   = currentGold >= cfg.cost;
+    let [r, g, b]   = cfg.color;
 
-    let gridX = Math.floor(mouseX / GRID_SIZE) * GRID_SIZE + GRID_SIZE / 2;
-    let gridY = Math.floor(mouseY / GRID_SIZE) * GRID_SIZE + GRID_SIZE / 2;
+    // Snap mouse to grid centre (same formula as GameManager.handleClick)
+    let col   = Math.floor(mouseX / GRID_SIZE);
+    let row   = Math.floor(mouseY / GRID_SIZE);
+    let gridX = col * GRID_SIZE + GRID_SIZE / 2;
+    let gridY = row * GRID_SIZE + GRID_SIZE / 2;
 
+    // ── Buildability: use the same canBuildAt() as placement logic ──
+    let tileOk = this.game.canBuildAt(col, row);
+    let canPlace = tileOk && canAfford;
+    let blocked  = !canPlace;
+
+    // ── Cell highlight overlay ─────────────────────────────────────
+    push();
+    rectMode(CENTER);
+    noStroke();
+    if (canPlace) {
+      fill(40, 220, 80, 55);    // green — OK to build
+    } else {
+      fill(220, 50, 50, 70);    // red   — blocked
+    }
+    rect(gridX, gridY, GRID_SIZE, GRID_SIZE, 4);
+
+    // Red ✕ cross when blocked
+    if (blocked) {
+      stroke(240, 60, 60, 200);
+      strokeWeight(2.5);
+      let s = GRID_SIZE * 0.22;
+      line(gridX - s, gridY - s, gridX + s, gridY + s);
+      line(gridX + s, gridY - s, gridX - s, gridY + s);
+    }
+    pop();
+
+    // ── Range circle ──────────────────────────────────────────────
     noFill();
-    stroke(r, g, b, canAfford ? 110 : 45);
-    strokeWeight(this.game.selectedTowerType === 'area' ? 2.2 : 1.5);
+    if (blocked) {
+      stroke(220, 60, 60, canAfford ? 90 : 50);
+    } else {
+      stroke(r, g, b, 110);
+    }
+    strokeWeight(type === 'area' ? 2.2 : 1.5);
     ellipse(gridX, gridY, cfg.range * 2, cfg.range * 2);
 
-    if (this.game.selectedTowerType === 'area') {
-      stroke(r, g, b, canAfford ? 65 : 30);
+    if (type === 'area') {
+      stroke(blocked ? 220 : r, blocked ? 60 : g, blocked ? 60 : b, canAfford ? 55 : 25);
       strokeWeight(1);
       ellipse(gridX, gridY, (cfg.range + 10) * 2, (cfg.range + 10) * 2);
     }
 
-    noStroke();
-    fill(r, g, b, canAfford ? 130 : 60);
-    ellipse(gridX, gridY, cfg.size + 6, cfg.size + 6);
+    // ── Tower preview sprite (only when placement is valid) ────────
+    if (!blocked) {
+      let imgs = (typeof gameImages !== 'undefined') ? gameImages : {};
+      const previewImgMap = { basic: imgs.towerBasic, slow: imgs.towerSlow, area: imgs.towerAreaFire };
+      let previewImg = previewImgMap[type];
+      if (previewImg && previewImg.width > 0) {
+        tint(r, g, b, 180);
+        imageMode(CENTER);
+        let ps = GRID_SIZE - 2;
+        image(previewImg, gridX, gridY, ps, ps);
+        noTint();
+      } else {
+        noStroke();
+        fill(r, g, b, 140);
+        ellipse(gridX, gridY, cfg.size + 6, cfg.size + 6);
+      }
+    }
   }
 
   handleEndScreenClick(mx, my) {

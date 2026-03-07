@@ -88,38 +88,67 @@ class Enemy {
   draw() {
     push();
 
-    // --- Enemy body (size varies by type) ---
+    // --- Determine sprite image and display size by type ---
+    let imgs = (typeof gameImages !== 'undefined') ? gameImages : {};
+    let spriteMap = {
+      basic: { img: imgs.enemyGuard,    w: 70, h: 90 },
+      fast:  { img: imgs.enemyPigeon,   w: 60, h: 60 },
+      tank:  { img: imgs.enemyHedgehog, w: 80, h: 80 }
+    };
+    let entry = spriteMap[this.type] || spriteMap.basic;
+    let useSprite = entry.img && entry.img.width > 0;
+
+    // --- Calculate movement direction for flipping ---
+    let movingLeft = false;
+    if (this.currentWaypointIndex < this.path.count()) {
+      let target = this.path.getWaypoint(this.currentWaypointIndex);
+      movingLeft = (target.x - this.x) < 0;
+    }
+
+    // --- Slow glow ring (drawn below sprite) ---
     if (this.isSlowed) {
       noStroke();
       fill(130, 210, 255, 90);
-      ellipse(this.x, this.y, this.bodySize + 12, this.bodySize + 12);
+      let glowR = useSprite ? Math.max(entry.w, entry.h) / 2 + 8 : this.bodySize / 2 + 6;
+      ellipse(this.x, this.y, glowR * 2, glowR * 2);
     }
 
-    noStroke();
-    let bodyColor = this._bodyColor();
-    fill(bodyColor.r, bodyColor.g, bodyColor.b);
-    ellipse(this.x, this.y, this.bodySize, this.bodySize);
+    // --- Sprite or fallback shape ---
+    if (useSprite) {
+      imageMode(CENTER);
+      if (movingLeft) {
+        translate(this.x, this.y);
+        scale(-1, 1);
+        image(entry.img, 0, 0, entry.w, entry.h);
+      } else {
+        image(entry.img, this.x, this.y, entry.w, entry.h);
+      }
+    } else {
+      noStroke();
+      let bodyColor = this._bodyColor();
+      fill(bodyColor.r, bodyColor.g, bodyColor.b);
+      ellipse(this.x, this.y, this.bodySize, this.bodySize);
+      stroke(0, 0, 0, 120);
+      strokeWeight(1.5);
+      noFill();
+      ellipse(this.x, this.y, this.bodySize, this.bodySize);
+    }
 
-    // --- Outline ---
-    stroke(0, 0, 0, 120);
-    strokeWeight(1.5);
-    noFill();
-    ellipse(this.x, this.y, this.bodySize, this.bodySize);
-
-    // --- HP bar (above the body, width scales with bodySize) ---
-    let barW  = this.bodySize + 10;
+    // --- HP bar (always drawn above, uses sprite height when available) ---
+    let halfH = useSprite ? entry.h / 2 : this.bodySize / 2;
+    let barW  = useSprite ? Math.max(entry.w, 30) : this.bodySize + 10;
     let barH  = 5;
     let barX  = this.x - barW / 2;
-    let barY  = this.y - this.bodySize / 2 - 8;
+    let barY  = this.y - halfH - 8;
     let ratio = this.hp / this.maxHp;
 
     noStroke();
-    fill(50, 50, 50, 180);                          // background
+    fill(50, 50, 50, 180);
     rect(barX, barY, barW, barH, 2);
 
-    if (ratio > 0.6)      fill(50, 210, 50);        // green
-    else if (ratio > 0.3) fill(240, 200, 0);        // yellow
-    else                  fill(230, 50, 50);        // red
+    if (ratio > 0.6)      fill(50, 210, 50);
+    else if (ratio > 0.3) fill(240, 200, 0);
+    else                  fill(230, 50, 50);
     rect(barX, barY, barW * ratio, barH, 2);
 
     pop();
