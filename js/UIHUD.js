@@ -269,15 +269,27 @@ class UIHUD {
     else fill(255, 100, 100);
     rect(barX, 15, barW * hpPercent, 20, 5);
 
-    // 关卡和敌人数
+    // 关卡
     fill(255);
-    text("Level: " + level, 650, 25);
-    text("Enemies: " + enemies, 800, 25);
+    text("Lv: " + level, 650, 25);
+
+    // 波次信息（从 WaveManager 获取）
+    let waveDisplay = '';
+    let waveState   = '';
+    if (this.game.waveManager) {
+      waveDisplay = this.game.waveManager.getCurrentWaveDisplay(); // "Wave 1 / 3"
+      waveState   = this.game.waveManager.getWaveStateText();      // "Next wave in 3s"
+    }
+    fill(200, 220, 255);
+    text(waveDisplay, 750, 25);
+
+    fill(180);
+    textSize(13);
+    text(waveState, 880, 25);
 
     // 操作提示
-    textSize(13);
-    fill(150);
-    text("E=spawn  T=damage  P=pause  R=restart", 960, 25);
+    fill(130);
+    text("K=kill all  T=damage  P=pause  R=restart", 1020, 25); // TODO: TESTING ONLY
   }
 
   /**

@@ -89,6 +89,15 @@ class GameManager {
     let waypointFn = waypointFns[levelId] || getLevel1Waypoints;
     this.path = new Path(waypointFn());
 
+    // Build the wave manager for this level (defined in Wave.js)
+    const waveFns = {
+      1: getLevel1Waves,
+      2: getLevel2Waves,
+      3: getLevel3Waves
+    };
+    let waveFn = waveFns[levelId] || getLevel1Waves;
+    this.waveManager = new WaveManager(waveFn());
+
     this.setState(GameState.PLAYING);
   }
 
@@ -96,6 +105,9 @@ class GameManager {
 
   update() {
     if (this.state !== GameState.PLAYING) return;
+
+    // Wave manager runs first so newly spawned enemies are available this frame
+    if (this.waveManager) this.waveManager.update(this.enemies, this.path);
 
     for (let i = this.enemies.length - 1; i >= 0; i--) {
       let enemy = this.enemies[i];
@@ -124,6 +136,15 @@ class GameManager {
     if (this.landmark && this.landmark.isDestroyed()) {
       console.log("Landmark destroyed — GAME OVER");
       this.setState(GameState.LOSE);
+      return;
+    }
+    // Win: all waves spawned, and no live enemies remain on the field
+    if (this.waveManager && this.waveManager.allWavesComplete) {
+      let liveEnemies = this.enemies.filter(e => !e.isDead() && !e.reachedEnd());
+      if (liveEnemies.length === 0) {
+        console.log("All waves cleared — VICTORY");
+        this.setState(GameState.WIN);
+      }
     }
   }
 
@@ -217,7 +238,7 @@ class GameManager {
 
     textSize(14);
     fill(180);
-    text("E=spawn  T=damage  P=pause  R=restart", 950, 25);
+    text("T=damage  P=pause  R=restart", 950, 25);
   }
 
   // --- Player actions ---
@@ -273,20 +294,15 @@ class GameManager {
   }
 
 
-  // --- Enemy spawning ---
-
-  /**
-   * Spawn a new enemy at the start of the current path.
-   * @param {string} type - 'basic' | 'fast' | 'tank' | 'boss'
-   */
-  spawnEnemy(type = 'basic') {
-    if (!this.path) {
-      console.log("No path defined — cannot spawn enemy");
-      return;
+  // TODO: TESTING ONLY
+  // Instantly clear all enemies currently on the map.
+  killAllEnemies() {
+    for (let enemy of this.enemies) {
+      if (!enemy.isDead() && !enemy.reachedEnd()) {
+        enemy.takeDamage(enemy.hp);
+      }
     }
-    let enemy = new Enemy(this.path, type);
-    this.enemies.push(enemy);
-    console.log(`Spawned ${type} enemy (total: ${this.enemies.length})`);
+    console.log("Testing shortcut: killed all active enemies");
   }
 
   tryPlaceTower(towerType, x, y) {
