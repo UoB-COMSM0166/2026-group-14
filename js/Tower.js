@@ -21,11 +21,17 @@ class Tower {
     this.slowDuration = stats.slowDuration || 0;
     this.splashRadius = stats.splashRadius || this.range;
 
+    this.bulletSpeed = stats.bulletSpeed || 5;  // per-type bullet speed from config
     this.fireTimer = 0;
     this.target = null;
     this.projectiles = [];
     this.areaPulseTimer = 0;
-    this.areaPulseDuration = 18;
+    // areaPulseDuration from config (area tower uses 9 = 2× faster than default 18)
+    this.areaPulseDuration = stats.areaPulseDuration || 18;
+
+    this.isFiring = false;
+    this.fireAnimTimer = 0;
+    this.fireAnimDuration = 10;
   }
 
   // ----------------------------------------
@@ -54,6 +60,11 @@ class Tower {
 
     if (this.fireTimer > 0) this.fireTimer--;
     if (this.areaPulseTimer > 0) this.areaPulseTimer--;
+
+    if (this.fireAnimTimer > 0) {
+      this.fireAnimTimer--;
+      if (this.fireAnimTimer <= 0) this.isFiring = false;
+    }
   }
 
   updateProjectileAttack(enemies) {
@@ -81,10 +92,12 @@ class Tower {
         x: this.x,
         y: this.y,
         targetEnemy: this.target,
-        speed: 5,
+        speed: this.bulletSpeed,  // uses per-tower speed from TOWER_TYPES config
         alive: true
       });
       this.fireTimer = this.fireRate;
+      this.isFiring = true;
+      this.fireAnimTimer = this.fireAnimDuration;
     }
 
     for (let proj of this.projectiles) {
@@ -164,36 +177,54 @@ class Tower {
   }
 
   drawTowerBody() {
-    let [cr, cg, cb] = this.color;
-    noStroke();
-    fill(28, 28, 40, 210);
-    ellipse(this.x, this.y, this.size + 10, this.size + 10);
-    fill(cr, cg, cb);
-    ellipse(this.x, this.y, this.size, this.size);
+    const SPRITE_SIZE = (typeof GRID_SIZE !== 'undefined' ? GRID_SIZE : 60) - 2;
+    let imgs = (typeof gameImages !== 'undefined') ? gameImages : {};
+    let img = null;
 
     if (this.type === 'basic') {
-      rectMode(CENTER);
-      fill(Math.max(0, cr - 15), Math.max(0, cg - 15), Math.max(0, cb - 15));
-      rect(this.x, this.y - this.size / 2 - 7, 10, 16, 3);
+      img = this.isFiring ? imgs.towerBasicFire : imgs.towerBasic;
     } else if (this.type === 'slow') {
-      stroke(220, 250, 255);
-      strokeWeight(2);
-      line(this.x - 7, this.y, this.x + 7, this.y);
-      line(this.x, this.y - 7, this.x, this.y + 7);
-      line(this.x - 5, this.y - 5, this.x + 5, this.y + 5);
+      img = this.target ? imgs.towerSlowActive : imgs.towerSlow;
     } else if (this.type === 'area') {
-      stroke(255, 200, 120);
-      strokeWeight(2);
-      for (let i = 0; i < 8; i++) {
-        let angle = (TWO_PI / 8) * i;
-        let inner = this.size * 0.35;
-        let outer = this.size * 0.7;
-        line(
-          this.x + Math.cos(angle) * inner,
-          this.y + Math.sin(angle) * inner,
-          this.x + Math.cos(angle) * outer,
-          this.y + Math.sin(angle) * outer
-        );
+      img = imgs.towerAreaFire;
+    }
+
+    if (img && img.width > 0) {
+      imageMode(CENTER);
+      image(img, this.x, this.y, SPRITE_SIZE, SPRITE_SIZE);
+    } else {
+      // Fallback: coloured shapes
+      let [cr, cg, cb] = this.color;
+      noStroke();
+      fill(28, 28, 40, 210);
+      ellipse(this.x, this.y, this.size + 10, this.size + 10);
+      fill(cr, cg, cb);
+      ellipse(this.x, this.y, this.size, this.size);
+
+      if (this.type === 'basic') {
+        rectMode(CENTER);
+        fill(Math.max(0, cr - 15), Math.max(0, cg - 15), Math.max(0, cb - 15));
+        rect(this.x, this.y - this.size / 2 - 7, 10, 16, 3);
+      } else if (this.type === 'slow') {
+        stroke(220, 250, 255);
+        strokeWeight(2);
+        line(this.x - 7, this.y, this.x + 7, this.y);
+        line(this.x, this.y - 7, this.x, this.y + 7);
+        line(this.x - 5, this.y - 5, this.x + 5, this.y + 5);
+      } else if (this.type === 'area') {
+        stroke(255, 200, 120);
+        strokeWeight(2);
+        for (let i = 0; i < 8; i++) {
+          let angle = (TWO_PI / 8) * i;
+          let inner = this.size * 0.35;
+          let outer = this.size * 0.7;
+          line(
+            this.x + Math.cos(angle) * inner,
+            this.y + Math.sin(angle) * inner,
+            this.x + Math.cos(angle) * outer,
+            this.y + Math.sin(angle) * outer
+          );
+        }
       }
     }
   }

@@ -12,6 +12,7 @@ class GameManager {
     this.towers = [];
     this.enemies = [];
     this.path = null;
+    this.mapGrid = null;  // 2-D tile array — see MapData.js
     this.ui = new UIHUD(this);
     this.waveManager = null;
 
@@ -19,6 +20,8 @@ class GameManager {
     this.waveSurvived = 0;
     this.finalStats = null;
     this.selectedTowerType = 'basic';
+
+    this.debugMode = false;  // toggled by 'D' key — shows tile grid overlay
 
     this.levelConfigs = {
       1: {
@@ -94,6 +97,15 @@ class GameManager {
     };
     let waypointFn = waypointFns[levelId] || getLevel1Waypoints;
     this.path = new Path(waypointFn());
+
+    // Build the tile grid for build-validity checks (defined in MapData.js)
+    const mapDataFns = {
+      1: getLevel1MapData
+      // Add getLevel2MapData, getLevel3MapData here when levels are designed
+    };
+    let mapDataFn = mapDataFns[levelId] || getLevel1MapData;
+    this.mapGrid = mapDataFn();
+    console.log(`Map grid built: ${this.mapGrid[0].length} cols × ${this.mapGrid.length} rows`);
 
     // Build the wave manager for this level (defined in Wave.js)
     const waveFns = {
@@ -220,21 +232,13 @@ class GameManager {
 
 
   drawGame() {
-    background(34, 139, 34);
-
-    // Grid lines
-    stroke(30, 120, 30);
-    strokeWeight(1);
-    for (let x = 0; x <= CANVAS_WIDTH; x += GRID_SIZE) {
-      line(x, 0, x, CANVAS_HEIGHT);
+    // Map background — image if available, solid colour fallback
+    if (gameImages && gameImages.mapLevel1 && gameImages.mapLevel1.width > 0) {
+      imageMode(CORNER);
+      image(gameImages.mapLevel1, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    } else {
+      background(34, 139, 34);
     }
-    for (let y = 0; y <= CANVAS_HEIGHT; y += GRID_SIZE) {
-      line(0, y, CANVAS_WIDTH, y);
-    }
-    noStroke();
-
-    // Path (drawn beneath towers and enemies)
-    if (this.path) this.path.draw();
 
     for (let tower of this.towers) {
       tower.draw();
@@ -252,7 +256,124 @@ class GameManager {
       this.ui.drawTowerPlacementPreview();
     }
 
+    // Debug grid overlay — drawn on top of everything except the HUD
+    if (this.debugMode) {
+      this.drawDebugGrid();
+    }
+
     this.drawHUD();
+  }
+
+  // ========================================
+  // 🔧 Debug grid overlay
+  // ========================================
+
+  /**
+   * Single source of truth for "can the player build a tower on this grid cell?".
+   * Used by: debug grid overlay, tower-placement logic, hover preview.
+   *
+   * @param {number} col  grid column (integer)
+   * @param {number} row  grid row    (integer)
+   * @returns {boolean}
+   */
+  canBuildAt(col, row) {
+    if (!this.mapGrid) return false;
+
+    // Out-of-bounds
+    if (row < 0 || row >= this.mapGrid.length)    return false;
+    if (col < 0 || col >= this.mapGrid[0].length) return false;
+
+    // Tile must be exactly GRASS
+    if (this.mapGrid[row][col] !== TILE_TYPES.GRASS) return false;
+
+    // A tower already occupies this cell
+    let cx = col * GRID_SIZE + GRID_SIZE / 2;
+    let cy = row * GRID_SIZE + GRID_SIZE / 2;
+    if (this.towers.some(t => t.x === cx && t.y === cy)) return false;
+
+    return true;
+  }
+
+  /**
+   * Visualise the tile grid for map editing.
+   * Enabled/disabled with the 'D' key (debugMode flag).
+   * Does NOT affect any game logic.
+   *
+   * Colour key:
+   *   Green = canBuildAt() → true
+   *   Red   = canBuildAt() → false
+   */
+  drawDebugGrid() {
+    if (!this.mapGrid) return;
+
+    let rows = this.mapGrid.length;
+    let cols = this.mapGrid[0].length;
+
+    push();
+    rectMode(CORNER);
+    textAlign(CENTER, CENTER);
+
+    // ── 1. Two-colour cell overlays + col,row labels ───────────────
+    //   GREEN = canBuildAt() true  (matches placement logic exactly)
+    //   RED   = canBuildAt() false (blocked for any reason)
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        let px = c * GRID_SIZE;
+        let py = r * GRID_SIZE;
+        let ok = this.canBuildAt(c, r);
+
+        noStroke();
+        fill(ok ? color(0, 255, 0, 77) : color(255, 0, 0, 77));
+        rect(px, py, GRID_SIZE, GRID_SIZE);
+
+        fill(255, 255, 255, 200);
+        textSize(10);
+        text(`${c},${r}`, px + GRID_SIZE / 2, py + GRID_SIZE / 2);
+      }
+    }
+
+    // ── 2. Grid lines ──────────────────────────────────────────────
+    stroke(255, 255, 255, 55);
+    strokeWeight(0.5);
+    for (let c = 0; c <= cols; c++) {
+      line(c * GRID_SIZE, 0, c * GRID_SIZE, CANVAS_HEIGHT);
+    }
+    for (let r = 0; r <= rows; r++) {
+      line(0, r * GRID_SIZE, CANVAS_WIDTH, r * GRID_SIZE);
+    }
+
+    // ── 3. Mouse-cell info (top-left) ─────────────────────────────
+    let mCol     = Math.floor(mouseX / GRID_SIZE);
+    let mRow     = Math.floor(mouseY / GRID_SIZE);
+    let canBuild = this.canBuildAt(mCol, mRow);
+    let rawTile  = (mRow >= 0 && mRow < rows && mCol >= 0 && mCol < cols)
+      ? this.mapGrid[mRow][mCol]
+      : 'OOB';
+    // Decode string tile type back to the integer the user authored (0/1/2)
+    const DECODE = {
+      [TILE_TYPES.GRASS]: 2, [TILE_TYPES.PATH]: 1,
+      [TILE_TYPES.OBSTACLE]: 0, [TILE_TYPES.OCCUPIED]: 'occ'
+    };
+    let mapVal = (rawTile in DECODE) ? DECODE[rawTile] : rawTile;
+    let info   = `Grid: col=${mCol}, row=${mRow} | canBuild: ${canBuild} | mapValue: ${mapVal}`;
+
+    noStroke();
+    textSize(13);
+    textAlign(LEFT, CENTER);
+    fill(0, 0, 0, 180);
+    rect(8, 54, 440, 22, 4);
+    fill(canBuild ? color(80, 255, 120) : color(255, 110, 80));
+    text(info, 16, 65);
+
+    pop();
+  }
+
+  toggleDebugMode() {
+    this.debugMode = !this.debugMode;
+    console.log(`Debug mode ${this.debugMode ? 'ON  ✅' : 'OFF ❌'}`);
+    if (this.debugMode && !this.mapGrid) {
+      console.warn('mapGrid is null — start a level first to see tile data.');
+    }
   }
 
   drawHUD() {
@@ -305,28 +426,43 @@ class GameManager {
 
     // ===== 游戏中：点击放塔 =====
     if (this.state === GameState.PLAYING) {
+      // ── Panel / HUD click → handled first ────────────────────────
       if (this.ui.handleTowerPanelClick(mx, my)) return;
+      if (my < 50) return;  // top HUD bar
 
-      // 不允许在 HUD 区域放塔（顶部 50 像素）
-      if (my < 50) return;
-      if (my > TOWER_PANEL_TOP) return;
+      // ── Unified col/row from pixel ─────────────────────────────
+      let col  = Math.floor(mx / GRID_SIZE);
+      let row  = Math.floor(my / GRID_SIZE);
+      let gridX = col * GRID_SIZE + GRID_SIZE / 2;
+      let gridY = row * GRID_SIZE + GRID_SIZE / 2;
 
-      // 不允许在地标附近放塔
-      if (this.landmark) {
-        let d = dist(mx, my, this.landmark.x, this.landmark.y);
-        if (d < 80) return;
+      // In debug mode: log info and exit — never place a tower
+      if (this.debugMode) {
+        let rawTile  = this.mapGrid ? (this.mapGrid[row] ? this.mapGrid[row][col] : 'OOB') : 'no-grid';
+        let hasTower = this.towers.some(t => t.x === gridX && t.y === gridY);
+        let canBuild = this.canBuildAt(col, row);
+        const DECODE = {
+          [TILE_TYPES.GRASS]: 2, [TILE_TYPES.PATH]: 1,
+          [TILE_TYPES.OBSTACLE]: 0, [TILE_TYPES.OCCUPIED]: 'occ'
+        };
+        let mapVal = (rawTile in DECODE) ? DECODE[rawTile] : rawTile;
+        console.log(
+          `Click at col=${col}, row=${row}, canBuild=${canBuild}, ` +
+          `mapValue=${mapVal}, hasTower=${hasTower}`
+        );
+        return;
       }
 
-      // 把鼠标坐标对齐到网格中心
-      let gridX = Math.floor(mx / GRID_SIZE) * GRID_SIZE + GRID_SIZE / 2;
-      let gridY = Math.floor(my / GRID_SIZE) * GRID_SIZE + GRID_SIZE / 2;
-
-      // 检查这个位置是否已经有塔了
-      for (let tower of this.towers) {
-        if (tower.x === gridX && tower.y === gridY) {
-          console.log("❌ This spot is already occupied!");
-          return;
-        }
+      // ── Placement validity: one authoritative check ───────────────
+      if (!this.canBuildAt(col, row)) {
+        let tileType = this.mapGrid && this.mapGrid[row] ? this.mapGrid[row][col] : null;
+        let reason =
+          tileType === TILE_TYPES.PATH     ? "Can't build on the path!" :
+          tileType === TILE_TYPES.OCCUPIED ? "Already occupied!"        :
+                                             "Can't build here!";
+        console.log(`❌ ${reason} (col=${col}, row=${row}, tile=${tileType})`);
+        this.ui.showPlacementError(reason);
+        return;
       }
 
       this.tryPlaceTower(this.selectedTowerType, gridX, gridY);
@@ -357,6 +493,13 @@ class GameManager {
 
     let tower = new Tower(x, y, towerType);
     this.towers.push(tower);
+
+    // Mark the grid cell as occupied so future placements and hover previews
+    // correctly show this cell as unavailable.
+    if (this.mapGrid) {
+      occupyTile(this.mapGrid, x, y);
+    }
+
     console.log(`Placed ${towerType} tower at (${x}, ${y})`);
     return true;
   }
@@ -386,6 +529,7 @@ class GameManager {
     this.towers = [];
     this.enemies = [];
     this.path = null;
+    this.mapGrid = null;
     this.waveManager = null;
     this.economy = null;
     this.landmark = null;
