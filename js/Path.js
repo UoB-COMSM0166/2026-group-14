@@ -57,41 +57,42 @@ class Path {
 
 // ========================================
 // Level waypoint definitions
-// Each path snakes from the left edge to the landmark.
-// All coordinates are grid-aligned (GRID_SIZE = 60).
-// Y values stay below the 50px HUD (i.e. >= GRID_SIZE).
+// 所有坐标使用固定像素值（基于 1920×900 设计尺寸）
+// 不再使用 CANVAS_WIDTH/CANVAS_HEIGHT 计算！
 // ========================================
 
 /**
- * Level 1 — Big Ben (landmark at CANVAS_WIDTH-100, CANVAS_HEIGHT/2)
- * Snake pattern: right → up → right → down → right → up → arrive
+ * Level 1 — Big Ben
+ * 固定坐标，与背景图上的石板路对齐
+ * 设计尺寸：1920×926（33列×15行），Y 坐标按 926/960 比例调整
  */
 function getLevel1Waypoints() {
   return [
-    { x: GRID_SIZE / 2,                  y: CANVAS_HEIGHT / 2           }, // entry (left edge)
-    { x: GRID_SIZE * 4,                  y: CANVAS_HEIGHT / 2           }, // →
-    { x: GRID_SIZE * 4,                  y: GRID_SIZE * 2               }, // ↑  (y=120, below HUD)
-    { x: GRID_SIZE * 9,                  y: GRID_SIZE * 2               }, // →
-    { x: GRID_SIZE * 9,                  y: CANVAS_HEIGHT - GRID_SIZE * 2 }, // ↓
-    { x: GRID_SIZE * 14,                 y: CANVAS_HEIGHT - GRID_SIZE * 2 }, // →
-    { x: GRID_SIZE * 14,                 y: CANVAS_HEIGHT / 2           }, // ↑
-    { x: CANVAS_WIDTH - 100,             y: CANVAS_HEIGHT / 2           }  // arrive at Big Ben
+    { x: 30,   y: 463 },   // 入口（左边缘中间）row 8
+    { x: 240,  y: 463 },   // → col 4
+    { x: 240,  y: 123 },   // ↑ row 2
+    { x: 540,  y: 123 },   // → col 9
+    { x: 540,  y: 803 },   // ↓ row 13
+    { x: 840,  y: 803 },   // → col 14
+    { x: 840,  y: 463 },   // ↑ row 8
+    { x: 1820, y: 463 }    // 终点（Big Ben 位置）
   ];
 }
 
 /**
- * Level 2 — Tower Bridge (placeholder, same shape but offset)
+ * Level 2 — Tower Bridge (placeholder)
+ * Y 坐标按 926/960 比例调整
  */
 function getLevel2Waypoints() {
   return [
-    { x: GRID_SIZE / 2,    y: CANVAS_HEIGHT / 3           },
-    { x: GRID_SIZE * 5,    y: CANVAS_HEIGHT / 3           },
-    { x: GRID_SIZE * 5,    y: CANVAS_HEIGHT * 2 / 3       },
-    { x: GRID_SIZE * 10,   y: CANVAS_HEIGHT * 2 / 3       },
-    { x: GRID_SIZE * 10,   y: CANVAS_HEIGHT / 3           },
-    { x: GRID_SIZE * 15,   y: CANVAS_HEIGHT / 3           },
-    { x: GRID_SIZE * 15,   y: CANVAS_HEIGHT / 2           },
-    { x: CANVAS_WIDTH - 100, y: CANVAS_HEIGHT / 2         }
+    { x: 30,   y: 309 },
+    { x: 300,  y: 309 },
+    { x: 300,  y: 618 },
+    { x: 600,  y: 618 },
+    { x: 600,  y: 309 },
+    { x: 900,  y: 309 },
+    { x: 900,  y: 463 },
+    { x: 1820, y: 463 }
   ];
 }
 
@@ -99,5 +100,5 @@ function getLevel2Waypoints() {
  * Level 3 — Buckingham Palace (placeholder)
  */
 function getLevel3Waypoints() {
-  return getLevel1Waypoints(); // replaced when Level 3 is fully designed
+  return getLevel1Waypoints();
 }
