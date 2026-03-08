@@ -2,16 +2,16 @@
 // 🎮 保卫英国 — 全局常量配置
 // ========================================
 
-// --- 画布设置 ---
-const CANVAS_WIDTH = window.innerWidth;
-const CANVAS_HEIGHT = window.innerHeight;
-const FPS = 60;
-const HUD_HEIGHT = 45;  // 顶部 HUD 栏高度，此区域不可放塔
-
-// --- 网格设置 ---
+// --- 画布设置（网格完美覆盖，无空隙） ---
 const GRID_SIZE = 60;  // 每个格子 60×60 像素
-const COLS = CANVAS_WIDTH / GRID_SIZE;   // 20 列
-const ROWS = CANVAS_HEIGHT / GRID_SIZE;  // 约 13 行
+const COLS = 32;       // 32 列
+const ROWS = 15;       // 15 行
+const DESIGN_WIDTH = COLS * GRID_SIZE;   // 32 × 60 = 1920
+const DESIGN_HEIGHT = ROWS * GRID_SIZE;  // 15 × 60 = 900
+const CANVAS_WIDTH = DESIGN_WIDTH;
+const CANVAS_HEIGHT = DESIGN_HEIGHT;
+const FPS = 60;
+const HUD_HEIGHT = 45;  // 顶部 HUD 栏高度
 
 // --- 游戏状态 ---
 const GameState = {
@@ -25,21 +25,21 @@ const GameState = {
 
 // --- 经济系统 ---
 const INITIAL_GOLD = 350;
-const ENEMY_KILL_REWARD = {      // 击杀奖励
+const ENEMY_KILL_REWARD = {
   basic: 20,
   fast: 25,
   tank: 40,
   boss: 50
 };
 const WAVE_CLEAR_BONUS_GOLD = 50;
-const WAVE_BONUS_DISPLAY_FRAMES = 120; // 2 seconds @ 60 FPS
+const WAVE_BONUS_DISPLAY_FRAMES = 120;
 
-// --- 塔类型配置（统一集中管理） ---
+// --- 塔类型配置 ---
 const TOWER_TYPES = {
   basic: {
     name: "Basic Tower",
     cost: 50,
-    range: 150,       // increased from 100 — wider path coverage
+    range: 150,
     damage: 25,
     fireRate: 60,
     bulletSpeed: 5,
@@ -51,7 +51,7 @@ const TOWER_TYPES = {
   slow: {
     name: "Slow Tower",
     cost: 75,
-    range: 130,       // increased from 90 — wider path coverage
+    range: 130,
     damage: 10,
     fireRate: 80,
     bulletSpeed: 5,
@@ -65,16 +65,16 @@ const TOWER_TYPES = {
   area: {
     name: "Area Tower",
     cost: 120,
-    range: 200,         // increased from 130 — AOE coverage for wide paths
-    damage: 12,         // reduced from 15 — balance offset for larger range
+    range: 200,
+    damage: 12,
     fireRate: 90,
-    bulletSpeed: 10,    // 2× faster than basic/slow
+    bulletSpeed: 10,
     color: [220, 80, 60],
     description: "Damages all enemies in range.",
     bulletColor: [255, 150, 50],
     size: 22,
-    splashRadius: 120,  // increased from 60
-    areaPulseDuration: 9  // halved from 18 — faster pulse animation
+    splashRadius: 120,
+    areaPulseDuration: 9
   }
 };
 const TOWER_PANEL_HEIGHT = 90;
@@ -86,9 +86,9 @@ const TOWER_COST = {
   area: TOWER_TYPES.area.cost
 };
 
-// --- 地标（被保护的建筑） ---
-const LANDMARK_MAX_HP = 100;      // 地标总血量
-const ENEMY_REACH_DAMAGE = 20;    // 怪物到达终点扣 1 滴血
+// --- 地标 ---
+const LANDMARK_MAX_HP = 100;
+const ENEMY_REACH_DAMAGE = 20;
 
 // --- 关卡设置 ---
 const TOTAL_LEVELS = 3;
@@ -97,17 +97,17 @@ const TOTAL_LEVELS = 3;
 const ENEMY_STATS = {
   basic: { hp: 100, speed: 2,   reward: ENEMY_KILL_REWARD.basic },
   fast:  { hp:  60, speed: 3,   reward: ENEMY_KILL_REWARD.fast  },
-  tank:  { hp: 300, speed: 1,   reward: ENEMY_KILL_REWARD.tank  }, // increased from 250
+  tank:  { hp: 300, speed: 1,   reward: ENEMY_KILL_REWARD.tank  },
   boss:  { hp: 500, speed: 0.8, reward: ENEMY_KILL_REWARD.boss  }
 };
 
-// --- 波次配置（统一集中管理） ---
+// --- 波次配置 ---
 const LEVEL_1_WAVE_CONFIGS = [
   {
     waveNumber: 1,
     spawnInterval: 60,
     enemies: [
-      { type: 'basic', count: 5, hp: 96, speed: 1.5 } // hp +20% (was 80)
+      { type: 'basic', count: 5, hp: 96, speed: 1.5 }
     ]
   },
   {
@@ -124,7 +124,7 @@ const LEVEL_1_WAVE_CONFIGS = [
     enemies: [
       { type: 'basic', count: 5, hp: 120, speed: 2 },
       { type: 'fast', count: 4, hp: 60, speed: 3.5 },
-      { type: 'tank', count: 3, hp: 300, speed: 1 } // hp increased from 250
+      { type: 'tank', count: 3, hp: 300, speed: 1 }
     ]
   }
 ];

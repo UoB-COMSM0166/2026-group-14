@@ -239,11 +239,48 @@ class GameManager {
 
 
 
+  /**
+   * 绘制背景图，裁剪以匹配设计尺寸宽高比，不变形
+   */
+  drawBackground() {
+    let bg = gameImages.mapLevel1;
+    if (!bg) return;
+
+    let imgW = bg.width;   // 2976
+    let imgH = bg.height;  // 1436
+    let designRatio = DESIGN_WIDTH / DESIGN_HEIGHT;
+    let imgRatio = imgW / imgH;
+
+    let srcX, srcY, srcW, srcH;
+
+    if (Math.abs(imgRatio - designRatio) < 0.01) {
+      // 宽高比已匹配，直接使用整张图
+      srcX = 0;
+      srcY = 0;
+      srcW = imgW;
+      srcH = imgH;
+    } else if (imgRatio > designRatio) {
+      // 背景图更宽，裁剪左右两边
+      srcH = imgH;
+      srcW = imgH * designRatio;
+      srcX = (imgW - srcW) / 2;
+      srcY = 0;
+    } else {
+      // 背景图更高，裁剪上下两边
+      srcW = imgW;
+      srcH = imgW / designRatio;
+      srcX = 0;
+      srcY = (imgH - srcH) / 2;
+    }
+
+    image(bg, 0, 0, DESIGN_WIDTH, DESIGN_HEIGHT, srcX, srcY, srcW, srcH);
+  }
+
   drawGame() {
-    // Map background — image if available, solid colour fallback
+    // Map background — 裁剪绘制，保持设计尺寸宽高比，不变形
     if (gameImages && gameImages.mapLevel1 && gameImages.mapLevel1.width > 0) {
       imageMode(CORNER);
-      image(gameImages.mapLevel1, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+      this.drawBackground();
     } else {
       background(34, 139, 34);
     }
@@ -318,16 +355,16 @@ class GameManager {
   drawDebugGrid() {
     if (!this.mapGrid) return;
 
-    let rows = this.mapGrid.length;
-    let cols = this.mapGrid[0].length;
+    // 使用 COLS/ROWS 确保网格与设计尺寸完全一致，从 (0,0) 开始无偏移
+    let rows = ROWS;
+    let cols = COLS;
 
     push();
     rectMode(CORNER);
     textAlign(CENTER, CENTER);
 
     // ── 1. Two-colour cell overlays + col,row labels ───────────────
-    //   GREEN = canBuildAt() true  (matches placement logic exactly)
-    //   RED   = canBuildAt() false (blocked for any reason)
+    //   网格覆盖整个画布包括 HUD 区域，从 (0,0) 开始
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
         let px = c * GRID_SIZE;
@@ -344,19 +381,19 @@ class GameManager {
       }
     }
 
-    // ── 2. Grid lines ──────────────────────────────────────────────
+    // ── 2. Grid lines — 从 (0,0) 到设计尺寸边界 ─────────────────────
     stroke(255, 255, 255, 55);
     strokeWeight(0.5);
     for (let c = 0; c <= cols; c++) {
-      line(c * GRID_SIZE, 0, c * GRID_SIZE, CANVAS_HEIGHT);
+      line(c * GRID_SIZE, 0, c * GRID_SIZE, DESIGN_HEIGHT);
     }
     for (let r = 0; r <= rows; r++) {
-      line(0, r * GRID_SIZE, CANVAS_WIDTH, r * GRID_SIZE);
+      line(0, r * GRID_SIZE, DESIGN_WIDTH, r * GRID_SIZE);
     }
 
-    // ── 3. Mouse-cell info (top-left) ─────────────────────────────
-    let mCol     = Math.floor(mouseX / GRID_SIZE);
-    let mRow     = Math.floor(mouseY / GRID_SIZE);
+    // ── 3. Mouse-cell info (top-left) — 使用设计坐标系 ─────────────
+    let mCol     = Math.floor(getGameMouseX() / GRID_SIZE);
+    let mRow     = Math.floor(getGameMouseY() / GRID_SIZE);
     let canBuild = this.canBuildAt(mCol, mRow);
     let rawTile  = (mRow >= 0 && mRow < rows && mCol >= 0 && mCol < cols)
       ? this.mapGrid[mRow][mCol]
@@ -561,8 +598,8 @@ class GameManager {
     let btnH = 60;
 
     // 鼠标悬停效果
-    let hovering = mouseX > btnX - btnW/2 && mouseX < btnX + btnW/2 &&
-                   mouseY > btnY - btnH/2 && mouseY < btnY + btnH/2;
+    let hovering = getGameMouseX() > btnX - btnW/2 && getGameMouseX() < btnX + btnW/2 &&
+                   getGameMouseY() > btnY - btnH/2 && getGameMouseY() < btnY + btnH/2;
 
     // 按钮背景
     if (hovering) {

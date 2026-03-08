@@ -207,8 +207,8 @@ class UIHUD {
     for (let i = 0; i < 3; i++) {
       const cy = centerYs[i];
       const rect = this.getMenuButtonRects()[i];
-      const hovered = mouseX >= rect.x && mouseX <= rect.x + rect.w &&
-                      mouseY >= rect.y && mouseY <= rect.y + rect.h;
+      const hovered = getGameMouseX() >= rect.x && getGameMouseX() <= rect.x + rect.w &&
+                      getGameMouseY() >= rect.y && getGameMouseY() <= rect.y + rect.h;
       const pressed = hovered && mouseIsPressed;
 
       let scaleFactor = 1;
@@ -667,32 +667,37 @@ class UIHUD {
   }
 
   showSettingsUI(startY, spacing) {
-    let sliderX = CANVAS_WIDTH / 2 - 50;
+    let sliderX = DESIGN_WIDTH / 2 - 50;
     let imgW = 500;
     let imgH = 600;
 
+    // HTML 元素需使用屏幕坐标定位
+    const toScreen = typeof toScreenCoords === 'function' ? toScreenCoords : (x, y) => ({ x, y });
+
     if (this.musicSlider) {
       this.musicSlider.show();
-      this.musicSlider.position(sliderX, startY - 10);
+      let pos = toScreen(sliderX, startY - 10);
+      this.musicSlider.position(pos.x, pos.y);
     }
     if (this.musicSelect) {
       this.musicSelect.show();
-      this.musicSelect.position(sliderX, startY + spacing - 10);
+      let pos = toScreen(sliderX, startY + spacing - 10);
+      this.musicSelect.position(pos.x, pos.y);
     }
     if (this.brightnessSlider) {
       this.brightnessSlider.show();
-      this.brightnessSlider.position(sliderX, startY + spacing * 2 - 10);
+      let pos = toScreen(sliderX, startY + spacing * 2 - 10);
+      this.brightnessSlider.position(pos.x, pos.y);
     }
     if (this.closeSettingsBtn) {
       this.closeSettingsBtn.show();
-      this.closeSettingsBtn.position(
-        CANVAS_WIDTH / 2 - imgW / 2 + 25,
-        CANVAS_HEIGHT / 2 - imgH / 2 + 25
-      );
+      let pos = toScreen(DESIGN_WIDTH / 2 - imgW / 2 + 25, DESIGN_HEIGHT / 2 - imgH / 2 + 25);
+      this.closeSettingsBtn.position(pos.x, pos.y);
     }
     if (this.backBtn) {
       this.backBtn.show();
-      this.backBtn.position(CANVAS_WIDTH / 2 - 70, CANVAS_HEIGHT / 2 + 100);
+      let pos = toScreen(DESIGN_WIDTH / 2 - 70, DESIGN_HEIGHT / 2 + 100);
+      this.backBtn.position(pos.x, pos.y);
     }
   }
 
@@ -805,8 +810,8 @@ class UIHUD {
       let cfg = TOWER_TYPES[tab.type];
       let affordable = currentGold >= cfg.cost;
       let selected   = this.game.selectedTowerType === tab.type;
-      let hovering   = mouseX >= tab.x && mouseX <= tab.x + tab.w &&
-                       mouseY >= tab.y && mouseY <= tab.y + tab.h;
+      let hovering   = getGameMouseX() >= tab.x && getGameMouseX() <= tab.x + tab.w &&
+                       getGameMouseY() >= tab.y && getGameMouseY() <= tab.y + tab.h;
 
       // ── Button background ──
       rectMode(CORNER);
@@ -914,7 +919,7 @@ class UIHUD {
   drawTowerPlacementPreview() {
     if (this.game.state !== GameState.PLAYING) return;
     if (!this.game.selectedTowerType) return;
-    if (mouseY < HUD_HEIGHT || mouseY > TOWER_PANEL_TOP) return;
+    if (getGameMouseY() < HUD_HEIGHT || getGameMouseY() > TOWER_PANEL_TOP) return;
 
     let type = this.game.selectedTowerType;
     let cfg  = TOWER_TYPES[type] || TOWER_TYPES.basic;
@@ -923,8 +928,8 @@ class UIHUD {
     let [r, g, b]   = cfg.color;
 
     // Snap mouse to grid centre (same formula as GameManager.handleClick)
-    let col   = Math.floor(mouseX / GRID_SIZE);
-    let row   = Math.floor(mouseY / GRID_SIZE);
+    let col   = Math.floor(getGameMouseX() / GRID_SIZE);
+    let row   = Math.floor(getGameMouseY() / GRID_SIZE);
     let gridX = col * GRID_SIZE + GRID_SIZE / 2;
     let gridY = row * GRID_SIZE + GRID_SIZE / 2;
 
@@ -1015,8 +1020,8 @@ class UIHUD {
   }
 
   _drawEndScreenButton(button, baseColor) {
-    let hovering = mouseX >= button.x && mouseX <= button.x + button.w &&
-                   mouseY >= button.y && mouseY <= button.y + button.h;
+    let hovering = getGameMouseX() >= button.x && getGameMouseX() <= button.x + button.w &&
+                   getGameMouseY() >= button.y && getGameMouseY() <= button.y + button.h;
 
     this.endScreenButtons.push(button);
     stroke(255, 235, 170);

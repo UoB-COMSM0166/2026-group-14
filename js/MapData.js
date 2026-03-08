@@ -1,29 +1,18 @@
 // ========================================
 // MapData — Tile grid & buildability system
 // ========================================
-//
-// Tile types used across all levels.
-// Defined here so they are available as soon as constants.js loads.
-// ========================================
 
 const TILE_TYPES = {
-  GRASS:    'grass',    // Can build ✅
-  PATH:     'path',     // Cannot build ❌ (enemy route)
-  OBSTACLE: 'obstacle', // Cannot build ❌ (building, tree, bench, etc.)
-  OCCUPIED: 'occupied'  // Cannot build ❌ (tower already placed here)
+  GRASS:    'grass',
+  PATH:     'path',
+  OBSTACLE: 'obstacle',
+  OCCUPIED: 'occupied'
 };
 
 // ----------------------------------------
 // Core helpers
 // ----------------------------------------
 
-/**
- * Return the tile type at a pixel coordinate.
- * @param {string[][]} grid
- * @param {number} px  pixel x
- * @param {number} py  pixel y
- * @returns {string}   one of TILE_TYPES
- */
 function getTileAt(grid, px, py) {
   if (!grid) return TILE_TYPES.GRASS;
   let col = Math.floor(px / GRID_SIZE);
@@ -34,12 +23,6 @@ function getTileAt(grid, px, py) {
   return grid[row][col];
 }
 
-/**
- * Mark a grid cell as OCCUPIED after a tower is placed there.
- * @param {string[][]} grid
- * @param {number} px  grid-center pixel x
- * @param {number} py  grid-center pixel y
- */
 function occupyTile(grid, px, py) {
   if (!grid) return;
   let col = Math.floor(px / GRID_SIZE);
@@ -49,9 +32,6 @@ function occupyTile(grid, px, py) {
   }
 }
 
-/**
- * Revert an OCCUPIED tile back to GRASS (e.g. on tower removal).
- */
 function freeTile(grid, px, py) {
   if (!grid) return;
   let col = Math.floor(px / GRID_SIZE);
@@ -63,80 +43,17 @@ function freeTile(grid, px, py) {
   }
 }
 
-// ----------------------------------------
-// Generic grid builder (used by future levels)
-// ----------------------------------------
-
-/**
- * Build a tile grid by tracing path waypoints and marking obstacle cells.
- * pathHalfWidth = extra cells to mark on each side of the path centre.
- */
-function buildTileGrid(waypoints, obstacles = [], pathHalfWidth = 1) {
-  let cols = Math.ceil(CANVAS_WIDTH  / GRID_SIZE) + 1;
-  let rows = Math.ceil(CANVAS_HEIGHT / GRID_SIZE) + 1;
-
-  let grid = [];
-  for (let r = 0; r < rows; r++) {
-    grid[r] = new Array(cols).fill(TILE_TYPES.GRASS);
-  }
-
-  function markPath(r, c) {
-    if (r >= 0 && r < rows && c >= 0 && c < cols) {
-      grid[r][c] = TILE_TYPES.PATH;
-    }
-  }
-
-  for (let i = 0; i < waypoints.length - 1; i++) {
-    let wp   = waypoints[i];
-    let next = waypoints[i + 1];
-    let c1 = Math.floor(wp.x   / GRID_SIZE);
-    let r1 = Math.floor(wp.y   / GRID_SIZE);
-    let c2 = Math.floor(next.x / GRID_SIZE);
-    let r2 = Math.floor(next.y / GRID_SIZE);
-
-    if (r1 === r2) {
-      let minC = Math.min(c1, c2), maxC = Math.max(c1, c2);
-      for (let c = minC; c <= maxC; c++)
-        for (let dr = -pathHalfWidth; dr <= pathHalfWidth; dr++)
-          markPath(r1 + dr, c);
-    } else if (c1 === c2) {
-      let minR = Math.min(r1, r2), maxR = Math.max(r1, r2);
-      for (let r = minR; r <= maxR; r++)
-        for (let dc = -pathHalfWidth; dc <= pathHalfWidth; dc++)
-          markPath(r, c1 + dc);
-    }
-  }
-
-  for (let obs of obstacles) {
-    let { col, row } = obs;
-    if (row >= 0 && row < rows && col >= 0 && col < cols) {
-      grid[row][col] = TILE_TYPES.OBSTACLE;
-    }
-  }
-
-  return grid;
-}
-
 // ========================================
 // Level 1 — whitelist grid
+// 15 rows × 32 cols（与 ROWS × COLS 完全匹配）
 // ========================================
-//
-// Encoding : 0 = not buildable  |  2 = grass (buildable)
-// Size     : 32 cols (0-31) × 15 rows (0-14)
-//
-// Default: every cell is 0 (not buildable).
-// Only cells explicitly listed in the whitelist below are set to 2.
-//
-// To add/remove a buildable cell:
-//   1. Press D in-game, click the cell → console logs col & row.
-//   2. Find LEVEL_1_GRID[row][col] and change 0↔2.
-//   3. Reload — the debug overlay updates immediately.
-// ─────────────────────────────────────────────────────────────────────
+
 const LEVEL_1_GRID = (() => {
-  // Start with a 15×32 grid of all zeroes
+  // 15 行 × 32 列
   const g = Array.from({ length: 15 }, () => new Array(32).fill(0));
 
   // Whitelist: [col, row] pairs → mark as 2 (grass / buildable)
+  // col 范围：0-31，row 范围：0-14
   const whitelist = [
     // col 1
     [1,9],
@@ -192,62 +109,40 @@ const LEVEL_1_GRID = (() => {
     [28,9],[28,10],[28,11],[28,12],[28,13],
     // col 29
     [29,9],[29,10],[29,11],[29,12],[29,13],
-    // col 30
+    // col 30（最大 col=31，所以 30 是倒数第二列）
     [30,9],[30,12],
   ];
 
   for (const [col, row] of whitelist) {
-    g[row][col] = 2;
+    if (row >= 0 && row < 15 && col >= 0 && col < 32) {
+      g[row][col] = 2;
+    }
   }
 
   return g;
 })();
 
-// Maps integer encoding → TILE_TYPES string
 const _GRID_DECODE = [
   TILE_TYPES.OBSTACLE, // 0
   TILE_TYPES.PATH,     // 1
   TILE_TYPES.GRASS,    // 2
 ];
 
-// ----------------------------------------
-// Level 1 map data
-// ----------------------------------------
-
-/**
- * Convert LEVEL_1_GRID into the runtime string[][] used by the engine.
- *
- * Cells outside the 32×15 reference default to OBSTACLE (safe for any
- * screen size larger than the reference resolution).
- */
 function getLevel1MapData() {
-  let totalRows = Math.ceil(CANVAS_HEIGHT / GRID_SIZE) + 1;
-  let totalCols = Math.ceil(CANVAS_WIDTH  / GRID_SIZE) + 1;
-  let refRows   = LEVEL_1_GRID.length;       // 15
-  let refCols   = LEVEL_1_GRID[0].length;    // 32
-
   let grid = [];
-  for (let r = 0; r < totalRows; r++) {
+  for (let r = 0; r < ROWS; r++) {
     grid[r] = [];
-    for (let c = 0; c < totalCols; c++) {
-      if (r < refRows && c < refCols) {
-        grid[r][c] = _GRID_DECODE[LEVEL_1_GRID[r][c]] || TILE_TYPES.OBSTACLE;
-      } else {
-        grid[r][c] = TILE_TYPES.OBSTACLE;
-      }
+    for (let c = 0; c < COLS; c++) {
+      let val = (r < LEVEL_1_GRID.length && c < LEVEL_1_GRID[0].length)
+        ? LEVEL_1_GRID[r][c]
+        : 0;
+      grid[r][c] = _GRID_DECODE[val] || TILE_TYPES.OBSTACLE;
     }
   }
-
-  console.log(
-    `[MapData] Level 1 grid: canvas ${totalCols}×${totalRows}, ` +
-    `reference ${refCols}×${refRows}`
-  );
+  console.log(`[MapData] Level 1 grid: ${COLS}×${ROWS} (matches COLS×ROWS)`);
   return grid;
 }
 
-/**
- * Returns true when a tile can receive a new tower.
- */
 function isBuildable(grid, px, py) {
   return getTileAt(grid, px, py) === TILE_TYPES.GRASS;
 }

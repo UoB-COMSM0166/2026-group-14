@@ -2,6 +2,10 @@ let game;
 let _bgImage, _settingsBgImg;
 let gameImages = {};
 
+// 缩放相关变量
+let scaleFactor = 1;
+let canvasWidth, canvasHeight;
+
 function preload() {
   _bgImage = loadImage('assets/magic_background.png');
   _settingsBgImg = loadImage('assets/PNG/panelInset_brown.png');
@@ -35,28 +39,60 @@ function preload() {
 }
 
 function setup() {
-  createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
+  // 计算适合屏幕的缩放比例
+  let maxWidth = windowWidth;
+  let maxHeight = windowHeight;
+
+  let scaleX = maxWidth / DESIGN_WIDTH;
+  let scaleY = maxHeight / DESIGN_HEIGHT;
+  scaleFactor = Math.min(scaleX, scaleY, 1);
+
+  canvasWidth = Math.floor(DESIGN_WIDTH * scaleFactor);
+  canvasHeight = Math.floor(DESIGN_HEIGHT * scaleFactor);
+
+  createCanvas(canvasWidth, canvasHeight);
   frameRate(FPS);
+
+  console.log(`Screen: ${windowWidth}x${windowHeight}`);
+  console.log(`Canvas: ${canvasWidth}x${canvasHeight}`);
+  console.log(`Scale: ${scaleFactor.toFixed(3)}`);
+  console.log(`Design: ${DESIGN_WIDTH}x${DESIGN_HEIGHT}`);
+  console.log(`Grid: ${COLS} cols × ${ROWS} rows, GRID_SIZE=${GRID_SIZE}`);
+  console.log(`Grid coverage: ${COLS * GRID_SIZE}x${ROWS * GRID_SIZE} (should equal design size)`);
+
   game = new GameManager();
   game.ui.bgImage = _bgImage;
   game.ui.settingsBgImg = _settingsBgImg;
   game.ui.setupUI();
+
   console.log("Game initialised");
 }
 
+function getGameMouseX() {
+  return mouseX / scaleFactor;
+}
+
+function getGameMouseY() {
+  return mouseY / scaleFactor;
+}
+
 function draw() {
+  push();
+  scale(scaleFactor);
   game.update();
   game.render();
+  pop();
 }
 
 function mousePressed() {
-  game.handleClick(mouseX, mouseY);
+  let mx = getGameMouseX();
+  let my = getGameMouseY();
+  game.handleClick(mx, my);
 }
 
 function keyPressed() {
   let state = game.getState();
 
-  // 'D' toggles debug grid overlay in any game state
   if (key === 'd' || key === 'D') {
     game.toggleDebugMode();
     return;
@@ -100,4 +136,16 @@ function keyPressed() {
     if (key === 'r' || key === 'R') game.restart();
     return;
   }
+}
+
+function windowResized() {
+  let scaleX = windowWidth / DESIGN_WIDTH;
+  let scaleY = windowHeight / DESIGN_HEIGHT;
+  scaleFactor = Math.min(scaleX, scaleY, 1);
+
+  canvasWidth = Math.floor(DESIGN_WIDTH * scaleFactor);
+  canvasHeight = Math.floor(DESIGN_HEIGHT * scaleFactor);
+
+  resizeCanvas(canvasWidth, canvasHeight);
+  console.log(`Resized - Scale: ${scaleFactor.toFixed(3)}`);
 }
