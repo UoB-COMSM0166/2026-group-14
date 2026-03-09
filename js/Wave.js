@@ -49,15 +49,27 @@ function getLevel1Waves() {
 }
 
 /**
- * Level 2 — placeholder (same as level 1 for now)
+ * Level 2 — River Thames Patrol（使用 LEVEL_2_WAVE_CONFIGS）
  */
 function getLevel2Waves() {
-  return getLevel1Waves();
+  return LEVEL_2_WAVE_CONFIGS.map(config => {
+    return new Wave(
+      config.waveNumber,
+      _buildEnemyList(config.enemies),
+      config.spawnInterval
+    );
+  });
 }
 
 /**
- * Level 3 — placeholder (same as level 1 for now)
+ * Level 3 — Tower of London Siege（使用 LEVEL_3_WAVE_CONFIGS）
  */
 function getLevel3Waves() {
-  return getLevel1Waves();
+  return LEVEL_3_WAVE_CONFIGS.map(config => {
+    return new Wave(
+      config.waveNumber,
+      _buildEnemyList(config.enemies),
+      config.spawnInterval
+    );
+  });
 }

@@ -251,13 +251,124 @@ class UIHUD {
   }
 
   /**
+   * 关卡选择界面
+   * 引擎在 GameState.LEVEL_SELECT 时自动调用
+   */
+  drawLevelSelect() {
+    push();
+
+    // 绘制背景图（铺满整个设计尺寸）
+    if (typeof gameImages !== 'undefined' && gameImages.levelSelectBg && gameImages.levelSelectBg.width > 0) {
+      image(gameImages.levelSelectBg, 0, 0, DESIGN_WIDTH, DESIGN_HEIGHT);
+    } else {
+      // fallback 背景色
+      background(40, 35, 30);
+    }
+
+    // 关卡按钮区域定义（根据背景图中三个关卡图片的实际位置调整）
+    this.levelButtons = [
+      {
+        level: 1,
+        x: 409,
+        y: 457,
+        width: 160,
+        height: 150,
+        unlocked: true,
+        name: "THE OUTER DEFENSES"
+      },
+      {
+        level: 2,
+        x: 1067,
+        y: 526,
+        width: 162,
+        height: 156,
+        unlocked: true,
+        name: "RIVER THAMES PATROL"
+      },
+      {
+        level: 3,
+        x: 1566,
+        y: 282,
+        width: 300,
+        height: 189,
+        unlocked: true,
+        name: "TOWER OF LONDON SIEGE"
+      }
+    ];
+
+    // 绘制每个关卡的交互提示
+    for (let btn of this.levelButtons) {
+      let mx = typeof getGameMouseX === 'function' ? getGameMouseX() : mouseX;
+      let my = typeof getGameMouseY === 'function' ? getGameMouseY() : mouseY;
+
+      let left = btn.x - btn.width / 2;
+      let right = btn.x + btn.width / 2;
+      let top = btn.y - btn.height / 2;
+      let bottom = btn.y + btn.height / 2;
+
+      let isHover = mx >= left && mx <= right && my >= top && my <= bottom;
+
+      // 已解锁关卡的悬停高亮
+      if (isHover && btn.unlocked) {
+        noFill();
+        stroke(255, 215, 0);
+        strokeWeight(4);
+        rectMode(CENTER);
+        rect(btn.x, btn.y, btn.width, btn.height, 10);
+      }
+
+      // 未解锁关卡的锁定遮罩
+      if (!btn.unlocked) {
+        fill(0, 0, 0, 150);
+        noStroke();
+        rectMode(CENTER);
+        rect(btn.x, btn.y, btn.width, btn.height, 10);
+
+        fill(255, 255, 255, 200);
+        textAlign(CENTER, CENTER);
+        textSize(18);
+        text("🔒 Coming Soon", btn.x, btn.y);
+      }
+    }
+
+    // 绘制返回按钮
+    this.backButton = {
+      x: 100,
+      y: 50,
+      width: 120,
+      height: 50
+    };
+
+    let mx = typeof getGameMouseX === 'function' ? getGameMouseX() : mouseX;
+    let my = typeof getGameMouseY === 'function' ? getGameMouseY() : mouseY;
+    let backHover = mx > this.backButton.x - this.backButton.width / 2 &&
+                    mx < this.backButton.x + this.backButton.width / 2 &&
+                    my > this.backButton.y - this.backButton.height / 2 &&
+                    my < this.backButton.y + this.backButton.height / 2;
+
+    fill(backHover ? color(80, 60, 40, 230) : color(50, 40, 30, 204));
+    stroke(backHover ? '#FFD700' : '#C8A84E');
+    strokeWeight(2);
+    rectMode(CENTER);
+    rect(this.backButton.x, this.backButton.y, this.backButton.width, this.backButton.height, 10);
+
+    fill(255);
+    noStroke();
+    textAlign(CENTER, CENTER);
+    textSize(18);
+    text("← Back", this.backButton.x, this.backButton.y);
+
+    pop();
+  }
+
+  /**
    * 处理主菜单按钮点击，返回 true 表示已处理
    */
   handleMenuClick(mx, my) {
     const rects = this.getMenuButtonRects();
     for (const r of rects) {
       if (mx >= r.x && mx <= r.x + r.w && my >= r.y && my <= r.y + r.h) {
-        if (r.action === 'start') this.game.startLevel(1);
+        if (r.action === 'start') this.game.setState(GameState.LEVEL_SELECT);
         else if (r.action === 'settings') this.game.setState(GameState.SETTINGS);
         else if (r.action === 'exit') window.location.href = 'about:blank';
         return true;
@@ -481,6 +592,7 @@ class UIHUD {
     }
 
     this.drawTowerPanel();
+    this.drawTowerHoverInfo();
   }
 
   showWaveBonus(message, durationFrames = WAVE_BONUS_DISPLAY_FRAMES) {
@@ -728,7 +840,7 @@ class UIHUD {
     const BTN_W  = 130;
     const BTN_H  = 70;
     const BTN_GAP = 25;
-    const totalW  = BTN_W * 3 + BTN_GAP * 2;
+    const totalW  = BTN_W * TOWER_SHORTCUT_ORDER.length + BTN_GAP * (TOWER_SHORTCUT_ORDER.length - 1);
     const startX  = Math.floor((CANVAS_WIDTH - totalW) / 2);
     const tabY    = TOWER_PANEL_TOP + Math.floor((TOWER_PANEL_HEIGHT - BTN_H) / 2);
 
@@ -800,7 +912,10 @@ class UIHUD {
     const thumbImgMap = {
       basic: imgs.towerBasic,
       slow:  imgs.towerSlow,
-      area:  imgs.towerAreaFire
+      area:  imgs.towerAreaFire,
+      crystal: imgs.towerCrystal || imgs.towerCrystalActive,
+      steam: imgs.towerSteam || imgs.towerSteamFire,
+      alchemist: imgs.towerAlchemist || imgs.towerAlchemistFire
     };
     const THUMB      = 40;
     const THUMB_CX_OFF = 8 + THUMB / 2;  // px from button left edge to thumb centre
@@ -896,6 +1011,63 @@ class UIHUD {
     }
   }
 
+  drawTowerHoverInfo() {
+    if (!this.game.towers || this.game.towers.length === 0) return;
+    let mx = getGameMouseX();
+    let my = getGameMouseY();
+    let hoverRadius = GRID_SIZE * 0.6;
+
+    for (let tower of this.game.towers) {
+      let d = dist(mx, my, tower.x, tower.y);
+      if (d <= hoverRadius) {
+        this.drawTowerInfo(tower);
+        break;
+      }
+    }
+  }
+
+  drawTowerInfo(tower) {
+    let cfg = TOWER_TYPES[tower.type] || {};
+    let x = tower.x + 45;
+    let y = tower.y - 30;
+    let w = 180;
+    let h = tower.type === 'crystal' ? 110 : 70;
+
+    push();
+    fill(0, 0, 0, 200);
+    stroke(200, 168, 78);
+    strokeWeight(2);
+    rectMode(CORNER);
+    rect(x, y, w, h, 8);
+    noStroke();
+
+    fill(255);
+    textAlign(LEFT, TOP);
+    textSize(14);
+    textStyle(BOLD);
+    text(cfg.name || tower.type, x + 10, y + 10);
+    textStyle(NORMAL);
+    textSize(12);
+    fill(200);
+    text(`$${cfg.cost}`, x + 10, y + 30);
+
+    if (tower.type === 'crystal') {
+      let boostedCount = this.game.towers.filter(t =>
+        t.type !== 'crystal' &&
+        dist(t.x, t.y, tower.x, tower.y) <= tower.boostRadius
+      ).length;
+      fill(200, 150, 255);
+      text(`Boosting ${boostedCount} towers`, x + 10, y + 50);
+      text(`+${Math.round(tower.boostDamage * 100)}% Damage`, x + 10, y + 68);
+      text(`+${Math.round(tower.boostFireRate * 100)}% Fire Rate`, x + 10, y + 86);
+    } else if (!tower.isSupport) {
+      fill(180);
+      text(`Dmg: ${tower.getEffectiveDamage ? tower.getEffectiveDamage() : tower.damage}`, x + 10, y + 50);
+      text(`Range: ${tower.range}`, x + 10, y + 65);
+    }
+    pop();
+  }
+
   handleTowerPanelClick(mx, my) {
     // Clicks at or below the panel top are always consumed (never place tower)
     if (my < TOWER_PANEL_TOP) return false;
@@ -966,8 +1138,9 @@ class UIHUD {
     } else {
       stroke(r, g, b, 110);
     }
-    strokeWeight(type === 'area' ? 2.2 : 1.5);
-    ellipse(gridX, gridY, cfg.range * 2, cfg.range * 2);
+    strokeWeight(type === 'area' ? 2.2 : type === 'crystal' ? 2 : 1.5);
+    let rangeRadius = type === 'crystal' ? (cfg.boostRadius || cfg.range) : cfg.range;
+    ellipse(gridX, gridY, rangeRadius * 2, rangeRadius * 2);
 
     if (type === 'area') {
       stroke(blocked ? 220 : r, blocked ? 60 : g, blocked ? 60 : b, canAfford ? 55 : 25);
@@ -978,7 +1151,7 @@ class UIHUD {
     // ── Tower preview sprite (only when placement is valid) ────────
     if (!blocked) {
       let imgs = (typeof gameImages !== 'undefined') ? gameImages : {};
-      const previewImgMap = { basic: imgs.towerBasic, slow: imgs.towerSlow, area: imgs.towerAreaFire };
+      const previewImgMap = { basic: imgs.towerBasic, slow: imgs.towerSlow, area: imgs.towerAreaFire, crystal: imgs.towerCrystal || imgs.towerCrystalActive, steam: imgs.towerSteam || imgs.towerSteamFire, alchemist: imgs.towerAlchemist || imgs.towerAlchemistFire };
       let previewImg = previewImgMap[type];
       if (previewImg && previewImg.width > 0) {
         tint(r, g, b, 180);
