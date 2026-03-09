@@ -1,6 +1,4 @@
-// ========================================
-// Tower — Placement, targeting, and firing
-// ========================================
+// Tower - Placement, targeting, and firing
 
 class Tower {
   constructor(x, y, type) {
@@ -45,13 +43,13 @@ class Tower {
     this.boostedDamageMultiplier = 1;
     this.boostedFireRateMultiplier = 1;
 
-    // 禁用状态（哥布林爆破手爆炸）
+    // Disabled by Goblin Bomber explosion
     this.disabled = false;
     this.disableTimer = 0;
     this.tauntDebuff = 0;
     this.tauntTimer = 0;
 
-    // 蒸汽炮穿透属性
+    // Steam cannon pierce
     this.pierceCount = stats.pierceCount || 0;
     this.pierceDamageDecay = stats.pierceDamageDecay || 0;
     this.chargeBonus = stats.chargeBonus || 0;
@@ -59,19 +57,19 @@ class Tower {
     this.chargeStacks = 0;
     this.lastTarget = null;
 
-    // 炼金术士塔药剂效果
+    // Alchemist potion effects
     this.potionEffects = stats.potionEffects || null;
   }
 
   getEffectiveDamage() {
     let dmg = this.damage * this.boostedDamageMultiplier;
 
-    // 嘲讽减益
+    // Taunt debuff
     if (this.tauntDebuff > 0) {
       dmg = dmg * (1 - this.tauntDebuff);
     }
 
-    // 蓄力加成（蒸汽炮）
+    // Charge bonus (Steam cannon)
     if (this.chargeStacks > 0) {
       dmg = dmg * (1 + this.chargeBonus * this.chargeStacks);
     }
@@ -83,9 +81,6 @@ class Tower {
     return Math.max(1, Math.floor(this.fireRate / this.boostedFireRateMultiplier));
   }
 
-  // ----------------------------------------
-  // Helpers
-  // ----------------------------------------
 
   getDistanceTo(enemy) {
     let dx = enemy.x - this.x;
@@ -97,13 +92,10 @@ class Tower {
     return this.getDistanceTo(enemy) <= this.range;
   }
 
-  // ----------------------------------------
-  // update(enemies) — called every frame by GameManager
-  // ----------------------------------------
   update(enemies) {
     if (this.isSupport) return;
 
-    // 更新禁用状态
+    // Update disabled state
     if (this.disabled) {
       this.disableTimer--;
       if (this.disableTimer <= 0) {
@@ -117,7 +109,7 @@ class Tower {
       return;
     }
 
-    // 更新嘲讽debuff
+    // Update taunt debuff
     if (this.tauntTimer > 0) {
       this.tauntTimer--;
       if (this.tauntTimer <= 0) {
@@ -197,7 +189,7 @@ class Tower {
       let d  = Math.sqrt(dx * dx + dy * dy);
 
       if (d < proj.speed) {
-        // 蒸汽炮蓄力：连续命中同一目标增加伤害
+        // Steam cannon charge: consecutive hits on same target increase damage
         if (this.pierceCount > 0) {
           if (proj.targetEnemy === this.lastTarget) {
             this.chargeStacks = Math.min(this.chargeStacks + 1, this.maxChargeStacks);
@@ -212,7 +204,7 @@ class Tower {
           if (this.type === 'slow') {
             proj.targetEnemy.applySlow(this.slowEffect, this.slowDuration);
           }
-          // 炼金术士塔：随机药剂效果
+          // Alchemist: random potion effect
           if (this.potionEffects && damageApplied) {
             let r = Math.random();
             let acc = 0;
@@ -234,9 +226,9 @@ class Tower {
               proj.targetEnemy.weakenTimer = this.potionEffects.weaken.duration;
               proj.targetEnemy.weakenBonus = this.potionEffects.weaken.damageBonus;
             }
-            // transform 暂不实现
+            // transform not implemented
           }
-          // 蒸汽炮穿透：命中额外敌人
+          // Steam cannon pierce: hit additional enemies
           if (this.pierceCount > 1 && damageApplied) {
             let hitEnemies = [proj.targetEnemy];
             let pierceRadius = 80;
@@ -301,13 +293,10 @@ class Tower {
     this.fireTimer = this.getEffectiveFireRate();
   }
 
-  // ----------------------------------------
-  // draw() — called every frame by GameManager (before enemies)
-  // ----------------------------------------
   draw() {
     push();
 
-    // 只有水晶塔才绘制增益范围光圈
+    // Crystal tower draws boost range
     if (this.type === 'crystal') {
       noFill();
       stroke(150, 100, 255, 80);
@@ -324,7 +313,7 @@ class Tower {
     this.drawProjectiles();
     this.drawHitEffects();
 
-    // 被增益的塔显示小光点特效（非水晶塔）
+    // Boosted towers show sparkle (non-crystal)
     if (this.isBoosted && this.type !== 'crystal') {
       fill(200, 150, 255, 150);
       noStroke();

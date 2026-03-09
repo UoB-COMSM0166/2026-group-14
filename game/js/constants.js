@@ -1,19 +1,15 @@
-// ========================================
-// 🎮 保卫英国 — 全局常量配置
-// ========================================
+// Global constants
 
-// --- 画布设置（网格完美覆盖，无空隙） ---
-const GRID_SIZE = 60;  // 每个格子 60×60 像素
-const COLS = 32;       // 32 列
-const ROWS = 15;       // 15 行
+const GRID_SIZE = 60;
+const COLS = 32;
+const ROWS = 15;
 const DESIGN_WIDTH = COLS * GRID_SIZE;   // 32 × 60 = 1920
 const DESIGN_HEIGHT = ROWS * GRID_SIZE;  // 15 × 60 = 900
 const CANVAS_WIDTH = DESIGN_WIDTH;
 const CANVAS_HEIGHT = DESIGN_HEIGHT;
 const FPS = 60;
-const HUD_HEIGHT = 45;  // 顶部 HUD 栏高度
+const HUD_HEIGHT = 45;
 
-// --- 游戏状态 ---
 const GameState = {
   MENU: 'menu',
   LEVEL_SELECT: 'level_select',
@@ -21,10 +17,10 @@ const GameState = {
   PAUSED: 'paused',
   WIN: 'win',
   LOSE: 'lose',
-  SETTINGS: 'settings'
+  SETTINGS: 'settings',
+  IN_GAME_SETTINGS: 'in_game_settings'
 };
 
-// --- 经济系统 ---
 const INITIAL_GOLD = 400;
 const ENEMY_KILL_REWARD = {
   basic: 15,
@@ -42,7 +38,6 @@ const ENEMY_KILL_REWARD = {
 const WAVE_CLEAR_BONUS_GOLD = 60;
 const WAVE_BONUS_DISPLAY_FRAMES = 120;
 
-// --- 塔类型配置 ---
 const TOWER_TYPES = {
   basic: {
     name: "Basic Tower",
@@ -139,6 +134,12 @@ const TOWER_TYPES = {
 const TOWER_PANEL_HEIGHT = 90;
 const TOWER_PANEL_TOP = CANVAS_HEIGHT - TOWER_PANEL_HEIGHT;
 const TOWER_SHORTCUT_ORDER = ['basic', 'slow', 'area', 'crystal', 'steam', 'alchemist'];
+
+const LEVEL_AVAILABLE_TOWERS = {
+  1: ['basic', 'slow', 'area'],
+  2: ['basic', 'slow', 'area', 'crystal'],
+  3: ['basic', 'slow', 'area', 'crystal', 'steam', 'alchemist']
+};
 const TOWER_COST = {
   basic: 60,
   slow: 85,
@@ -148,14 +149,11 @@ const TOWER_COST = {
   alchemist: 150
 };
 
-// --- 地标 ---
 const LANDMARK_MAX_HP = 100;
 const ENEMY_REACH_DAMAGE = 20;
 
-// --- 关卡设置 ---
 const TOTAL_LEVELS = 3;
 
-// --- 敌人属性 ---
 const ENEMY_STATS = {
   basic:  { hp: 100, speed: 2,   reward: 15 },
   fast:   { hp:  60, speed: 3,   reward: 20 },
@@ -224,7 +222,6 @@ const ENEMY_STATS = {
   }
 };
 
-// --- 波次配置 ---
 const LEVEL_1_WAVE_CONFIGS = [
   {
     waveNumber: 1,
@@ -252,7 +249,7 @@ const LEVEL_1_WAVE_CONFIGS = [
   }
 ];
 
-// Level 2 波次配置 — River Thames Patrol
+// Level 2 - River Thames Patrol
 const LEVEL_2_WAVE_CONFIGS = [
   {
     waveNumber: 1,
@@ -314,7 +311,7 @@ const LEVEL_2_WAVE_CONFIGS = [
   }
 ];
 
-// Level 3 波次配置 — Tower of London Siege
+// Level 3 - Tower of London Siege
 const LEVEL_3_WAVE_CONFIGS = [
   {
     waveNumber: 1,

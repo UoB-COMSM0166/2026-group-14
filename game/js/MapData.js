@@ -44,7 +44,7 @@ function freeTile(grid, px, py) {
 }
 
 // ========================================
-// Level 1 — Big Ben 网格数据
+// Level 1 - Big Ben grid data
 // 15 rows × 32 cols
 // ========================================
 
@@ -119,11 +119,7 @@ const LEVEL_1_GRID = (() => {
   return g;
 })();
 
-// ========================================
-// Level 2 — River Thames Patrol 网格数据
-// 15 rows × 32 cols
-// 共 243 个可建造格子
-// ========================================
+// Level 2 - River Thames Patrol (15 rows x 32 cols, 243 buildable cells)
 
 const LEVEL_2_GRID = (() => {
   const g = Array.from({ length: 15 }, () => new Array(32).fill(0));
@@ -171,7 +167,7 @@ const LEVEL_2_GRID = (() => {
 })();
 
 // ========================================
-// Level 3 — Tower of London Siege 网格数据
+// Level 3 - Tower of London Siege grid data
 // 15 rows × 32 cols
 // ========================================
 
@@ -254,7 +250,7 @@ function getLevel1MapData() {
       grid[r][c] = _GRID_DECODE[val] || TILE_TYPES.OBSTACLE;
     }
   }
-  console.log(`[MapData] Level 1 grid: ${COLS}×${ROWS}`);
+  console.log(`[MapData] Level 1 grid: ${COLS}x${ROWS}`);
   return grid;
 }
 
@@ -269,7 +265,7 @@ function getLevel2MapData() {
       grid[r][c] = _GRID_DECODE[val] || TILE_TYPES.OBSTACLE;
     }
   }
-  console.log(`[MapData] Level 2 grid: ${COLS}×${ROWS}`);
+  console.log(`[MapData] Level 2 grid: ${COLS}x${ROWS}`);
   return grid;
 }
 
@@ -284,7 +280,7 @@ function getLevel3MapData() {
       grid[r][c] = _GRID_DECODE[val] || TILE_TYPES.OBSTACLE;
     }
   }
-  console.log(`[MapData] Level 3 grid: ${COLS}×${ROWS}`);
+  console.log(`[MapData] Level 3 grid: ${COLS}x${ROWS}`);
   return grid;
 }
 

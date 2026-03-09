@@ -14,15 +14,15 @@
 </head>
 
 <body>
-  <!-- 1. Constants first, then map data (depends on constants) -->
+  <!-- 1. Constants first, then map data -->
   <script src="js/constants.js"></script>
   <script src="js/MapData.js"></script>
 
-  <!-- 2. Core modules -->
+  <!-- 2. Core modules (Economy, Landmark) -->
   <script src="js/Economy.js"></script>
   <script src="js/Landmark.js"></script>
 
-  <!-- 3. Gameplay classes -->
+  <!-- 3. Gameplay (Path, Tower, Enemy, Wave) -->
   <script src="js/Path.js"></script>
   <script src="js/Tower.js"></script>
   <script src="js/Enemy.js"></script>
@@ -30,18 +30,16 @@
   <script src="js/Wave.js"></script>
   <script src="js/WaveManager.js"></script>
 
-  <!-- 4. UI system (must be before GameManager) -->
+  <!-- 4. UI (before GameManager) -->
   <script src="js/UIHUD.js"></script>
 
   <!-- 5. Game engine -->
   <script src="js/GameManager.js"></script>
 
-  <!-- 6. P5.js entry point (must be last) -->
+  <!-- 6. P5.js entry point -->
   <script src="sketch.js"></script>
 
-  <a href="https://github.com/UoB-COMSM0166/2026-group-14/tree/main" target="_blank" id="github-link">
-    <img src="assets/shield.png" alt="GitHub" id="github-icon">
-  </a>
+  
 </body>
 
 </html>

@@ -43,22 +43,3 @@ h1 {
   color: #FFFFFF;
   text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.7);
 }
-
-#github-link {
-  position: fixed;
-  right: 20px;
-  bottom: 20px;
-  z-index: 9999;
-  transition: transform 0.2s;
-}
-
-#github-link:hover {
-  transform: scale(1.1);
-}
-
-#github-icon {
-  width: 100px;
-  height: 100px;
-  display: block;
-  cursor: pointer;
-}

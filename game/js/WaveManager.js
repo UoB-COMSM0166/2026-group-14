@@ -1,11 +1,4 @@
-// ========================================
-// WaveManager — Controls wave spawning flow
-//
-// State machine:
-//   "waiting"  → counting down before the wave starts
-//   "spawning" → releasing enemies one by one
-//   "active"   → all spawned; waiting for enemies to be cleared
-// ========================================
+// WaveManager - Controls wave spawning flow
 
 class WaveManager {
   /**
@@ -47,7 +40,7 @@ class WaveManager {
       if (this.waitTimer <= 0) {
         this.waveState  = 'spawning';
         this.spawnTimer = 0; // spawn first enemy immediately
-        console.log(`Wave ${wave.waveNumber} starting`);
+        console.log(`[Game] Wave ${wave.waveNumber} starting`);
       }
     }
 
@@ -65,7 +58,7 @@ class WaveManager {
         if (this.enemiesSpawnedInWave >= wave.enemyList.length) {
           wave.completed = true;
           this.waveState = 'active';
-          console.log(`Wave ${wave.waveNumber} fully spawned`);
+          console.log(`[Game] Wave ${wave.waveNumber} fully spawned`);
         }
       }
     }
@@ -81,14 +74,14 @@ class WaveManager {
 
         if (this.currentWaveIndex >= this.waves.length) {
           this.allWavesComplete = true;
-          console.log('All waves complete — victory!');
+          console.log('[Game] All waves complete - victory!');
         } else {
           // Reset for the next wave (5 s gap = 300 frames)
           this.waveState            = 'waiting';
           this.waitTimer            = 300;
           this.enemiesSpawnedInWave = 0;
           this.spawnTimer           = 0;
-          console.log(`Preparing wave ${this.waves[this.currentWaveIndex].waveNumber}`);
+          console.log(`[Game] Preparing wave ${this.waves[this.currentWaveIndex].waveNumber}`);
         }
       }
     }

@@ -1,36 +1,30 @@
-// ========================================
-// UIHUD.js — 用户界面管理器
-// ========================================
+// UIHUD - User interface manager
 
 class UIHUD {
   /**
-   * @param {GameManager} game - 游戏引擎的引用
-   * 通过 game 可以读取金币、血量、状态等数据
+   * @param {GameManager} game - Game engine reference
    */
   constructor(game) {
     this.game = game;
 
-    // 图片资源（在 sketch.js 的 preload 中加载，然后传进来）
     this.bgImage = null;
     this.settingsBgImg = null;
 
-    // 主菜单按钮
     this.playButton = null;
     this.settingsButton = null;
     this.exitButton = null;
 
-    // 设置页面 UI 元素
     this.musicSlider = null;
     this.brightnessSlider = null;
     this.musicSelect = null;
     this.closeSettingsBtn = null;
     this.backBtn = null;
 
-    // 亮度值
     this.brightnessValue = 200;
 
     this.waveBonusMessage = '';
     this.waveBonusUntilFrame = 0;
+    this.waveBonusTimer = 0;
 
     this.placementMessage = '';
     this.placementMessageUntilFrame = 0;
@@ -38,11 +32,15 @@ class UIHUD {
     this.endScreenButtons = [];
     this.towerPanelTabs = [];
     this._panelLogged = false;  // print tab rects once to console
+
+    this.settings = {
+      musicVolume: 0.5,
+      brightness: 1.0,
+      musicTrack: 0
+    };
+    this._settingsDragTarget = null;  // 'music' | 'brightness' | null
   }
 
-  // ========================================
-  // 初始化（在 sketch.js 的 setup 中调用）
-  // ========================================
 
   setupUI() {
     this.createMenuButtons();
@@ -51,26 +49,24 @@ class UIHUD {
   }
 
   createMenuButtons() {
-    // 主菜单按钮改为图片绘制，不再创建 HTML 按钮
     this.playButton = null;
     this.settingsButton = null;
     this.exitButton = null;
   }
 
   /**
-   * 返回主菜单三个图片按钮的点击区域（用于 handleClick 检测）
-   * 与 drawMainMenu 中的绘制位置保持一致
+   * Returns main menu button click regions for handleClick detection
    */
   getMenuButtonRects() {
-    const BW = 180;
-    const BH = 50;
-    const GAP = 15;
-    const startCenterY = CANVAS_HEIGHT * 0.52;
+    const BW = 225;
+    const BH = 63;
+    const GAP = 19;
+    const startY = CANVAS_HEIGHT / 2 - 50;
     const cx = CANVAS_WIDTH / 2;
     return [
-      { id: 'start', x: cx - BW / 2, y: startCenterY - BH / 2, w: BW, h: BH, action: 'start' },
-      { id: 'settings', x: cx - BW / 2, y: startCenterY + BH / 2 + GAP, w: BW, h: BH, action: 'settings' },
-      { id: 'exit', x: cx - BW / 2, y: startCenterY + BH / 2 + GAP + BH + GAP, w: BW, h: BH, action: 'exit' }
+      { id: 'start', x: cx - BW / 2, y: startY, w: BW, h: BH, action: 'start' },
+      { id: 'settings', x: cx - BW / 2, y: startY + BH + GAP, w: BW, h: BH, action: 'settings' },
+      { id: 'exit', x: cx - BW / 2, y: startY + (BH + GAP) * 2, w: BW, h: BH, action: 'exit' }
     ];
   }
 
@@ -85,10 +81,8 @@ class UIHUD {
         font-size: 16px;
       `;
 
-    // 音乐音量滑块
     this.musicSlider = createSlider(0, 1, 0.5, 0.01);
 
-    // 音乐切换下拉菜单
     this.musicSelect = createSelect();
     this.musicSelect.option('Epic Battle Music');
     this.musicSelect.option('Peaceful Village');
@@ -100,15 +94,13 @@ class UIHUD {
     this.musicSelect.style('border', '2px solid #FFD54F');
     this.musicSelect.style('border-radius', '8px');
     this.musicSelect.style('text-align', 'center');
-    this.musicSelect.style('text-align-last', 'center'); // 针对下拉框收起状态
+    this.musicSelect.style('text-align-last', 'center');
     this.musicSelect.style('box-sizing', 'border-box');
     this.musicSelect.style('appearance', 'none');
     this.musicSelect.style('-webkit-appearance', 'none');
 
-    // 亮度滑块
     this.brightnessSlider = createSlider(10, 230, 100);
 
-    // 关闭按钮（X 图标）
     this.closeSettingsBtn = createButton('');
     this.closeSettingsBtn.style('background', "url('assets/PNG/iconCross_brown.png') no-repeat center center");
     this.closeSettingsBtn.style('background-size', 'contain');
@@ -126,7 +118,6 @@ class UIHUD {
       this.closeSettingsBtn.style('transform', 'scale(1.0)');
     });
 
-    // 返回按钮
     this.backBtn = createButton('Back to Menu');
     this.backBtn.style('background', '#795548');
     this.backBtn.style('color', '#FFECB3');
@@ -144,18 +135,12 @@ class UIHUD {
     this.backBtn.mouseOut(() => this.backBtn.style('background', '#795548'));
   }
 
-  // ========================================
-  // 绘制方法（被 GameManager 的 render() 自动调用）
-  // ========================================
-
   /**
-   * 主菜单画面
-   * 引擎在 GameState.MENU 时自动调用这个方法
+   * Main menu - called when GameState.MENU
    */
   drawMainMenu() {
     this.endScreenButtons = [];
 
-    // 背景图（主菜单专用，已包含 "Defend London" 标题）
     if (typeof gameImages !== 'undefined' && gameImages.mainBackground && gameImages.mainBackground.width > 0) {
       image(gameImages.mainBackground, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
     } else if (this.bgImage) {
@@ -164,24 +149,22 @@ class UIHUD {
       background(20, 60, 20);
     }
 
-    // 亮度遮罩
     this.applyBrightness();
 
     this.hideSettingsUI();
     this.hideMenuButtons();
 
-    // 绘制图片按钮（或 fallback 文字按钮）
     this.drawMenuButtons();
   }
 
   /**
-   * 绘制主菜单按钮（图片或 fallback 文字）
+   * Draw main menu buttons (image or fallback text)
    */
   drawMenuButtons() {
-    const BW = 180;
-    const BH = 50;
-    const GAP = 15;
-    const startCenterY = CANVAS_HEIGHT * 0.52;
+    const BW = 225;
+    const BH = 63;
+    const GAP = 19;
+    const startY = CANVAS_HEIGHT / 2 - 50;
     const cx = CANVAS_WIDTH / 2;
 
     const imgs = typeof gameImages !== 'undefined' ? gameImages : {};
@@ -190,18 +173,17 @@ class UIHUD {
     const hasExit = imgs.btnExit && imgs.btnExit.width > 0;
     const useImages = hasStart && hasSettings && hasExit;
 
-    // 调试：首次进入时输出（避免每帧刷屏）
     if (!this._menuBtnDebugLogged) {
       this._menuBtnDebugLogged = true;
-      console.log('Drawing menu buttons, btnStart exists:', !!imgs.btnStart,
+      console.log('[Debug] Drawing menu buttons, btnStart exists:', !!imgs.btnStart,
         'width:', imgs.btnStart ? imgs.btnStart.width : 0,
         'useImages:', useImages);
     }
 
     const centerYs = [
-      startCenterY,
-      startCenterY + BH + GAP,
-      startCenterY + 2 * BH + 2 * GAP
+      startY + BH / 2,
+      startY + BH + GAP + BH / 2,
+      startY + (BH + GAP) * 2 + BH / 2
     ];
 
     for (let i = 0; i < 3; i++) {
@@ -226,18 +208,18 @@ class UIHUD {
         image(img, cx, cy, BW, BH);
         imageMode(CORNER);
       } else {
-        // Fallback: 深色圆角矩形 + 白色文字
+        // Fallback: dark rounded rect + white text
         noStroke();
         fill(60, 50, 40, 230);
-        rect(rect.x, rect.y, rect.w, rect.h, 10);
+        rect(rect.x, rect.y, rect.w, rect.h, 12);
         stroke(180, 160, 120);
         strokeWeight(2);
         noFill();
-        rect(rect.x, rect.y, rect.w, rect.h, 10);
+        rect(rect.x, rect.y, rect.w, rect.h, 12);
         noStroke();
         fill(255);
         textAlign(CENTER, CENTER);
-        textSize(18);
+        textSize(22);
         textStyle(BOLD);
         const labels = ['Start', 'Settings', 'Exit'];
         text(labels[i], cx, cy);
@@ -251,21 +233,18 @@ class UIHUD {
   }
 
   /**
-   * 关卡选择界面
-   * 引擎在 GameState.LEVEL_SELECT 时自动调用
+   * Level select - called when GameState.LEVEL_SELECT
    */
   drawLevelSelect() {
     push();
 
-    // 绘制背景图（铺满整个设计尺寸）
     if (typeof gameImages !== 'undefined' && gameImages.levelSelectBg && gameImages.levelSelectBg.width > 0) {
       image(gameImages.levelSelectBg, 0, 0, DESIGN_WIDTH, DESIGN_HEIGHT);
     } else {
-      // fallback 背景色
+      // Fallback background
       background(40, 35, 30);
     }
 
-    // 关卡按钮区域定义（根据背景图中三个关卡图片的实际位置调整）
     this.levelButtons = [
       {
         level: 1,
@@ -296,7 +275,6 @@ class UIHUD {
       }
     ];
 
-    // 绘制每个关卡的交互提示
     for (let btn of this.levelButtons) {
       let mx = typeof getGameMouseX === 'function' ? getGameMouseX() : mouseX;
       let my = typeof getGameMouseY === 'function' ? getGameMouseY() : mouseY;
@@ -308,7 +286,6 @@ class UIHUD {
 
       let isHover = mx >= left && mx <= right && my >= top && my <= bottom;
 
-      // 已解锁关卡的悬停高亮
       if (isHover && btn.unlocked) {
         noFill();
         stroke(255, 215, 0);
@@ -317,7 +294,6 @@ class UIHUD {
         rect(btn.x, btn.y, btn.width, btn.height, 10);
       }
 
-      // 未解锁关卡的锁定遮罩
       if (!btn.unlocked) {
         fill(0, 0, 0, 150);
         noStroke();
@@ -331,7 +307,6 @@ class UIHUD {
       }
     }
 
-    // 绘制返回按钮
     this.backButton = {
       x: 100,
       y: 50,
@@ -362,7 +337,7 @@ class UIHUD {
   }
 
   /**
-   * 处理主菜单按钮点击，返回 true 表示已处理
+   * Handle main menu click, return true if handled
    */
   handleMenuClick(mx, my) {
     const rects = this.getMenuButtonRects();
@@ -378,13 +353,11 @@ class UIHUD {
   }
 
   /**
-   * 设置页面
-   * 引擎在 GameState.SETTINGS 时自动调用
+   * Settings page - called when GameState.SETTINGS
    */
   drawSettings() {
     this.endScreenButtons = [];
 
-    // 背景
     if (this.bgImage) {
       image(this.bgImage, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
     } else {
@@ -394,7 +367,6 @@ class UIHUD {
     this.applyBrightness();
     this.hideMenuButtons();
 
-    // 设置面板背景图
     let imgW = 500;
     let imgH = 600;
     if (this.settingsBgImg) {
@@ -403,7 +375,6 @@ class UIHUD {
       imageMode(CORNER);
     }
 
-    // 标题
     textAlign(CENTER, CENTER);
     fill(255);
     textSize(32);
@@ -411,7 +382,6 @@ class UIHUD {
     text("SETTINGS", CANVAS_WIDTH / 2 + 2, CANVAS_HEIGHT / 2 - imgH / 2 + 102);
     textStyle(NORMAL);
 
-    // 标签
     textSize(18);
     let labelX = CANVAS_WIDTH / 2 - 150;
     let startY = CANVAS_HEIGHT / 2 - 100;
@@ -421,55 +391,28 @@ class UIHUD {
     text("Switch Track :", labelX, startY + spacing);
     text("Brightness :", labelX, startY + spacing * 2);
 
-    // 显示滑块和按钮
     this.showSettingsUI(startY, spacing);
   }
 
   /**
-   * 绘制顶部 HUD 栏（45px 高）
-   * 与底部面板风格统一的深色木质/中世纪风格
-   * @param {boolean} showPaused - 是否在中央显示 "⏸ PAUSED" 标记
+   * Draw top HUD bar (45px)
+   * @param {boolean} showPaused - Show PAUSED in centre
    */
   drawTopHUDBar(showPaused = false) {
     const H = HUD_HEIGHT;
     const leftX = 15;
 
-    // 背景：深色半透明
     noStroke();
     fill(30, 25, 18, 224);  // rgba(30, 25, 18, 0.88) ≈ 224
     rectMode(CORNER);
     rect(0, 0, CANVAS_WIDTH, H);
 
-    // 底部金色分隔线
     stroke(200, 168, 78);  // #C8A84E
     strokeWeight(2);
     line(0, H, CANVAS_WIDTH, H);
     noStroke();
 
-    // ── 左侧：金币 ─────────────────────────────────────────────
-    let gold = this.game.economy ? Math.floor(this.game.economy.getGold()) : 0;
-    let coinCX = leftX + 11;
-    let coinCY = H / 2;
 
-    // 金币图标：金色圆形 + $ 符号
-    fill(255, 210, 0);
-    ellipse(coinCX, coinCY, 22, 22);
-    fill(180, 140, 0);  // 深黄色 $
-    textAlign(CENTER, CENTER);
-    textSize(12);
-    textStyle(BOLD);
-    text('$', coinCX, coinCY);
-    textStyle(NORMAL);
-
-    // 金币数量（图标右侧 8px）
-    fill(255, 215, 0);  // #FFD700
-    textAlign(LEFT, CENTER);
-    textSize(20);
-    textStyle(BOLD);
-    text(String(gold), leftX + 22 + 8, coinCY);
-    textStyle(NORMAL);
-
-    // ── 中间：地标血量（水平居中）────────────────────────────────
     let hp = this.game.landmark ? Math.floor(this.game.landmark.hp) : 0;
     let maxHp = this.game.landmark ? Math.floor(this.game.landmark.maxHp) : 0;
     let name = this.game.landmark ? this.game.landmark.name : 'Landmark';
@@ -481,20 +424,16 @@ class UIHUD {
     let barX = centerX - barW / 2;
     let barY = 24;
 
-    // 地标名称（第一行）
     fill(255, 255, 255, 204);  // rgba(255,255,255,0.8)
     textAlign(CENTER, CENTER);
     textSize(13);
     text(name, centerX, 10);
 
-    // 血条背景
     fill(60, 60, 60, 204);
     rect(barX, barY, barW, barH, 7);
 
-    // 血条填充（根据血量变色）
     if (hpPercent > 0.6) {
       fill(76, 175, 80);  // #4CAF50
-      // 渐变效果用两个色块近似
     } else if (hpPercent > 0.3) {
       fill(255, 193, 7);  // #FFC107
     } else {
@@ -502,7 +441,6 @@ class UIHUD {
     }
     rect(barX, barY, barW * hpPercent, barH, 7);
 
-    // 血条上方文字 "80 / 100"（居中叠加，带阴影）
     let hpText = `${hp} / ${maxHp}`;
     textSize(10);
     textStyle(BOLD);
@@ -513,7 +451,6 @@ class UIHUD {
     text(hpText, centerX, barY + barH / 2);
     textStyle(NORMAL);
 
-    // ── 右侧：波次信息（距右边缘 15px）──────────────────────────
     let rightEdge = CANVAS_WIDTH - 15;
     let waveDisplay = '';
     let waveState = '';
@@ -525,12 +462,10 @@ class UIHUD {
       currWave = Math.min(this.game.waveManager.currentWaveIndex + 1, this.game.waveManager.waves.length);
       totalWaves = this.game.waveManager.waves.length;
     }
-    // 波次标题（第一行）
     fill(255, 255, 255, 204);
     textSize(13);
     textAlign(RIGHT, CENTER);
     text('Wave', rightEdge, 10);
-    // 波次数字 "Wave 1 / 3" — 1 金色，/ 3 白色，右对齐
     textSize(18);
     textStyle(BOLD);
     let suffix = ' / ' + totalWaves;
@@ -540,7 +475,6 @@ class UIHUD {
     fill(255, 215, 0);
     text(currStr, rightEdge - textWidth(suffix), 31);
     textStyle(NORMAL);
-    // 波次间歇期小字
     if (waveState && (waveState.indexOf('Next wave') !== -1 || waveState.indexOf('incoming') !== -1)) {
       fill(255, 200, 100, 179);
       textSize(10);
@@ -548,7 +482,6 @@ class UIHUD {
       text('Next wave incoming...', rightEdge, 40);
     }
 
-    // 暂停标记（可选）
     if (showPaused) {
       fill(255, 215, 0, 220);
       textAlign(CENTER, CENTER);
@@ -560,8 +493,7 @@ class UIHUD {
   }
 
   /**
-   * 游戏内 HUD（顶部信息栏 + 底部塔选择面板）
-   * 引擎在 GameState.PLAYING 时自动调用
+   * In-game HUD - called when GameState.PLAYING
    */
   drawHUD() {
     this.hideAll();
@@ -570,11 +502,46 @@ class UIHUD {
 
     this.drawTopHUDBar(false);
 
-    if (this.waveBonusMessage && frameCount <= this.waveBonusUntilFrame) {
+    if (this.waveBonusMessage && this.waveBonusTimer > 0) {
+      push();
+
+      let alpha = 255;
+      if (this.waveBonusTimer < 30) {
+        alpha = Math.floor(this.waveBonusTimer * 255 / 30);
+      } else if (this.waveBonusTimer > 150) {
+        alpha = Math.floor((180 - this.waveBonusTimer) * 255 / 30);
+      }
+
+      let msgW = 400;
+      let msgH = 100;
+      let msgX = CANVAS_WIDTH / 2 - msgW / 2;
+      let msgY = CANVAS_HEIGHT / 2 - msgH / 2;
+
+      fill(0, 0, 0, alpha * 0.7);
+      noStroke();
+      rectMode(CORNER);
+      rect(msgX, msgY, msgW, msgH, 15);
+
+      stroke(255, 215, 0, alpha);
+      strokeWeight(3);
+      noFill();
+      rect(msgX, msgY, msgW, msgH, 15);
+
+      fill(255, 215, 0, alpha);
+      noStroke();
       textAlign(CENTER, CENTER);
-      textSize(22);
-      fill(255, 230, 120);
-      text(this.waveBonusMessage, CANVAS_WIDTH / 2, HUD_HEIGHT + 33);
+      textSize(32);
+      textStyle(BOLD);
+      text("WAVE COMPLETE!", CANVAS_WIDTH / 2, msgY + 35);
+
+      fill(255, 255, 255, alpha);
+      textSize(24);
+      textStyle(NORMAL);
+      text(this.waveBonusMessage, CANVAS_WIDTH / 2, msgY + 70);
+
+      pop();
+
+      this.waveBonusTimer--;
     }
 
     if (this.placementMessage && frameCount <= this.placementMessageUntilFrame) {
@@ -598,6 +565,7 @@ class UIHUD {
   showWaveBonus(message, durationFrames = WAVE_BONUS_DISPLAY_FRAMES) {
     this.waveBonusMessage = message;
     this.waveBonusUntilFrame = frameCount + durationFrames;
+    this.waveBonusTimer = 180;
   }
 
   /** Show a "Can't build here!" style placement error for ~1.5 s. */
@@ -607,9 +575,7 @@ class UIHUD {
   }
 
   /**
-   * 胜利画面
-   * 引擎在 GameState.WIN 时自动调用
-   * 引擎已经画了游戏画面作为背景，你只需要画遮罩和文字
+   * Win screen - called when GameState.WIN
    */
   drawWinScreen() {
     this.hideAll();
@@ -627,7 +593,7 @@ class UIHUD {
     textAlign(CENTER, CENTER);
     textSize(48);
     textStyle(BOLD);
-    text("🏆 VICTORY!", CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 - 220);
+    text("VICTORY!", CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 - 220);
 
     textStyle(NORMAL);
     fill(170, 255, 190);
@@ -665,8 +631,7 @@ class UIHUD {
   }
 
   /**
-   * 失败画面
-   * 引擎在 GameState.LOSE 时自动调用
+   * Lose screen - called when GameState.LOSE
    */
   drawLoseScreen() {
     this.hideAll();
@@ -684,7 +649,7 @@ class UIHUD {
     textAlign(CENTER, CENTER);
     textSize(48);
     textStyle(BOLD);
-    text("💀 GAME OVER", CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 - 220);
+    text("GAME OVER", CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 - 220);
 
     textStyle(NORMAL);
     textSize(24);
@@ -721,18 +686,14 @@ class UIHUD {
   }
 
   /**
-   * 暂停画面
-   * 引擎在 GameState.PAUSED 时自动调用
-   * HUD 栏保持可见，中央显示 PAUSED 标记
+   * Pause screen - called when GameState.PAUSED
    */
   drawPauseScreen() {
     this.hideAll();
     this.endScreenButtons = [];
 
-    // 先绘制顶部 HUD 栏（带 PAUSED 标记），确保可见
     this.drawTopHUDBar(true);
 
-    // 半透明遮罩（不覆盖 HUD 区域）
     fill(0, 0, 0, 150);
     noStroke();
     rectMode(CORNER);
@@ -752,7 +713,6 @@ class UIHUD {
   }
 
   // ========================================
-  // 内部辅助方法（你可以自由修改）
   // ========================================
 
   applyBrightness() {
@@ -760,7 +720,6 @@ class UIHUD {
       this.brightnessValue = this.brightnessSlider.value();
       select('body').style('filter', `brightness(${this.brightnessValue}%)`);
 
-      // 如果背景是白色的，调暗后会变灰，建议背景设为黑色
       select('body').style('background-color', '#000');
     }
 
@@ -783,7 +742,6 @@ class UIHUD {
     let imgW = 500;
     let imgH = 600;
 
-    // HTML 元素需使用屏幕坐标定位
     const toScreen = typeof toScreenCoords === 'function' ? toScreenCoords : (x, y) => ({ x, y });
 
     if (this.musicSlider) {
@@ -828,23 +786,20 @@ class UIHUD {
 
   /**
    * Calculate the clickable rect for each tower-select tab.
-   * Tabs are centred on the panel, laid out with equal spacing.
-   * Tab layout (vertical, top→bottom): thumbnail → name → price.
-   *
+   * Dynamic layout based on available towers per level.
    * Returned objects: { type, x, y, w, h }
-   * These EXACTLY match both the visual rendering and the click detection —
-   * they are computed once and shared by both drawTowerPanel() and
-   * handleTowerPanelClick().
    */
   getTowerPanelTabs() {
+    const availableTowers = (this.game && this.game.availableTowers) || LEVEL_AVAILABLE_TOWERS[1];
     const BTN_W  = 130;
     const BTN_H  = 70;
     const BTN_GAP = 25;
-    const totalW  = BTN_W * TOWER_SHORTCUT_ORDER.length + BTN_GAP * (TOWER_SHORTCUT_ORDER.length - 1);
+    const count = availableTowers.length;
+    const totalW  = BTN_W * count + BTN_GAP * (count - 1);
     const startX  = Math.floor((CANVAS_WIDTH - totalW) / 2);
     const tabY    = TOWER_PANEL_TOP + Math.floor((TOWER_PANEL_HEIGHT - BTN_H) / 2);
 
-    return TOWER_SHORTCUT_ORDER.map((type, i) => ({
+    return availableTowers.map((type, i) => ({
       type,
       x: startX + i * (BTN_W + BTN_GAP),
       y: tabY,
@@ -853,9 +808,126 @@ class UIHUD {
     }));
   }
 
+  getTowerImage(towerType) {
+    let imgs = (typeof gameImages !== 'undefined') ? gameImages : {};
+    switch (towerType) {
+      case 'basic': return imgs.towerBasic;
+      case 'slow': return imgs.towerSlow || imgs.towerSlowActive;
+      case 'area': return imgs.towerAreaFire || imgs.towerArea;
+      case 'crystal': return imgs.towerCrystal || imgs.towerCrystalActive;
+      case 'steam': return imgs.towerSteam || imgs.towerSteamFire;
+      case 'alchemist': return imgs.towerAlchemist || imgs.towerAlchemistFire;
+      default: return null;
+    }
+  }
+
+  getTowerSpecialText(towerType) {
+    switch (towerType) {
+      case 'basic': return "Balanced tower";
+      case 'slow': return " Slows enemies by 45%";
+      case 'area': return " Damages all enemies in range";
+      case 'crystal': return " Boosts nearby towers +25% DMG";
+      case 'steam': return " Pierces through 3 enemies";
+      case 'alchemist': return " Random potion effects";
+      default: return null;
+    }
+  }
+
+  drawTowerTooltip(towerType, mx, my) {
+    let config = TOWER_TYPES[towerType];
+    if (!config) return;
+
+    push();
+
+    let tipW = 220;
+    let tipH = 160;
+
+    let tipX = mx - tipW / 2;
+    let tipY = my - tipH - 20;
+
+    if (tipX < 10) tipX = 10;
+    if (tipX + tipW > CANVAS_WIDTH - 10) tipX = CANVAS_WIDTH - tipW - 10;
+    if (tipY < 10) tipY = my + 30;
+
+    fill(0, 0, 0, 80);
+    noStroke();
+    rectMode(CORNER);
+    rect(tipX + 4, tipY + 4, tipW, tipH, 10);
+
+    fill(60, 50, 40, 245);
+    stroke(180, 150, 100);
+    strokeWeight(2);
+    rect(tipX, tipY, tipW, tipH, 10);
+
+    fill(255, 220, 150);
+    noStroke();
+    textAlign(CENTER, TOP);
+    textSize(18);
+    textStyle(BOLD);
+    text(config.name, tipX + tipW / 2, tipY + 12);
+    textStyle(NORMAL);
+
+    stroke(150, 120, 80);
+    strokeWeight(1);
+    line(tipX + 15, tipY + 38, tipX + tipW - 15, tipY + 38);
+    noStroke();
+
+    let attrY = tipY + 48;
+    let lineH = 20;
+    let labelX = tipX + 15;
+    let valueX = tipX + tipW - 15;
+
+    textSize(13);
+
+    fill(200, 200, 200);
+    textAlign(LEFT, TOP);
+    text("Cost:", labelX, attrY);
+    fill(255, 215, 0);
+    textAlign(RIGHT, TOP);
+    text("$" + config.cost, valueX, attrY);
+    attrY += lineH;
+
+    fill(200, 200, 200);
+    textAlign(LEFT, TOP);
+    text("Damage:", labelX, attrY);
+    fill(255, 100, 100);
+    textAlign(RIGHT, TOP);
+    text(config.damage, valueX, attrY);
+    attrY += lineH;
+
+    fill(200, 200, 200);
+    textAlign(LEFT, TOP);
+    text("Fire Rate:", labelX, attrY);
+    fill(100, 200, 255);
+    textAlign(RIGHT, TOP);
+    let speedText = config.fireRate <= 50 ? "Fast" : config.fireRate <= 80 ? "Medium" : "Slow";
+    text(speedText, valueX, attrY);
+    attrY += lineH;
+
+    fill(200, 200, 200);
+    textAlign(LEFT, TOP);
+    text("Range:", labelX, attrY);
+    fill(150, 255, 150);
+    textAlign(RIGHT, TOP);
+    text(config.range + "px", valueX, attrY);
+    attrY += lineH;
+
+    let specialText = this.getTowerSpecialText(towerType);
+    if (specialText) {
+      fill(255, 200, 100);
+      textAlign(CENTER, TOP);
+      textSize(11);
+      text(specialText, tipX + tipW / 2, attrY + 5);
+    }
+
+    pop();
+  }
+
   drawTowerPanel() {
     let tabs = this.getTowerPanelTabs();
     this.towerPanelTabs = tabs;
+    this.towerButtons = tabs.map(t => ({ type: t.type, x: t.x, y: t.y, w: t.w, h: t.h }));
+    this.hoveredTower = null;
 
     let imgs = (typeof gameImages !== 'undefined') ? gameImages : {};
     const PY = TOWER_PANEL_TOP;
@@ -876,10 +948,69 @@ class UIHUD {
 
     let currentGold = this.game.economy ? this.game.economy.getGold() : 0;
 
-    // ── Left side: coin icon + gold amount ───────────────────────
-    let leftEdge = tabs[0].x;
-    let coinCX   = Math.floor(leftEdge / 2);
-    let coinCY   = panelCY;
+    // ── Left side: Settings + Pause buttons, then coin + gold ─────
+    let btnStartX = 15;
+    let btnY = PY + 8;
+    let btnW = 65;
+    let btnH = PH - 16;
+    let btnGap = 8;
+
+    let mx = getGameMouseX();
+    let my = getGameMouseY();
+
+    // --- Settings button ---
+    let settingsBtnX = btnStartX;
+    let isSettingsHover = mx >= settingsBtnX && mx <= settingsBtnX + btnW &&
+                          my >= btnY && my <= btnY + btnH;
+
+    fill(isSettingsHover ? color(100, 80, 60) : color(55, 45, 35));
+    stroke(isSettingsHover ? color(220, 180, 100) : color(120, 100, 70));
+    strokeWeight(2);
+    rectMode(CORNER);
+    rect(settingsBtnX, btnY, btnW, btnH, 6);
+
+    fill(isSettingsHover ? color(255, 230, 180) : color(180, 160, 120));
+    noStroke();
+    textAlign(CENTER, CENTER);
+    textSize(20);
+    text("S", settingsBtnX + btnW / 2, btnY + btnH / 2 - 5);
+    textSize(9);
+    text("Settings", settingsBtnX + btnW / 2, btnY + btnH / 2 + 14);
+
+    this.inGameSettingsBtn = { x: settingsBtnX, y: btnY, w: btnW, h: btnH };
+
+    // --- Pause/Resume button ---
+    let pauseBtnX = settingsBtnX + btnW + btnGap;
+    let isPauseHover = mx >= pauseBtnX && mx <= pauseBtnX + btnW &&
+                       my >= btnY && my <= btnY + btnH;
+
+    let isPaused = (typeof game !== 'undefined' && game.manualPaused);
+
+    fill(isPauseHover ? color(100, 80, 60) : color(55, 45, 35));
+    stroke(isPauseHover ? color(220, 180, 100) : color(120, 100, 70));
+    strokeWeight(2);
+    rect(pauseBtnX, btnY, btnW, btnH, 6);
+
+    fill(isPauseHover ? color(255, 230, 180) : color(180, 160, 120));
+    noStroke();
+    textAlign(CENTER, CENTER);
+    textSize(20);
+    if (isPaused) {
+      text(">", pauseBtnX + btnW / 2, btnY + btnH / 2 - 5);
+      textSize(9);
+      text("Resume", pauseBtnX + btnW / 2, btnY + btnH / 2 + 14);
+    } else {
+      text("||", pauseBtnX + btnW / 2, btnY + btnH / 2 - 5);
+      textSize(9);
+      text("Pause", pauseBtnX + btnW / 2, btnY + btnH / 2 + 14);
+    }
+
+    this.pauseBtn = { x: pauseBtnX, y: btnY, w: btnW, h: btnH };
+
+    // --- Coin + gold (right of buttons) ---
+    let coinStartX = pauseBtnX + btnW + btnGap + 25;
+    let coinCX     = coinStartX + 37;  // coin center at coinCX-22, amount at coinCX-8
+    let coinCY     = panelCY;
 
     // Coin circle
     fill(255, 210, 0);
@@ -898,15 +1029,6 @@ class UIHUD {
     textStyle(BOLD);
     text(currentGold, coinCX - 8, coinCY);
     textStyle(NORMAL);
-
-    // ── Right side: England shield ───────────────────────────────
-    if (imgs.englandShield && imgs.englandShield.width > 0) {
-      noTint();
-      imageMode(CORNER);
-      let sh = PH - 12;
-      let sw = sh;
-      image(imgs.englandShield, CANVAS_WIDTH - sw - 8, PY + 6, sw, sh);
-    }
 
     // ── Tower buttons ─────────────────────────────────────────────
     const thumbImgMap = {
@@ -927,6 +1049,8 @@ class UIHUD {
       let selected   = this.game.selectedTowerType === tab.type;
       let hovering   = getGameMouseX() >= tab.x && getGameMouseX() <= tab.x + tab.w &&
                        getGameMouseY() >= tab.y && getGameMouseY() <= tab.y + tab.h;
+
+      if (hovering) this.hoveredTower = tab.type;
 
       // ── Button background ──
       rectMode(CORNER);
@@ -997,13 +1121,16 @@ class UIHUD {
       if (hovering && affordable) cursor(HAND);
     }
 
-    // ── One-time console log of button bounds ─────────────────────
+    if (this.hoveredTower) {
+      this.drawTowerTooltip(this.hoveredTower, getGameMouseX(), getGameMouseY());
+    }
+
     if (!this._panelLogged) {
       this._panelLogged = true;
-      console.log('=== Tower Panel Button Bounds ===');
+      console.log('[Debug] Tower Panel Button Bounds');
       for (let tab of tabs) {
         console.log(
-          `${tab.type}: x=${tab.x.toFixed(0)} y=${tab.y.toFixed(0)} ` +
+          `[Debug] ${tab.type}: x=${tab.x.toFixed(0)} y=${tab.y.toFixed(0)} ` +
           `w=${tab.w} h=${tab.h} | right=${(tab.x + tab.w).toFixed(0)} ` +
           `bottom=${(tab.y + tab.h).toFixed(0)}`
         );
@@ -1068,21 +1195,239 @@ class UIHUD {
     pop();
   }
 
+  /**
+   * In-game settings panel (canvas)
+   */
+  drawInGameSettings() {
+    push();
+
+    let panelW = 520;
+    let panelH = 450;
+
+    let panelX = Math.floor((CANVAS_WIDTH - panelW) / 2);
+    let panelY = Math.floor((CANVAS_HEIGHT - panelH) / 2);
+
+    let centerX = panelX + panelW / 2;
+
+    fill(0, 0, 0, 100);
+    noStroke();
+    rectMode(CORNER);
+    rect(panelX + 10, panelY + 10, panelW, panelH, 15);
+
+    fill(80, 60, 45, 250);
+    stroke(180, 150, 100);
+    strokeWeight(4);
+    rect(panelX, panelY, panelW, panelH, 15);
+
+    stroke(120, 90, 60);
+    strokeWeight(2);
+    rect(panelX + 12, panelY + 12, panelW - 24, panelH - 24, 10);
+    noStroke();
+
+    fill(255, 220, 150);
+    textAlign(CENTER, CENTER);
+    textSize(36);
+    textStyle(BOLD);
+    text("SETTINGS", centerX, panelY + 55);
+    textStyle(NORMAL);
+
+    stroke(150, 120, 80);
+    strokeWeight(2);
+    line(panelX + 40, panelY + 95, panelX + panelW - 40, panelY + 95);
+    noStroke();
+
+    let labelX = panelX + 50;
+    let sliderX = panelX + 200;
+    let sliderW = 230;
+    let startY = panelY + 145;
+    let spacing = 85;
+
+    // Music Volume
+    fill(255);
+    textAlign(LEFT, CENTER);
+    textSize(20);
+    text("Music Volume", labelX, startY);
+    this.drawCustomSlider(sliderX, startY - 12, sliderW, 24, this.settings.musicVolume, 'music');
+    fill(200);
+    textSize(16);
+    textAlign(LEFT, CENTER);
+    text(Math.round(this.settings.musicVolume * 100) + '%', sliderX + sliderW + 15, startY);
+
+    // Music Track
+    fill(255);
+    textAlign(LEFT, CENTER);
+    textSize(20);
+    text("Music Track", labelX, startY + spacing);
+    this.drawTrackSelector(sliderX, startY + spacing - 18, sliderW, 36);
+
+    // Brightness
+    fill(255);
+    textAlign(LEFT, CENTER);
+    textSize(20);
+    text("Brightness", labelX, startY + spacing * 2);
+    let brightnessNorm = (this.settings.brightness - 0.5) / 1.0;
+    this.drawCustomSlider(sliderX, startY + spacing * 2 - 12, sliderW, 24, brightnessNorm, 'brightness');
+    fill(200);
+    textSize(16);
+    textAlign(LEFT, CENTER);
+    text(Math.round(this.settings.brightness * 100) + '%', sliderX + sliderW + 15, startY + spacing * 2);
+
+    let btnW = 200;
+    let btnH = 55;
+    let btnX = centerX - btnW / 2;
+    let btnY = panelY + panelH - 90;
+    this.drawSettingsButton(btnX, btnY, btnW, btnH, "Resume Game", 'back');
+
+    this.drawCloseButton(panelX + panelW - 48, panelY + 18, 32);
+
+    pop();
+  }
+
+  drawCustomSlider(x, y, w, h, value, id) {
+    value = Math.max(0, Math.min(1, value));
+    this._sliderRects = this._sliderRects || {};
+    this._sliderRects[id] = { x, y, w, h };
+
+    fill(60, 50, 40);
+    stroke(120, 100, 70);
+    strokeWeight(2);
+    rect(x, y, w, h, 6);
+    noStroke();
+
+    fill(200, 168, 78);
+    rect(x, y, w * value, h, 6);
+  }
+
+  drawTrackSelector(x, y, w, h) {
+    this._trackSelectorRect = { x, y, w, h };
+    let tracks = ['Epic Battle Music', 'Peaceful Village', 'Dark Dungeon'];
+    let idx = Math.min(this.settings.musicTrack, tracks.length - 1);
+
+    fill(60, 50, 40);
+    stroke(120, 100, 70);
+    strokeWeight(2);
+    rect(x, y, w, h, 6);
+    noStroke();
+
+    fill(255, 230, 180);
+    textAlign(CENTER, CENTER);
+    textSize(14);
+    text(tracks[idx], x + w / 2, y + h / 2);
+  }
+
+  drawSettingsButton(x, y, w, h, label, action) {
+    this._settingsBackBtn = { x, y, w, h, action };
+    let mx = getGameMouseX();
+    let my = getGameMouseY();
+    let hover = mx >= x && mx <= x + w && my >= y && my <= y + h;
+
+    fill(hover ? color(100, 80, 60) : color(55, 45, 35));
+    stroke(hover ? color(220, 180, 100) : color(120, 100, 70));
+    strokeWeight(2);
+    rect(x, y, w, h, 8);
+    noStroke();
+
+    fill(255, 230, 180);
+    textAlign(CENTER, CENTER);
+    textSize(20);
+    text(label, x + w / 2, y + h / 2);
+  }
+
+  drawCloseButton(x, y, size) {
+    this._settingsCloseBtn = { x, y, w: size, h: size };
+    let mx = getGameMouseX();
+    let my = getGameMouseY();
+    let hover = mx >= x && mx <= x + size && my >= y && my <= y + size;
+
+    fill(hover ? color(120, 60, 60) : color(80, 40, 40));
+    stroke(hover ? color(255, 100, 100) : color(150, 80, 80));
+    strokeWeight(2);
+    rect(x, y, size, size, 6);
+    noStroke();
+
+    fill(255, 200, 200);
+    textAlign(CENTER, CENTER);
+    textSize(18);
+    text("✕", x + size / 2, y + size / 2);
+  }
+
+  handleSettingsClick(mx, my) {
+    if (this._settingsCloseBtn) {
+      let b = this._settingsCloseBtn;
+      if (mx >= b.x && mx <= b.x + b.w && my >= b.y && my <= b.y + b.h) {
+        return 'close';
+      }
+    }
+    if (this._settingsBackBtn) {
+      let b = this._settingsBackBtn;
+      if (mx >= b.x && mx <= b.x + b.w && my >= b.y && my <= b.y + b.h) {
+        return 'back';
+      }
+    }
+    if (this._trackSelectorRect) {
+      let r = this._trackSelectorRect;
+      if (mx >= r.x && mx <= r.x + r.w && my >= r.y && my <= r.y + r.h) {
+        this.settings.musicTrack = (this.settings.musicTrack + 1) % 3;
+        return;
+      }
+    }
+    if (this._sliderRects) {
+      for (let id of ['music', 'brightness']) {
+        let r = this._sliderRects[id];
+        if (r && mx >= r.x && mx <= r.x + r.w && my >= r.y && my <= r.y + r.h) {
+          this._settingsDragTarget = id;
+          let norm = (mx - r.x) / r.w;
+          if (id === 'music') {
+            this.settings.musicVolume = Math.max(0, Math.min(1, norm));
+          } else {
+            this.settings.brightness = 0.5 + norm;  // 0.5 to 1.5
+          }
+          this._applyInGameSettings();
+          return;
+        }
+      }
+    }
+    return null;
+  }
+
+  handleSettingsDrag(mx, my) {
+    if (!this._settingsDragTarget) return;
+    let id = this._settingsDragTarget;
+    let r = this._sliderRects && this._sliderRects[id];
+    if (!r) return;
+
+    let norm = (mx - r.x) / r.w;
+    norm = Math.max(0, Math.min(1, norm));
+    if (id === 'music') {
+      this.settings.musicVolume = norm;
+    } else {
+      this.settings.brightness = 0.5 + norm;
+    }
+    this._applyInGameSettings();
+  }
+
+  handleSettingsRelease() {
+    this._settingsDragTarget = null;
+  }
+
+  _applyInGameSettings() {
+    if (select('body').length) {
+      select('body').style('filter', `brightness(${Math.round(this.settings.brightness * 100)}%)`);
+      select('body').style('background-color', '#000');
+    }
+  }
+
   handleTowerPanelClick(mx, my) {
     // Clicks at or below the panel top are always consumed (never place tower)
     if (my < TOWER_PANEL_TOP) return false;
 
-    let tabs = this.getTowerPanelTabs();
-    let currentGold = this.game.economy ? this.game.economy.getGold() : 0;
+    let buttons = this.towerButtons || this.getTowerPanelTabs();
 
-    for (let tab of tabs) {
-      if (mx >= tab.x && mx <= tab.x + tab.w &&
-          my >= tab.y && my <= tab.y + tab.h) {
-        let cfg = TOWER_TYPES[tab.type];
-        if (currentGold >= cfg.cost) {
-          this.game.setSelectedTowerType(tab.type);
-        }
-        break;
+    for (let btn of buttons) {
+      if (mx >= btn.x && mx <= btn.x + btn.w &&
+          my >= btn.y && my <= btn.y + btn.h) {
+        this.game.setSelectedTowerType(btn.type);
+        return true;
       }
     }
     return true; // always block map placement when click is in panel area
