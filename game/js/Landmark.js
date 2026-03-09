@@ -1,50 +1,41 @@
-// Landmark: protected objective building logic (to be implemented).
-// ========================================
-// 🏰 Landmark — 英国地标建筑（被保护的目标）
-// 怪物走到终点就会攻击地标，血量归零则游戏失败
-// ========================================
+// Landmark - Protected objective building
 
 class Landmark {
     /**
-     * 创建一个地标
-     * @param {string} name - 地标名称（如 "Big Ben"）
-     * @param {number} maxHp - 最大血量
-     * @param {number} x - 在画布上的 x 坐标
-     * @param {number} y - 在画布上的 y 坐标
+     * @param {string} name - Landmark name (e.g. "Big Ben")
+     * @param {number} maxHp - Max HP
+     * @param {number} x - X coordinate on canvas
+     * @param {number} y - Y coordinate on canvas
      */
     constructor(name, maxHp, x, y) {
       this.name = name;
       this.maxHp = maxHp;
-      this.hp = maxHp;      // 当前血量 = 满血
+      this.hp = maxHp;
       this.x = x;
       this.y = y;
     }
   
     /**
-     * 地标受到伤害
-     * @param {number} amount - 伤害值
-     * 
-     * 就像城墙被撞了一下，裂了一点
+     * Landmark takes damage
+     * @param {number} amount - Damage amount
      */
     takeDamage(amount) {
       this.hp -= amount;
-      if (this.hp < 0) this.hp = 0;  // 血量不能低于0
-      console.log(`🏰 ${this.name} 受到 ${amount} 点伤害！剩余血量：${this.hp}/${this.maxHp}`);
+      if (this.hp < 0) this.hp = 0;
+      console.log(`[Combat] ${this.name} took ${amount} damage. HP: ${this.hp}/${this.maxHp}`);
     }
   
     /**
-     * 地标是否被摧毁
-     * @returns {boolean} true = 被摧毁了（游戏失败）
-     * 
-     * 就像检查城墙还在不在
+     * Check if landmark is destroyed
+     * @returns {boolean}
      */
     isDestroyed() {
       return this.hp <= 0;
     }
   
     /**
-     * 获取当前血量百分比（给血条显示用）
-     * @returns {number} 0 到 1 之间的小数
+     * Get current HP as fraction (0-1) for bar display
+     * @returns {number}
      */
     getHpPercent() {
       return this.hp / this.maxHp;
@@ -91,7 +82,7 @@ class Landmark {
     }
   
     /**
-     * 重置血量（重新开始关卡时用）
+     * Reset HP (when restarting level)
      */
     reset() {
       this.hp = this.maxHp;

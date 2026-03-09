@@ -1,66 +1,56 @@
-// ========================================
-// 💰 Economy — 金币经济系统
-// ========================================
+// Economy - Gold economy system
 
 class Economy {
     /**
-     * 创建一个新的经济系统
-     * @param {number} initialGold - 初始金币数量
+     * @param {number} initialGold - Initial gold amount
      */
     constructor(initialGold) {
       this.gold = initialGold;
     }
   
     /**
-     * 获取当前金币数量
-     * 就像看一眼钱包里有多少钱
+     * Get current gold amount
      */
     getGold() {
       return this.gold;
     }
   
     /**
-     * 检查是否买得起某样东西
-     * @param {number} cost - 需要花费的金币
-     * @returns {boolean} true = 买得起，false = 买不起
-     * 
-     * 就像去超市，先看看钱包里的钱够不够
+     * Check if can afford cost
+     * @param {number} cost - Gold required
+     * @returns {boolean}
      */
     canAfford(cost) {
       return this.gold >= cost;
     }
   
     /**
-     * 花费金币（买塔、升级）
-     * @param {number} cost - 花费数量
-     * @returns {boolean} 是否花费成功
-     * 
-     * 就像付款：钱够就扣掉，钱不够就告诉你"余额不足"
+     * Spend gold (tower purchase, upgrade)
+     * @param {number} cost - Amount to spend
+     * @returns {boolean}
      */
     spendGold(cost) {
       if (this.canAfford(cost)) {
         this.gold -= cost;
-        console.log(`💰 花费 ${cost} 金币，剩余 ${this.gold}`);
-        return true;   // 花费成功
+        console.log(`[Game] Spent ${cost} gold, remaining: ${this.gold}`);
+        return true;
       } else {
-        console.log(`❌ 金币不足！需要 ${cost}，只有 ${this.gold}`);
-        return false;  // 花费失败
+        console.log(`[Game] Not enough gold: need ${cost}, have ${this.gold}`);
+        return false;
       }
     }
   
     /**
-     * 获得金币（击杀怪物的奖励）
-     * @param {number} amount - 获得数量
-     * 
-     * 就像捡到钱，放进钱包
+     * Add gold (enemy kill reward)
+     * @param {number} amount - Amount to add
      */
     addGold(amount) {
       this.gold += amount;
-      console.log(`💰 获得 ${amount} 金币，当前 ${this.gold}`);
+      console.log(`[Game] Gained ${amount} gold, total: ${this.gold}`);
     }
   
     /**
-     * 重置金币（重新开始关卡时用）
+     * Reset gold (when restarting level)
      */
     reset(initialGold) {
       this.gold = initialGold;

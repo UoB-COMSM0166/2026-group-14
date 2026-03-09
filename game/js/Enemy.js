@@ -23,7 +23,7 @@ class Enemy {
     this.slowTimer = 0;
     this.isSlowed = false;
 
-    // 特殊能力初始化
+    // Ability init
     this.ability = preset.ability || null;
     this.chargeSpeedMultiplier = preset.chargeSpeedMultiplier || 1;
     this.chargeThreshold = preset.chargeThreshold || 0;
@@ -38,24 +38,24 @@ class Enemy {
     this.leapTimer = 0;
     this.leapEffectTimer = 0;
 
-    // 哥布林爆破手 - 死亡爆炸
+    // Goblin Bomber - death explosion
     this.explodeRadius = preset.explodeRadius || 0;
     this.disableDuration = preset.disableDuration || 0;
 
-    // 潜水蜥蜴 - 潜行
+    // Diving Lizard - dive
     this.diveCooldown = preset.diveCooldown || 0;
     this.diveDuration = preset.diveDuration || 0;
     this.diveTimer = 0;
     this.isDiving = false;
     this.diveEffectTimer = 0;
 
-    // 树人法师 - 治疗
+    // Treant Mage - heal
     this.healRadius = preset.healRadius || 0;
     this.healPercent = preset.healPercent || 0;
     this.healCooldown = preset.healCooldown || 0;
     this.healTimer = 0;
 
-    // Boss - 多阶段
+    // Boss - multi-phase
     this.phase = 1;
     this.phase2Threshold = preset.phase2Threshold || 0;
     this.phase3Threshold = preset.phase3Threshold || 0;
@@ -64,7 +64,7 @@ class Enemy {
     this.tauntCooldown = preset.tauntCooldown || 0;
     this.tauntTimer = 0;
 
-    // 炼金术士塔施加的 debuff
+    // Alchemist debuffs
     this.poisonDamage = 0;
     this.poisonTimer = 0;
     this.weakened = false;
@@ -87,7 +87,7 @@ class Enemy {
 
     this.updateAbilities();
 
-    // 中毒伤害
+    // Poison damage
     if (this.poisonTimer > 0) {
       this.hp -= this.poisonDamage;
       this.poisonTimer--;
@@ -97,7 +97,7 @@ class Enemy {
       }
     }
 
-    // 虚弱 debuff 计时
+    // Weaken debuff timer
     if (this.weakenTimer > 0) this.weakenTimer--;
 
     let actualSpeed = this.speed;
@@ -153,25 +153,25 @@ class Enemy {
       }
     }
 
-    // 潜水蜥蜴：潜行
+    // Diving Lizard: dive
     if (this.ability === 'dive') {
       this.diveTimer++;
       if (!this.isDiving && this.diveTimer >= this.diveCooldown) {
         this.isDiving = true;
         this.diveEffectTimer = this.diveDuration;
         this.diveTimer = 0;
-        console.log('🌊 Diving Lizard 潜入水中！');
+        console.log('[Combat] Diving Lizard submerged');
       }
       if (this.isDiving) {
         this.diveEffectTimer--;
         if (this.diveEffectTimer <= 0) {
           this.isDiving = false;
-          console.log('🌊 Diving Lizard 浮出水面！');
+          console.log('[Combat] Diving Lizard emerged');
         }
       }
     }
 
-    // 树人法师：治疗（需要在 GameManager 中处理）
+    // Treant Mage: heal (handled in GameManager)
     if (this.ability === 'heal') {
       this.healTimer++;
       if (this.healTimer >= this.healCooldown) {
@@ -180,17 +180,17 @@ class Enemy {
       }
     }
 
-    // Boss：阶段切换
+    // Boss: phase transition
     if (this.ability === 'boss') {
       let hpPercent = this.hp / this.maxHp;
       if (this.phase === 1 && hpPercent <= this.phase2Threshold) {
         this.phase = 2;
-        console.log('🎩 Gentleman Bug 进入阶段2 - 护盾激活！');
+        console.log('[Combat] Gentleman Bug phase 2 - Shield active');
       }
       if (this.phase === 2 && hpPercent <= this.phase3Threshold) {
         this.phase = 3;
         this.speed = this.baseSpeed * 2;
-        console.log('🎩 Gentleman Bug 进入阶段3 - 狂暴！');
+        console.log('[Combat] Gentleman Bug phase 3 - Enraged');
       }
 
       this.summonTimer++;
@@ -223,23 +223,23 @@ class Enemy {
   }
 
   takeDamage(amount) {
-    // 潜水蜥蜴潜行时免疫伤害
+    // Diving Lizard immune when submerged
     if (this.isDiving) {
-      console.log('🌊 攻击穿过了潜行中的 Diving Lizard！');
+      console.log('[Combat] Attack passed through submerged Diving Lizard');
       return false;
     }
 
-    // Boss 阶段2 减伤50%
+    // Boss phase 2: 50% damage reduction
     if (this.ability === 'boss' && this.phase === 2) {
       amount = amount * 0.5;
     }
 
-    // 虚弱 debuff：受到额外伤害
+    // Weaken debuff: take extra damage
     if (this.weakened && this.weakenTimer > 0) {
       amount = amount * (1 + this.weakenBonus);
     }
 
-    // 闪避判定（Archer）
+    // Dodge check (Archer)
     if (this.ability === 'dodge' && Math.random() < this.dodgeChance) {
       this.dodgeEffectTimer = 20;
       return false;
@@ -261,7 +261,7 @@ class Enemy {
   }
 
   applySlow(slowEffect, duration) {
-    // Boss 阶段3 免疫减速
+    // Boss phase 3: immune to slow
     if (this.ability === 'boss' && this.phase === 3) {
       return;
     }
@@ -297,7 +297,7 @@ class Enemy {
       movingLeft = (target.x - this.x) < 0;
     }
 
-    // 潜行特效（半透明+水波纹）
+    // Dive effect (transparent + ripple)
     if (this.isDiving) {
       tint(255, 255, 255, 80);
       if (entry.img && entry.img.width > 0) {
@@ -378,7 +378,7 @@ class Enemy {
       ellipse(this.x, this.y, glowR * 2, glowR * 2);
     }
 
-    // 树人治疗特效
+    // Treant heal effect
     if (this.ability === 'heal' && this.healTimer >= this.healCooldown - 30) {
       noFill();
       stroke(100, 255, 100, 150);
@@ -395,7 +395,7 @@ class Enemy {
       }
     }
 
-    // Boss 护盾特效（阶段2）
+    // Boss shield effect (phase 2)
     if (this.ability === 'boss' && this.phase === 2) {
       noFill();
       stroke(150, 100, 200, 150);
@@ -403,7 +403,7 @@ class Enemy {
       ellipse(this.x, this.y, 120, 140);
     }
 
-    // Boss 狂暴特效（阶段3）
+    // Boss enrage effect (phase 3)
     if (this.ability === 'boss' && this.phase === 3) {
       noFill();
       stroke(255, 50, 50, 100 + sin(frameCount * 0.2) * 50);
@@ -459,17 +459,17 @@ class Enemy {
     if (this.ability === 'charge') {
       if (this.isCharging) {
         fill(255, 50, 50);
-        text('⚔️', iconX, iconY);
+        text('!', iconX, iconY);
       } else if (!this.hasCharged && this.hp / this.maxHp <= 0.5) {
         fill(255, 150, 50);
-        text('⚔️', iconX, iconY);
+        text('!', iconX, iconY);
       }
     } else if (this.ability === 'dodge') {
       fill(100, 200, 255);
-      text('💨', iconX, iconY);
+      text('~', iconX, iconY);
     } else if (this.ability === 'leap' && this.leapTimer / this.leapCooldown > 0.8) {
       fill(255, 200, 50);
-      text('🦘', iconX, iconY);
+      text('^', iconX, iconY);
     }
   }
 

@@ -36,7 +36,7 @@ function _buildEnemyList(groups) {
 // ========================================
 
 /**
- * Level 1 — 3 waves, escalating difficulty
+ * Level 1 - 3 waves, escalating difficulty
  */
 function getLevel1Waves() {
   return LEVEL_1_WAVE_CONFIGS.map(config => {
@@ -49,7 +49,7 @@ function getLevel1Waves() {
 }
 
 /**
- * Level 2 — River Thames Patrol（使用 LEVEL_2_WAVE_CONFIGS）
+ * Level 2 - River Thames Patrol
  */
 function getLevel2Waves() {
   return LEVEL_2_WAVE_CONFIGS.map(config => {
@@ -62,7 +62,7 @@ function getLevel2Waves() {
 }
 
 /**
- * Level 3 — Tower of London Siege（使用 LEVEL_3_WAVE_CONFIGS）
+ * Level 3 - Tower of London Siege
  */
 function getLevel3Waves() {
   return LEVEL_3_WAVE_CONFIGS.map(config => {
