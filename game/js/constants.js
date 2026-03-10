@@ -18,7 +18,69 @@ const GameState = {
   WIN: 'win',
   LOSE: 'lose',
   SETTINGS: 'settings',
-  IN_GAME_SETTINGS: 'in_game_settings'
+  IN_GAME_SETTINGS: 'in_game_settings',
+  MONSTER_INFO: 'monster_info'
+};
+
+// Enemies available in each level (only enemies with images)
+const LEVEL_ENEMIES = {
+  1: ['basic', 'fast', 'tank'],
+  2: ['basic', 'fast', 'tank', 'knight', 'archer', 'giant'],
+  3: ['basic', 'fast', 'tank', 'knight', 'archer', 'giant', 'goblinBomber', 'divingLizard', 'treantMage', 'gentlemanBug']
+};
+
+// Enemy display information
+const ENEMY_INFO = {
+  basic: {
+    name: 'Guard',
+    description: 'Standard enemy',
+    ability: 'None'
+  },
+  fast: {
+    name: 'Pigeon',
+    description: 'Fast but weak',
+    ability: 'High speed'
+  },
+  tank: {
+    name: 'Hedgehog',
+    description: 'Slow but tanky',
+    ability: 'High HP'
+  },
+  knight: {
+    name: 'Knight',
+    description: 'Armored warrior',
+    ability: 'Charge: 2.5x speed at low HP'
+  },
+  archer: {
+    name: 'Archer',
+    description: 'Agile attacker',
+    ability: 'Dodge: 25% evade'
+  },
+  giant: {
+    name: 'Giant',
+    description: 'Massive creature',
+    ability: 'Leap: Jump every 5s'
+  },
+  goblinBomber: {
+    name: 'Goblin Bomber',
+    description: 'Explosive enemy',
+    ability: 'Explode: Disable towers'
+  },
+  divingLizard: {
+    name: 'Diving Lizard',
+    description: 'Aquatic creature',
+    ability: 'Dive: Immune 3s'
+  },
+  treantMage: {
+    name: 'Treant Mage',
+    description: 'Nature healer',
+    ability: 'Heal: 5% to nearby'
+  },
+  gentlemanBug: {
+    name: 'Gentleman Bug',
+    description: 'Multi-phase boss',
+    ability: 'Summon/Shield/Rage'
+  }
 };
 
 const INITIAL_GOLD = 400;

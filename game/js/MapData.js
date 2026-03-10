@@ -1,6 +1,5 @@
-// ========================================
 // MapData — Tile grid & buildability system
-// ========================================
+
 
 const TILE_TYPES = {
   GRASS:    'grass',
@@ -9,9 +8,7 @@ const TILE_TYPES = {
   OCCUPIED: 'occupied'
 };
 
-// ----------------------------------------
 // Core helpers
-// ----------------------------------------
 
 function getTileAt(grid, px, py) {
   if (!grid) return TILE_TYPES.GRASS;
@@ -43,10 +40,8 @@ function freeTile(grid, px, py) {
   }
 }
 
-// ========================================
 // Level 1 - Big Ben grid data
 // 15 rows × 32 cols
-// ========================================
 
 const LEVEL_1_GRID = (() => {
   const g = Array.from({ length: 15 }, () => new Array(32).fill(0));
@@ -166,10 +161,9 @@ const LEVEL_2_GRID = (() => {
   return g;
 })();
 
-// ========================================
 // Level 3 - Tower of London Siege grid data
 // 15 rows × 32 cols
-// ========================================
+
 
 const LEVEL_3_GRID = (() => {
   const g = Array.from({ length: 15 }, () => new Array(32).fill(0));
@@ -235,9 +229,7 @@ const _GRID_DECODE = [
   TILE_TYPES.GRASS,    // 2
 ];
 
-// ========================================
 // Level data getters
-// ========================================
 
 function getLevel1MapData() {
   let grid = [];

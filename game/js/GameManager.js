@@ -276,6 +276,8 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
 
     if (this.state === GameState.IN_GAME_SETTINGS) return;
 
+    if (this.state === GameState.MONSTER_INFO) return;
+
     if (this.state !== GameState.PLAYING) return;
 
     if (this.manualPaused) return;
@@ -493,6 +495,15 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
       case GameState.LOSE:
         this.drawGame();
         this.ui.drawLoseScreen();
+        break;
+      case GameState.MONSTER_INFO:
+        this.drawGameScene();
+        this.ui.drawHUD();
+        fill(0, 0, 0, 180);
+        noStroke();
+        rectMode(CORNER);
+        rect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        this.ui.drawMonsterInfoPanel(this.currentLevel);
         break;
     }
   }
@@ -995,6 +1006,14 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
         }
       }
 
+      if (this.ui.monsterInfoBtn) {
+        let btn = this.ui.monsterInfoBtn;
+        if (mx >= btn.x && mx <= btn.x + btn.w && my >= btn.y && my <= btn.y + btn.h) {
+          this.setState(GameState.MONSTER_INFO);
+          return;
+        }
+      }
+
       if (this.manualPaused) return;
 
       if (this.ui.handleTowerPanelClick(mx, my)) return;
@@ -1034,6 +1053,17 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
       }
 
       this.tryPlaceTower(this.selectedTowerType, gridX, gridY);
+      return;
+    }
+
+    if (this.state === GameState.MONSTER_INFO) {
+      if (this.ui.monsterInfoCloseBtn) {
+        let btn = this.ui.monsterInfoCloseBtn;
+        if (mx >= btn.x && mx <= btn.x + btn.w && my >= btn.y && my <= btn.y + btn.h) {
+          this.setState(GameState.PLAYING);
+          return;
+        }
+      }
       return;
     }
 

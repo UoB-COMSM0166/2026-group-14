@@ -41,15 +41,7 @@ class Landmark {
       return this.hp / this.maxHp;
     }
   
-    /**
-     * Draw only the HP bar above Big Ben's location in the background image.
-     * The Big Ben sprite itself is already part of map_bg_level1.png — we do
-     * NOT draw bigben.png on top of it to avoid double-rendering.
-     *
-     * HP bar position: centred on this.x, placed ~100 px above this.y so that
-     * the bar sits near the top of the tower in the background artwork.
-     * Adjust the BAR_OFFSET_Y value if the bar doesn't line up with the image.
-     */
+
     draw() {
       push();
 

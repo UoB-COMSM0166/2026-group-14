@@ -1,9 +1,9 @@
 // UIHUD - User interface manager
 
 class UIHUD {
-  /**
-   * @param {GameManager} game - Game engine reference
-   */
+
+  //@param {GameManager} game - Game engine reference
+
   constructor(game) {
     this.game = game;
 
@@ -54,9 +54,8 @@ class UIHUD {
     this.exitButton = null;
   }
 
-  /**
-   * Returns main menu button click regions for handleClick detection
-   */
+  //Returns main menu button click regions for handleClick detection
+
   getMenuButtonRects() {
     const BW = 225;
     const BH = 63;
@@ -135,9 +134,8 @@ class UIHUD {
     this.backBtn.mouseOut(() => this.backBtn.style('background', '#795548'));
   }
 
-  /**
-   * Main menu - called when GameState.MENU
-   */
+  //Main menu - called when GameState.MENU
+
   drawMainMenu() {
     this.endScreenButtons = [];
 
@@ -157,9 +155,8 @@ class UIHUD {
     this.drawMenuButtons();
   }
 
-  /**
-   * Draw main menu buttons (image or fallback text)
-   */
+  //Draw main menu buttons (image or fallback text)
+
   drawMenuButtons() {
     const BW = 225;
     const BH = 63;
@@ -232,9 +229,8 @@ class UIHUD {
     }
   }
 
-  /**
-   * Level select - called when GameState.LEVEL_SELECT
-   */
+  //Level select - called when GameState.LEVEL_SELECT
+
   drawLevelSelect() {
     push();
 
@@ -492,9 +488,8 @@ class UIHUD {
     }
   }
 
-  /**
-   * In-game HUD - called when GameState.PLAYING
-   */
+  //In-game HUD - called when GameState.PLAYING
+
   drawHUD() {
     this.hideAll();
     this.endScreenButtons = [];
@@ -630,9 +625,8 @@ class UIHUD {
     );
   }
 
-  /**
-   * Lose screen - called when GameState.LOSE
-   */
+  //Lose screen - called when GameState.LOSE
+
   drawLoseScreen() {
     this.hideAll();
     this.endScreenButtons = [];
@@ -685,9 +679,8 @@ class UIHUD {
     );
   }
 
-  /**
-   * Pause screen - called when GameState.PAUSED
-   */
+  //Pause screen - called when GameState.PAUSED
+
   drawPauseScreen() {
     this.hideAll();
     this.endScreenButtons = [];
@@ -711,9 +704,6 @@ class UIHUD {
     text("Press P → Resume    Press R → Restart",
       CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 50);
   }
-
-  // ========================================
-  // ========================================
 
   applyBrightness() {
     if (this.brightnessSlider) {
@@ -784,11 +774,10 @@ class UIHUD {
     this.hideSettingsUI();
   }
 
-  /**
-   * Calculate the clickable rect for each tower-select tab.
-   * Dynamic layout based on available towers per level.
-   * Returned objects: { type, x, y, w, h }
-   */
+  //Calculate the clickable rect for each tower-select tab.
+  //Dynamic layout based on available towers per level.
+  //Returned objects: { type, x, y, w, h }
+
   getTowerPanelTabs() {
     const availableTowers = (this.game && this.game.availableTowers) || LEVEL_AVAILABLE_TOWERS[1];
     const BTN_W  = 130;
@@ -1007,8 +996,42 @@ class UIHUD {
 
     this.pauseBtn = { x: pauseBtnX, y: btnY, w: btnW, h: btnH };
 
+    // --- Monster Info button - use monster image instead of "!" ---
+    let monsterBtnX = pauseBtnX + btnW + btnGap;
+    let isMonsterHover = mx >= monsterBtnX && mx <= monsterBtnX + btnW &&
+                         my >= btnY && my <= btnY + btnH;
+
+    fill(isMonsterHover ? color(100, 80, 60) : color(55, 45, 35));
+    stroke(isMonsterHover ? color(220, 180, 100) : color(120, 100, 70));
+    strokeWeight(2);
+    rect(monsterBtnX, btnY, btnW, btnH, 6);
+
+    // Draw monster icon image
+    let monsterIcon = this.getEnemyImage('basic');  // Use Guard as icon
+    if (monsterIcon && monsterIcon.width > 0) {
+      imageMode(CENTER);
+      let iconSize = 32;
+      image(monsterIcon, monsterBtnX + btnW / 2, btnY + btnH / 2 - 3, iconSize, iconSize);
+    } else {
+      // Fallback text if no image
+      fill(isMonsterHover ? color(255, 230, 180) : color(180, 160, 120));
+      noStroke();
+      textAlign(CENTER, CENTER);
+      textSize(16);
+      text("?", monsterBtnX + btnW / 2, btnY + btnH / 2 - 5);
+    }
+
+    // Label below icon
+    fill(isMonsterHover ? color(255, 230, 180) : color(180, 160, 120));
+    noStroke();
+    textAlign(CENTER, CENTER);
+    textSize(9);
+    text("Enemies", monsterBtnX + btnW / 2, btnY + btnH - 8);
+
+    this.monsterInfoBtn = { x: monsterBtnX, y: btnY, w: btnW, h: btnH };
+
     // --- Coin + gold (right of buttons) ---
-    let coinStartX = pauseBtnX + btnW + btnGap + 25;
+    let coinStartX = monsterBtnX + btnW + btnGap + 25;
     let coinCX     = coinStartX + 37;  // coin center at coinCX-22, amount at coinCX-8
     let coinCY     = panelCY;
 
@@ -1195,9 +1218,8 @@ class UIHUD {
     pop();
   }
 
-  /**
-   * In-game settings panel (canvas)
-   */
+  //In-game settings panel (canvas)
+
   drawInGameSettings() {
     push();
 
@@ -1556,5 +1578,203 @@ class UIHUD {
     textAlign(CENTER, CENTER);
     textSize(22);
     text(button.label, button.x + button.w / 2, button.y + button.h / 2);
+  }
+
+  getEnemyImage(enemyType) {
+    let imgs = (typeof gameImages !== 'undefined') ? gameImages : {};
+    switch (enemyType) {
+      case 'basic': return imgs.enemyGuard;
+      case 'fast': return imgs.enemyPigeon;
+      case 'tank': return imgs.enemyHedgehog;
+      case 'knight': return imgs.monster1;
+      case 'archer': return imgs.monster2;
+      case 'giant': return imgs.monster3;
+      case 'goblinBomber': return imgs.goblinBomber || imgs.monster1;
+      case 'divingLizard': return imgs.divingLizard || imgs.monster2;
+      case 'treantMage': return imgs.treantMage || imgs.monster3;
+      case 'gentlemanBug': return imgs.gentlemanBug || imgs.enemyHedgehog;
+      default: return null;
+    }
+  }
+
+  drawEnemyCardCompact(x, y, w, h, enemyType) {
+    let stats = ENEMY_STATS[enemyType];
+    let info = ENEMY_INFO[enemyType];
+
+    if (!stats || !info) return;
+
+    push();
+
+    // Card background
+    fill(65, 55, 48);
+    stroke(110, 95, 75);
+    strokeWeight(2);
+    rectMode(CORNER);
+    rect(x, y, w, h, 6);
+    noStroke();
+
+    // Left section: Enemy image
+    let imgSize = 50;
+    let imgCenterX = x + 40;
+    let imgCenterY = y + h / 2;
+
+    // Image background circle
+    fill(45, 40, 35);
+    noStroke();
+    ellipse(imgCenterX, imgCenterY, imgSize + 8, imgSize + 8);
+
+    // Draw enemy image
+    let img = this.getEnemyImage(enemyType);
+    if (img && img.width > 0) {
+      imageMode(CENTER);
+      image(img, imgCenterX, imgCenterY, imgSize - 2, imgSize - 2);
+    }
+
+    // Right section: All text content
+    let textLeftX = x + 80;  // Start text after image area
+    let textRightX = x + w - 10;
+    let textWidth = textRightX - textLeftX;
+
+    // Row 1: Enemy name
+    fill(255, 220, 150);
+    textAlign(LEFT, TOP);
+    textSize(14);
+    textStyle(BOLD);
+    text(info.name, textLeftX, y + 12);
+    textStyle(NORMAL);
+
+    // Row 2: Stats (HP, SPD, Reward) - all on same line
+    let statsY = y + 32;
+    textSize(11);
+
+    fill(255, 110, 110);
+    textAlign(LEFT, TOP);
+    text("HP:" + stats.hp, textLeftX, statsY);
+
+    fill(110, 200, 255);
+    text("SPD:" + stats.speed, textLeftX + 55, statsY);
+
+    fill(255, 215, 0);
+    text("$" + stats.reward, textLeftX + 115, statsY);
+
+    // Row 3: Ability text (below stats, within right section only)
+    if (info.ability && info.ability !== 'None') {
+      let abilityY = y + 52;
+      fill(255, 190, 100);
+      textSize(10);
+      textAlign(LEFT, TOP);
+      textLeading(12);
+      // Constrain text to right section only
+      text(info.ability, textLeftX, abilityY, textWidth - 5, h - abilityY + y - 8);
+    }
+
+    pop();
+  }
+
+  drawMonsterInfoPanel(currentLevel) {
+    push();
+
+    // Get enemies for current level
+    let enemies = LEVEL_ENEMIES[currentLevel] || LEVEL_ENEMIES[1];
+    let enemyCount = enemies.length;
+
+    // Calculate panel size based on enemy count
+    let cardsPerRow = 3;
+    let cardW = 240;
+    let cardH = 100;  // Reduced height since ability text is more compact now
+    let cardGapX = 15;
+    let cardGapY = 15;
+    let padding = 30;
+
+    let rows = Math.ceil(enemyCount / cardsPerRow);
+    let contentW = cardsPerRow * cardW + (cardsPerRow - 1) * cardGapX;
+    let contentH = rows * cardH + (rows - 1) * cardGapY;
+
+    let panelW = contentW + padding * 2;
+    let panelH = contentH + 150;
+
+    // Minimum panel size
+    panelW = Math.max(panelW, 780);
+    panelH = Math.max(panelH, 400);
+
+    // Center panel
+    let panelX = (CANVAS_WIDTH - panelW) / 2;
+    let panelY = (CANVAS_HEIGHT - panelH) / 2;
+
+    // Panel background
+    fill(45, 38, 32, 250);
+    stroke(160, 130, 90);
+    strokeWeight(4);
+    rectMode(CORNER);
+    rect(panelX, panelY, panelW, panelH, 12);
+
+    // Inner border
+    stroke(100, 85, 65);
+    strokeWeight(2);
+    rect(panelX + 8, panelY + 8, panelW - 16, panelH - 16, 10);
+    noStroke();
+
+    // Title
+    fill(255, 220, 150);
+    textAlign(CENTER, CENTER);
+    textSize(28);
+    textStyle(BOLD);
+    text("ENEMY GUIDE - LEVEL " + currentLevel, CANVAS_WIDTH / 2, panelY + 40);
+    textStyle(NORMAL);
+
+    // Divider line
+    stroke(120, 100, 70);
+    strokeWeight(2);
+    line(panelX + 25, panelY + 65, panelX + panelW - 25, panelY + 65);
+    noStroke();
+
+    // Calculate starting position for cards (centered)
+    let actualContentW = Math.min(enemyCount, cardsPerRow) * cardW + (Math.min(enemyCount, cardsPerRow) - 1) * cardGapX;
+    let startX = panelX + (panelW - actualContentW) / 2;
+    let startY = panelY + 80;
+
+    // Draw enemy cards
+    for (let i = 0; i < enemyCount; i++) {
+      let row = Math.floor(i / cardsPerRow);
+      let col = i % cardsPerRow;
+
+      // Recalculate startX for partial rows
+      let enemiesInThisRow = Math.min(cardsPerRow, enemyCount - row * cardsPerRow);
+      let rowContentW = enemiesInThisRow * cardW + (enemiesInThisRow - 1) * cardGapX;
+      let rowStartX = panelX + (panelW - rowContentW) / 2;
+
+      let cardX = rowStartX + col * (cardW + cardGapX);
+      let cardY = startY + row * (cardH + cardGapY);
+
+      this.drawEnemyCardCompact(cardX, cardY, cardW, cardH, enemies[i]);
+    }
+
+    // Close button - positioned below all cards
+    let closeBtnW = 140;
+    let closeBtnH = 42;
+    let closeBtnX = CANVAS_WIDTH / 2 - closeBtnW / 2;
+    let closeBtnY = panelY + panelH - 55;
+
+    let mx = getGameMouseX();
+    let my = getGameMouseY();
+    let isCloseHover = mx >= closeBtnX && mx <= closeBtnX + closeBtnW &&
+                       my >= closeBtnY && my <= closeBtnY + closeBtnH;
+
+    fill(isCloseHover ? color(110, 90, 65) : color(80, 65, 50));
+    stroke(160, 135, 100);
+    strokeWeight(2);
+    rect(closeBtnX, closeBtnY, closeBtnW, closeBtnH, 8);
+
+    fill(255, 240, 200);
+    noStroke();
+    textAlign(CENTER, CENTER);
+    textSize(18);
+    textStyle(BOLD);
+    text("CLOSE", closeBtnX + closeBtnW / 2, closeBtnY + closeBtnH / 2);
+    textStyle(NORMAL);
+
+    this.monsterInfoCloseBtn = { x: closeBtnX, y: closeBtnY, w: closeBtnW, h: closeBtnH };
+
+    pop();
   }
 }
