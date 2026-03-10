@@ -1,6 +1,4 @@
-// ========================================
 // Path — Enemy movement path
-// ========================================
 
 class Path {
   /**
@@ -57,9 +55,7 @@ class Path {
 
 // Level waypoint definitions (1920x900 design, GRID_SIZE=60)
 
-/**
- * Level 1 — Big Ben
- */
+//Level 1 — Big Ben
 function getLevel1Waypoints() {
   return [
     { x: 30,   y: 463 },   // Entry
@@ -73,9 +69,9 @@ function getLevel1Waypoints() {
   ];
 }
 
-/**
- * Level 2 - River Thames Patrol (Tower Bridge)
- */
+
+//Level 2 - River Thames Patrol (Tower Bridge)
+
 function getLevel2Waypoints() {
   return [
     { x: 510, y: 810 },   // Entry
@@ -102,9 +98,8 @@ function getLevel2Waypoints() {
   ];
 }
 
-/**
- * Level 3 - Tower of London Siege
- */
+//Level 3 - Tower of London Siege
+
 function getLevel3Waypoints() {
   return [
     { x: 30, y: 450 },     // Entry

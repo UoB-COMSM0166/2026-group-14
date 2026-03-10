@@ -1,9 +1,7 @@
 // WaveManager - Controls wave spawning flow
 
 class WaveManager {
-  /**
-   * @param {Wave[]} waves - Ordered array of Wave objects for this level
-   */
+  //@param {Wave[]} waves - Ordered array of Wave objects for this level
   constructor(waves) {
     this.waves = waves;
 
@@ -22,11 +20,9 @@ class WaveManager {
     this._stopped = false;
   }
 
-  // ----------------------------------------
-  // update() — called every frame by GameManager (BEFORE enemy loop)
-  // @param {Enemy[]} enemies - live reference to game.enemies array
-  // @param {Path}    path    - current level path
-  // ----------------------------------------
+  //update() — called every frame by GameManager (BEFORE enemy loop)
+  //@param {Enemy[]} enemies - live reference to game.enemies array
+  //@param {Path}    path    - current level path
   update(enemies, path) {
     this._waveClearedThisFrame = false;
 
@@ -93,17 +89,15 @@ class WaveManager {
     return wasCleared;
   }
 
-  // ----------------------------------------
-  // Display helpers (called by UIHUD)
-  // ----------------------------------------
+  //Display helpers (called by UIHUD)
 
-  /** Returns e.g. "Wave 1 / 3" */
+  //Returns e.g. "Wave 1 / 3"
   getCurrentWaveDisplay() {
     let displayIndex = Math.min(this.currentWaveIndex + 1, this.waves.length);
     return `Wave ${displayIndex} / ${this.waves.length}`;
   }
 
-  /** Returns a short status string for the HUD */
+  //Returns a short status string for the HUD
   getWaveStateText() {
     if (this.allWavesComplete) return 'All clear!';
 
