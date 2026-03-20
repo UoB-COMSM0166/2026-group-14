@@ -13,15 +13,21 @@ You will be developing your game using [P5.js](https://p5js.org) a javascript li
 - [P5.js tutorials](https://p5js.org/tutorials/) 
 - [Coding Train P5.js](https://thecodingtrain.com/tracks/code-programming-with-p5-js) course - go here for enthusiastic video tutorials from Dan Shiffman (recommended!)
 
-## Your Game (change to title of your game)
+## Defend London
 
 STRAPLINE. Add an exciting one sentence description of your game here.
 
 IMAGE. Add an image of your game here, keep this updated with a snapshot of your latest development.
 
-LINK. Add a link here to your deployed game, you can also make the image above link to your game if you wish. Your game lives in the [/docs](/docs) folder, and is published using Github pages. 
+
+
 
 VIDEO. Include a demo video of your game here (you don't have to wait until the end, you can insert a work in progress video)
+
+Defend London is a London-themed tower defense game in which players must protect the city’s iconic landmarks from waves of invading enemies. By placing and upgrading defensive towers across a stylized map of London, players must manage resources carefully and adapt their strategy to survive increasingly difficult enemy attacks.
+
+Play the game: [Start](https://uob-comsm0166.github.io/2026-group-14/game/)
+Demo video: 
 
 ## Your Group
 
@@ -47,14 +53,33 @@ VIDEO. Include a demo video of your game here (you don't have to wait until the 
 - 5% ~250 words 
 - Describe your game, what is based on, what makes it novel? (what's the "twist"?) 
 
+Defend London is a London-themed tower defense game that challenges players to protect some of the city’s most iconic landmarks from continuous waves of invading enemies. The game is based on the core mechanics of traditional tower defense games, where players must strategically place and upgrade defensive structures to stop enemies from reaching key objectives. However, rather than using a generic fantasy or medieval setting, Defend London reimagines the genre through a stylized version of London, turning familiar routes, rivers, and landmarks into the foundation of its gameplay and identity.
+
+The game takes inspiration from well-known tower defense design principles such as wave-based progression, resource management, and tactical placement, but introduces a distinctive twist through its setting, visual style, and enemy variety. Each level is framed around recognizable London-inspired locations, such as outer city defenses, the River Thames, and the Tower of London, allowing the environment itself to become part of the player’s experience. This gives the game a stronger sense of place than many conventional tower defense titles.
+
+What makes Defend London novel is its combination of local cultural identity with a mixed roster of unusual enemies, ranging from fantasy-inspired creatures to other hostile forces, all threatening a modern, recognizable city. This contrast between classic tower defense mechanics and a uniquely London-centered theme creates a memorable experience that feels both familiar and original. By combining strategic gameplay, illustrated visuals, and landmark-based level design, Defend London offers a creative reinterpretation of the tower defense genre.
+
 ### Requirements 
+
 We use a GitHub Kanban board to track our progress; you can access it via the link here.
 https://github.com/orgs/UoB-COMSM0166/projects/168
 
 - 15% ~750 words
 - Early stages design. Ideation process. How did you decide as a team what to develop? Use case diagrams, user stories.
 
-Reflection:
+#### Ideation
+
+During our early design process, we explored two different prototype ideas before deciding on the final concept for the project. The first was Double Steal, which was designed as a more movement-based game focused on navigating a multi-level environment, managing health, and interacting with objectives across the map. This idea suggested a stronger emphasis on direct player control, exploration, and possibly stealth-based gameplay.
+
+[prototype](./demo/paper-prototype2.mp4)
+
+The second prototype developed into Defend London. This paper prototype already presented the main tower defense gameplay loop clearly: enemies follow a fixed path, players spend money to place different types of towers, defeated enemies provide further resources, and the overall objective is to prevent monsters from reaching and damaging the protected target. The prototype also showed early ideas for tower selection, resource display, and combat flow.
+
+[prototype](./demo/paper-prototype.MOV)
+
+After comparing the two concepts, we decided to continue with Defend London because it offered a more focused and coherent gameplay structure. It seemed more suitable for teamwork because the mechanics could be divided more naturally into separate systems such as map design, enemy behaviour, tower logic, and interface development.
+
+#### Reflection
 
 At this stage of the project, our team has been focusing on the preparation work for developing a tower defense game. Through this process, we have gained a basic understanding of Epics, User Stories, Acceptance Criteria, and their roles in the project.
 
@@ -70,6 +95,18 @@ This preparation work has not only improved team collaboration and consensus but
 
 - 15% ~750 words 
 - System architecture. Class diagrams, behavioural diagrams. 
+
+#### Class Diagram
+
+![Class](./weekly_progress/week5_class_and_sequence/class-diagram.png)
+
+The class diagram shows the object-oriented structure of Defend London and the relationships between the main gameplay systems. The Game class controls the overall flow of the application, while the Level class acts as the central gameplay container. Other classes such as Map, Tower, Enemy, WaveManager, Landmark, Economy, and UIHUD each handle a specific part of the game, making the architecture more modular and easier to maintain.
+
+#### Sequence Diagram
+
+![Sequence](./weekly_progress/week5_class_and_sequence/sequence-diagram.png)
+
+The sequence diagram shows the main gameplay update cycle in Defend London. The Game updates the current Level, which then updates the WaveManager to spawn enemies when needed. Enemies move along the path, towers attack enemies in range, defeated enemies reward the player with gold, and the game checks whether the landmark has been destroyed or all waves have been cleared.
 
 ### Implementation
 
