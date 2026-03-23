@@ -69,11 +69,11 @@ https://github.com/orgs/UoB-COMSM0166/projects/168
 
 #### Ideation
 
-During our early design process, we explored two different prototype ideas before deciding on the final concept for the project. The first was Double Steal, which was designed as a more movement-based game focused on navigating a multi-level environment, managing health, and interacting with objectives across the map. This idea suggested a stronger emphasis on direct player control, exploration, and possibly stealth-based gameplay.
+At the beginning of the design process, we discussed a range of possible gameplay ideas and considered several different types of games that could be developed for the project. This stage helped us explore different directions and think about what kind of experience we wanted to create. After comparing these ideas, we selected two prototypes to develop further and discuss in more detail.
+
+The first prototype was Double Steal, which focused on direct character control in a multi-level environment. In this prototype, the player would move through different floors of the map, avoid danger, manage health, and complete objectives in different locations. The second prototype was Defend London, a tower defense game based on defending iconic London landmarks from waves of enemies through tower placement and upgrades.
 
 [prototype](./demo/paper-prototype2.mp4)
-
-The second prototype developed into Defend London. This paper prototype already presented the main tower defense gameplay loop clearly: enemies follow a fixed path, players spend money to place different types of towers, defeated enemies provide further resources, and the overall objective is to prevent monsters from reaching and damaging the protected target. The prototype also showed early ideas for tower selection, resource display, and combat flow.
 
 [prototype](./demo/paper-prototype.MOV)
 
@@ -98,15 +98,67 @@ This preparation work has not only improved team collaboration and consensus but
 
 #### Class Diagram
 
-![Class](./weekly_progress/week5_class_and_sequence/class-diagram.png)
+![Class](./images/class-diagram.png)
 
-The class diagram shows the object-oriented structure of Defend London and the relationships between the main gameplay systems. The Game class controls the overall flow of the application, while the Level class acts as the central gameplay container. Other classes such as Map, Tower, Enemy, WaveManager, Landmark, Economy, and UIHUD each handle a specific part of the game, making the architecture more modular and easier to maintain.
+##### Overall Structure
+
+The class design of Defend London is organised into separate components so that each part of the game has a clear responsibility. This makes the system easier to understand, develop, and maintain. The overall gameplay flow is controlled by the Game class, while the Level class manages the main elements inside each stage.
+
+###### Game Control
+
+The Game class is responsible for the overall flow of the program, including starting a level, updating the game during play, and ending the level with a result. The GameState enumeration supports this by defining the main states of the game, such as menu, playing, paused, win, and lose. This helps the game switch clearly between different stages.
+
+###### Level Management
+
+The Level class acts as the centre of the gameplay system. It contains the Map, Landmark, Economy, WaveManager, and the lists of towers and enemies. Because of this, it is responsible for updating the state of the level and checking whether the level has been completed.
+
+##### Map and Building
+
+The Map class stores the enemy path and the available build slots. These build slots define where towers can be placed. The BuildController handles the tower placement process by checking whether a slot is valid and whether the player has enough resources to build a tower. This separates the map layout from the player’s building actions.
+
+##### Combat System
+
+Combat is mainly handled through the interaction between Tower and Enemy. Towers have attributes such as range, damage, and cooldown, which allow them to attack enemies within range. Enemies move along the predefined path, take damage from towers, and can damage the Landmark if they reach the end of the route.
+
+##### Waves and Enemy Creation
+
+The WaveManager controls the spawning and progression of enemy waves during the level. It works together with the Wave class, which stores the number and type of enemies in each wave. The EnemyFactory is used to create enemy objects, helping separate enemy creation from wave control logic.
+
+##### Resources and Interface
+
+The Economy class manages resources such as gold and diamonds, including checking whether the player can afford certain actions and rewarding resources when needed. The UIHUD displays important gameplay information, such as current gold, landmark health, and wave information, helping the player understand the current state of the game.
 
 #### Sequence Diagram
 
-![Sequence](./weekly_progress/week5_class_and_sequence/sequence-diagram.png)
+![Sequence](./images/sequence-diagram.png)
 
-The sequence diagram shows the main gameplay update cycle in Defend London. The Game updates the current Level, which then updates the WaveManager to spawn enemies when needed. Enemies move along the path, towers attack enemies in range, defeated enemies reward the player with gold, and the game checks whether the landmark has been destroyed or all waves have been cleared.
+##### Overall Process
+
+This sequence diagram shows the main gameplay update process in Defend London during each frame of the game loop. It explains how the game updates the level, spawns enemies, processes movement and attacks, and checks whether the player has won or lost.
+
+##### Game and Level Update
+
+The process begins when the Game class calls update(dt) on the Level class. This starts the update cycle for the current frame and allows the level to process all active gameplay elements.
+
+##### Enemy Spawning
+
+The Level class first updates the WaveManager. If new enemies need to be spawned, the WaveManager calls the EnemyFactory to create enemies of the required type. These newly created enemies are then added to the list of active enemies in the level.
+
+##### Enemy Movement
+
+After spawning, the Level updates each enemy in the active enemy list. Each enemy moves along the path by running its update(dt, path) method. If an enemy reaches the end of the path, it damages the Landmark and is removed from the level.
+
+##### Tower Attacks
+
+Once enemy movement has been processed, the Level updates each tower. Each tower checks the current list of enemies and attacks when a target is within range. The attack causes damage to the enemy through the takeDamage(damage) method.
+
+##### Enemy Removal and Rewards
+
+If a tower attack kills an enemy, the Economy system rewards the player with gold using addGold(rewardGold). After this, the defeated enemy is removed from the active enemy list. This connects combat directly with the game’s resource system.
+
+##### End Conditions
+
+At the end of the update cycle, the level checks whether the game should finish. If the Landmark has been destroyed, the Game ends the level with a lose result. If the level has been cleared, meaning all waves are completed and all enemies have been removed, the Game ends the level with a win result.
 
 ### Implementation
 
