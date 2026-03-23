@@ -70,31 +70,46 @@ function getLevel1Waypoints() {
 }
 
 
-//Level 2 - River Thames Patrol (Tower Bridge)
-
 function getLevel2Waypoints() {
   return [
-    { x: 510, y: 810 },   // Entry
-    { x: 450, y: 810 },   // Waypoint 1
-    { x: 390, y: 750 },   // Waypoint 2
-    { x: 330, y: 690 },   // Waypoint 3
-    { x: 330, y: 630 },   // Waypoint 4
-    { x: 270, y: 570 },   // Waypoint 5
-    { x: 270, y: 510 },   // Waypoint 6
-    { x: 270, y: 450 },   // Waypoint 7
-    { x: 270, y: 390 },   // Waypoint 8
-    { x: 270, y: 330 },   // Waypoint 9
-    { x: 330, y: 270 },   // Waypoint 10
-    { x: 390, y: 210 },   // Waypoint 11
-    { x: 450, y: 210 },   // Waypoint 12
-    { x: 510, y: 210 },   // Waypoint 13
-    { x: 570, y: 270 },   // Waypoint 14
-    { x: 630, y: 270 },   // Waypoint 15
-    { x: 630, y: 330 },   // Waypoint 16
-    { x: 690, y: 390 },   // Waypoint 17
-    { x: 750, y: 390 },   // Waypoint 18
-    { x: 810, y: 450 },   // Waypoint 19
-    { x: 1890, y: 450 }   // Exit (Tower Bridge)
+    { x: 450, y: 870 },  
+
+
+    { x: 390, y: 810 },
+    { x: 330, y: 750 },
+    { x: 270, y: 690 },
+    { x: 240, y: 630 },
+    { x: 210, y: 570 },
+    { x: 180, y: 510 },
+    { x: 180, y: 450 },
+
+
+    { x: 180, y: 390 },
+    { x: 210, y: 330 },
+    { x: 270, y: 270 },
+    { x: 330, y: 210 },
+    { x: 420, y: 180 },
+    { x: 510, y: 180 },
+
+
+    { x: 600, y: 210 },
+    { x: 690, y: 270 },
+    { x: 780, y: 330 },
+    { x: 900, y: 360 },
+
+ 
+    { x: 1020, y: 375 },
+    { x: 1140, y: 375 },
+    { x: 1260, y: 375 },
+    { x: 1380, y: 375 },
+    { x: 1500, y: 375 },
+    { x: 1620, y: 375 },
+    { x: 1710, y: 390 },
+    { x: 1770, y: 405 },
+
+
+    { x: 1830, y: 420 },
+    { x: 1890, y: 420 }
   ];
 }
 
