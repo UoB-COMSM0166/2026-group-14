@@ -25,7 +25,7 @@ class Path {
     fill(180, 140, 80, 70);
     for (let wp of this.waypoints) {
       rectMode(CENTER);
-      rect(wp.x, wp.y, GRID_SIZE, GRID_SIZE);
+      rect(wp.x, wp.y, CURRENT_GRID_SIZE, CURRENT_GRID_SIZE);
     }
 
     // --- Connecting line ---
@@ -53,7 +53,7 @@ class Path {
   }
 }
 
-// Level waypoint definitions (1920x900 design, GRID_SIZE=60)
+// Level waypoint definitions (1920x900 design; alignment uses applyLevelGridConfig + CURRENT_GRID_SIZE)
 
 //Level 1 — Big Ben
 function getLevel1Waypoints() {
