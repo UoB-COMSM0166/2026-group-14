@@ -125,8 +125,8 @@ function setup() {
   console.log(`[Debug] Canvas: ${canvasWidth}x${canvasHeight}`);
   console.log(`[Debug] Scale: ${scaleFactor.toFixed(3)}`);
   console.log(`[Debug] Design: ${DESIGN_WIDTH}x${DESIGN_HEIGHT}`);
-  console.log(`[Debug] Grid: ${COLS} cols x ${ROWS} rows, GRID_SIZE=${GRID_SIZE}`);
-  console.log(`[Debug] Grid coverage: ${COLS * GRID_SIZE}x${ROWS * GRID_SIZE} (should equal design size)`);
+  console.log(`[Debug] Grid: ${COLS} cols x ${ROWS} rows, base GRID_SIZE=${GRID_SIZE}, CURRENT_GRID_SIZE=${CURRENT_GRID_SIZE}`);
+  console.log(`[Debug] Design: ${DESIGN_WIDTH}x${DESIGN_HEIGHT} (nominal ${COLS * GRID_SIZE}x${ROWS * GRID_SIZE})`);
 
   game = new GameManager();
   game.ui.bgImage = _bgImage;
@@ -177,6 +177,58 @@ function mouseReleased() {
 }
 
 function keyPressed() {
+  let state = game ? game.getState() : null;
+
+  if (game && game.debugMode) {
+    if (keyCode === LEFT_ARROW) {
+      GRID_OFFSET_X -= 1;
+      console.log('[Grid] OFFSET_X:', GRID_OFFSET_X);
+      return false;
+    }
+    if (keyCode === RIGHT_ARROW) {
+      GRID_OFFSET_X += 1;
+      console.log('[Grid] OFFSET_X:', GRID_OFFSET_X);
+      return false;
+    }
+    if (keyCode === UP_ARROW) {
+      GRID_OFFSET_Y -= 1;
+      console.log('[Grid] OFFSET_Y:', GRID_OFFSET_Y);
+      return false;
+    }
+    if (keyCode === DOWN_ARROW) {
+      GRID_OFFSET_Y += 1;
+      console.log('[Grid] OFFSET_Y:', GRID_OFFSET_Y);
+      return false;
+    }
+    if (keyCode === 219) {
+      CURRENT_GRID_SIZE = Math.max(10, CURRENT_GRID_SIZE - 1);
+      console.log('[Grid] SIZE:', CURRENT_GRID_SIZE);
+      return false;
+    }
+    if (keyCode === 221) {
+      CURRENT_GRID_SIZE += 1;
+      console.log('[Grid] SIZE:', CURRENT_GRID_SIZE);
+      return false;
+    }
+    if (key === '-' || key === '_') {
+      CURRENT_GRID_SIZE = Math.max(10, CURRENT_GRID_SIZE - 1);
+      console.log('[Grid] SIZE:', CURRENT_GRID_SIZE);
+      return false;
+    }
+    if (key === '=' || key === '+') {
+      CURRENT_GRID_SIZE += 1;
+      console.log('[Grid] SIZE:', CURRENT_GRID_SIZE);
+      return false;
+    }
+    if (key === 'p' || key === 'P') {
+      console.log('='.repeat(50));
+      console.log('LEVEL ' + game.currentLevel + ' CONFIG:');
+      console.log('{ offsetX: ' + GRID_OFFSET_X + ', offsetY: ' + GRID_OFFSET_Y + ', gridSize: ' + CURRENT_GRID_SIZE + ' }');
+      console.log('='.repeat(50));
+      return false;
+    }
+  }
+
   if (game && game.getState() === GameState.PLAYING && game.pathEditMode) {
     if (key === 'z' || key === 'Z') {
       if (game.pathPoints.length > 0) {
@@ -210,8 +262,6 @@ function keyPressed() {
     game.toggleDebugMode();
     return;
   }
-
-  let state = game.getState();
 
   if (state === GameState.MENU) {
     if (key === 's' || key === 'S') game.setState(GameState.LEVEL_SELECT);
