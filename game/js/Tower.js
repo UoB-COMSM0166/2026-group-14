@@ -329,7 +329,7 @@ class Tower {
   }
 
   drawTowerBody() {
-    const SPRITE_SIZE = (typeof GRID_SIZE !== 'undefined' ? GRID_SIZE : 60) - 2;
+    const SPRITE_SIZE = (typeof CURRENT_GRID_SIZE !== 'undefined' ? CURRENT_GRID_SIZE : GRID_SIZE) - 2;
     let imgs = (typeof gameImages !== 'undefined') ? gameImages : {};
     let img = null;
     let isAttacking = this.isFiring || (this.type === 'area' && this.areaPulseTimer > 0) || (this.type === 'slow' && this.target);
