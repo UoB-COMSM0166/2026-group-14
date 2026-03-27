@@ -1,10 +1,56 @@
 // Global constants
 
+// Grid configuration — default cell size and logical map dimensions
 const GRID_SIZE = 60;
 const COLS = 32;
 const ROWS = 15;
 const DESIGN_WIDTH = COLS * GRID_SIZE;   // 32 × 60 = 1920
 const DESIGN_HEIGHT = ROWS * GRID_SIZE;  // 15 × 60 = 900
+
+// Active grid settings (can be modified during debug; reset from LEVEL_GRID_CONFIG on load)
+let GRID_OFFSET_X = 0;
+let GRID_OFFSET_Y = 0;
+let CURRENT_GRID_SIZE = GRID_SIZE;
+
+// Per-level grid alignment (offset + cell size per map)
+const LEVEL_GRID_CONFIG = {
+  1: { offsetX: -2, offsetY:-16, gridSize: 60 },
+  2: { offsetX: 0, offsetY: 0, gridSize: 58 },  
+  3: { offsetX: -5, offsetY: -15, gridSize: 60 }
+};
+
+function applyLevelGridConfig(level) {
+  let config = LEVEL_GRID_CONFIG[level];
+  if (config) {
+    GRID_OFFSET_X = config.offsetX;
+    GRID_OFFSET_Y = config.offsetY;
+    CURRENT_GRID_SIZE = config.gridSize;
+  } else {
+    GRID_OFFSET_X = 0;
+    GRID_OFFSET_Y = 0;
+    CURRENT_GRID_SIZE = GRID_SIZE;
+  }
+  console.log('[Grid] Level ' + level + ' loaded: offset=(' + GRID_OFFSET_X + ',' + GRID_OFFSET_Y + '), size=' + CURRENT_GRID_SIZE);
+}
+
+function pixelToCol(x) {
+  return Math.floor((x - GRID_OFFSET_X) / CURRENT_GRID_SIZE);
+}
+function pixelToRow(y) {
+  return Math.floor((y - GRID_OFFSET_Y) / CURRENT_GRID_SIZE);
+}
+function colToCenterX(col) {
+  return GRID_OFFSET_X + col * CURRENT_GRID_SIZE + CURRENT_GRID_SIZE / 2;
+}
+function rowToCenterY(row) {
+  return GRID_OFFSET_Y + row * CURRENT_GRID_SIZE + CURRENT_GRID_SIZE / 2;
+}
+function colToLeftX(col) {
+  return GRID_OFFSET_X + col * CURRENT_GRID_SIZE;
+}
+function rowToTopY(row) {
+  return GRID_OFFSET_Y + row * CURRENT_GRID_SIZE;
+}
 const CANVAS_WIDTH = DESIGN_WIDTH;
 const CANVAS_HEIGHT = DESIGN_HEIGHT;
 const FPS = 60;
