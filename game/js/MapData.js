@@ -12,8 +12,8 @@ const TILE_TYPES = {
 
 function getTileAt(grid, px, py) {
   if (!grid) return TILE_TYPES.GRASS;
-  let col = Math.floor(px / GRID_SIZE);
-  let row = Math.floor(py / GRID_SIZE);
+  let col = pixelToCol(px);
+  let row = pixelToRow(py);
   if (row < 0 || row >= grid.length || col < 0 || col >= grid[0].length) {
     return TILE_TYPES.OBSTACLE;
   }
@@ -22,8 +22,8 @@ function getTileAt(grid, px, py) {
 
 function occupyTile(grid, px, py) {
   if (!grid) return;
-  let col = Math.floor(px / GRID_SIZE);
-  let row = Math.floor(py / GRID_SIZE);
+  let col = pixelToCol(px);
+  let row = pixelToRow(py);
   if (row >= 0 && row < grid.length && col >= 0 && col < grid[0].length) {
     grid[row][col] = TILE_TYPES.OCCUPIED;
   }
@@ -31,8 +31,8 @@ function occupyTile(grid, px, py) {
 
 function freeTile(grid, px, py) {
   if (!grid) return;
-  let col = Math.floor(px / GRID_SIZE);
-  let row = Math.floor(py / GRID_SIZE);
+  let col = pixelToCol(px);
+  let row = pixelToRow(py);
   if (row >= 0 && row < grid.length && col >= 0 && col < grid[0].length) {
     if (grid[row][col] === TILE_TYPES.OCCUPIED) {
       grid[row][col] = TILE_TYPES.GRASS;
