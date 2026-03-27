@@ -85,6 +85,8 @@ class GameManager {
   // --- Level management ---
 
   startLevel(levelId) {
+    applyLevelGridConfig(levelId);
+
     let config = this.levelConfigs[levelId];
     if (!config) {
       console.log(`[Game] Level ${levelId} does not exist`);
@@ -248,13 +250,13 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
     console.log('========== EXPORTED PATH CODE ==========');
     console.log('');
     console.log(`function getLevel${levelNum}Waypoints() {`);
-    console.log('  // Based on GRID_SIZE=60 cell centres');
+    console.log('  // Based on CURRENT_GRID_SIZE cell centres (export uses live offset/size)');
     console.log('  return [');
 
     for (let i = 0; i < this.pathPoints.length; i++) {
       let pt = this.pathPoints[i];
-      let x = pt.col * GRID_SIZE + GRID_SIZE / 2;
-      let y = pt.row * GRID_SIZE + GRID_SIZE / 2;
+      let x = colToCenterX(pt.col);
+      let y = rowToCenterY(pt.row);
       let comment = '';
       if (i === 0) comment = '  // Entry';
       else if (i === this.pathPoints.length - 1) comment = '  // Exit';
@@ -595,8 +597,8 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
 
     for (let row = 0; row < ROWS; row++) {
       for (let col = 0; col < COLS; col++) {
-        let x = col * GRID_SIZE;
-        let y = row * GRID_SIZE;
+        let x = colToLeftX(col);
+        let y = rowToTopY(row);
 
         if (this.editGrid[row][col] === 2) {
           fill(0, 255, 0, 100);
@@ -604,31 +606,31 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
           fill(255, 0, 0, 100);
         }
         noStroke();
-        rect(x, y, GRID_SIZE, GRID_SIZE);
+        rect(x, y, CURRENT_GRID_SIZE, CURRENT_GRID_SIZE);
 
         stroke(255, 255, 255, 150);
         strokeWeight(1);
         noFill();
-        rect(x, y, GRID_SIZE, GRID_SIZE);
+        rect(x, y, CURRENT_GRID_SIZE, CURRENT_GRID_SIZE);
 
         fill(255, 255, 255, 200);
         noStroke();
         textSize(9);
         textAlign(CENTER, CENTER);
-        text(`${col},${row}`, x + GRID_SIZE / 2, y + GRID_SIZE / 2);
+        text(`${col},${row}`, x + CURRENT_GRID_SIZE / 2, y + CURRENT_GRID_SIZE / 2);
       }
     }
 
     let mx = getGameMouseX();
     let my = getGameMouseY();
-    let hoverCol = Math.floor(mx / GRID_SIZE);
-    let hoverRow = Math.floor(my / GRID_SIZE);
+    let hoverCol = pixelToCol(mx);
+    let hoverRow = pixelToRow(my);
 
     if (hoverCol >= 0 && hoverCol < COLS && hoverRow >= 0 && hoverRow < ROWS) {
       stroke(255, 255, 0);
       strokeWeight(3);
       noFill();
-      rect(hoverCol * GRID_SIZE, hoverRow * GRID_SIZE, GRID_SIZE, GRID_SIZE);
+      rect(colToLeftX(hoverCol), rowToTopY(hoverRow), CURRENT_GRID_SIZE, CURRENT_GRID_SIZE);
     }
 
     fill(0, 0, 0, 220);
@@ -674,8 +676,8 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
 
     for (let row = 0; row < ROWS; row++) {
       for (let col = 0; col < COLS; col++) {
-        let x = col * GRID_SIZE;
-        let y = row * GRID_SIZE;
+        let x = colToLeftX(col);
+        let y = rowToTopY(row);
 
         let canBuild = this.canBuildAt(col, row);
 
@@ -685,18 +687,18 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
           fill(100, 255, 100, 30);
         }
         noStroke();
-        rect(x, y, GRID_SIZE, GRID_SIZE);
+        rect(x, y, CURRENT_GRID_SIZE, CURRENT_GRID_SIZE);
 
         stroke(255, 255, 255, 80);
         strokeWeight(1);
         noFill();
-        rect(x, y, GRID_SIZE, GRID_SIZE);
+        rect(x, y, CURRENT_GRID_SIZE, CURRENT_GRID_SIZE);
 
         fill(255, 255, 255, 150);
         noStroke();
         textSize(8);
         textAlign(CENTER, CENTER);
-        text(`${col},${row}`, x + GRID_SIZE / 2, y + GRID_SIZE / 2);
+        text(`${col},${row}`, x + CURRENT_GRID_SIZE / 2, y + CURRENT_GRID_SIZE / 2);
       }
     }
 
@@ -706,16 +708,16 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
       noFill();
       beginShape();
       for (let pt of this.pathPoints) {
-        let x = pt.col * GRID_SIZE + GRID_SIZE / 2;
-        let y = pt.row * GRID_SIZE + GRID_SIZE / 2;
+        let x = colToCenterX(pt.col);
+        let y = rowToCenterY(pt.row);
         vertex(x, y);
       }
       endShape();
 
       for (let i = 0; i < this.pathPoints.length; i++) {
         let pt = this.pathPoints[i];
-        let x = pt.col * GRID_SIZE + GRID_SIZE / 2;
-        let y = pt.row * GRID_SIZE + GRID_SIZE / 2;
+        let x = colToCenterX(pt.col);
+        let y = rowToCenterY(pt.row);
 
         if (i === 0) {
           fill(50, 255, 50);
@@ -738,14 +740,14 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
 
     let mx = getGameMouseX();
     let my = getGameMouseY();
-    let hoverCol = Math.floor(mx / GRID_SIZE);
-    let hoverRow = Math.floor(my / GRID_SIZE);
+    let hoverCol = pixelToCol(mx);
+    let hoverRow = pixelToRow(my);
 
     if (hoverCol >= 0 && hoverCol < COLS && hoverRow >= 0 && hoverRow < ROWS) {
       stroke(255, 255, 0);
       strokeWeight(3);
       noFill();
-      rect(hoverCol * GRID_SIZE, hoverRow * GRID_SIZE, GRID_SIZE, GRID_SIZE);
+      rect(colToLeftX(hoverCol), rowToTopY(hoverRow), CURRENT_GRID_SIZE, CURRENT_GRID_SIZE);
     }
 
     fill(0, 0, 0, 220);
@@ -788,15 +790,15 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
     if (row < 0 || row >= this.mapGrid.length)    return false;
     if (col < 0 || col >= this.mapGrid[0].length) return false;
 
-    let cellCenterY = row * GRID_SIZE + GRID_SIZE / 2;
+    let cellCenterY = rowToCenterY(row);
     if (cellCenterY < HUD_HEIGHT) return false;
 
     // Tile must be exactly GRASS
     if (this.mapGrid[row][col] !== TILE_TYPES.GRASS) return false;
 
     // A tower already occupies this cell
-    let cx = col * GRID_SIZE + GRID_SIZE / 2;
-    let cy = row * GRID_SIZE + GRID_SIZE / 2;
+    let cx = colToCenterX(col);
+    let cy = rowToCenterY(row);
     if (this.towers.some(t => t.x === cx && t.y === cy)) return false;
 
     return true;
@@ -812,53 +814,67 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
    *   Red   = canBuildAt() → false
    */
   drawDebugGrid() {
-    if (!this.mapGrid) return;
-
-    let rows = ROWS;
-    let cols = COLS;
+    if (!this.debugMode) return;
 
     push();
     rectMode(CORNER);
-    textAlign(CENTER, CENTER);
 
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        let px = c * GRID_SIZE;
-        let py = r * GRID_SIZE;
-        let ok = this.canBuildAt(c, r);
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        let x = GRID_OFFSET_X + c * CURRENT_GRID_SIZE;
+        let y = GRID_OFFSET_Y + r * CURRENT_GRID_SIZE;
+
+        let tile = this.mapGrid && this.mapGrid[r] ? this.mapGrid[r][c] : null;
+        if (tile === TILE_TYPES.GRASS) {
+          fill(0, 255, 0, 40);
+        } else {
+          fill(255, 0, 0, 20);
+        }
 
         noStroke();
-        fill(ok ? color(0, 255, 0, 77) : color(255, 0, 0, 77));
-        rect(px, py, GRID_SIZE, GRID_SIZE);
+        rect(x, y, CURRENT_GRID_SIZE, CURRENT_GRID_SIZE);
 
-        fill(255, 255, 255, 200);
-        textSize(10);
-        text(`${c},${r}`, px + GRID_SIZE / 2, py + GRID_SIZE / 2);
+        stroke(255, 255, 255, 60);
+        strokeWeight(1);
+        noFill();
+        rect(x, y, CURRENT_GRID_SIZE, CURRENT_GRID_SIZE);
+
+        if (r === 0) {
+          fill(255, 255, 0, 200);
+          noStroke();
+          textSize(10);
+          textAlign(CENTER, TOP);
+          text(c, x + CURRENT_GRID_SIZE / 2, y + 2);
+        }
+        if (c === 0) {
+          fill(255, 255, 0, 200);
+          noStroke();
+          textSize(10);
+          textAlign(LEFT, CENTER);
+          text(r, x + 2, y + CURRENT_GRID_SIZE / 2);
+        }
       }
     }
 
-    stroke(255, 255, 255, 55);
-    strokeWeight(0.5);
-    for (let c = 0; c <= cols; c++) {
-      line(c * GRID_SIZE, 0, c * GRID_SIZE, DESIGN_HEIGHT);
-    }
-    for (let r = 0; r <= rows; r++) {
-      line(0, r * GRID_SIZE, DESIGN_WIDTH, r * GRID_SIZE);
-    }
+    let mx = getGameMouseX();
+    let my = getGameMouseY();
+    stroke(255, 0, 255);
+    strokeWeight(1);
+    line(mx - 20, my, mx + 20, my);
+    line(mx, my - 20, mx, my + 20);
 
-    let mCol     = Math.floor(getGameMouseX() / GRID_SIZE);
-    let mRow     = Math.floor(getGameMouseY() / GRID_SIZE);
-    let canBuild = this.canBuildAt(mCol, mRow);
-    let rawTile  = (mRow >= 0 && mRow < rows && mCol >= 0 && mCol < cols)
+    let mCol = pixelToCol(mx);
+    let mRow = pixelToRow(my);
+    let canBuild = this.mapGrid ? this.canBuildAt(mCol, mRow) : false;
+    let rawTile = (this.mapGrid && mRow >= 0 && mRow < ROWS && mCol >= 0 && mCol < COLS)
       ? this.mapGrid[mRow][mCol]
       : 'OOB';
-    // Decode string tile type back to the integer the user authored (0/1/2)
     const DECODE = {
       [TILE_TYPES.GRASS]: 2, [TILE_TYPES.PATH]: 1,
       [TILE_TYPES.OBSTACLE]: 0, [TILE_TYPES.OCCUPIED]: 'occ'
     };
     let mapVal = (rawTile in DECODE) ? DECODE[rawTile] : rawTile;
-    let info   = `Grid: col=${mCol}, row=${mRow} | canBuild: ${canBuild} | mapValue: ${mapVal}`;
+    let hoverLine = `Grid: col=${mCol}, row=${mRow} | canBuild: ${canBuild} | mapValue: ${mapVal}`;
 
     noStroke();
     textSize(13);
@@ -866,7 +882,28 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
     fill(0, 0, 0, 180);
     rect(8, 54, 440, 22, 4);
     fill(canBuild ? color(80, 255, 120) : color(255, 110, 80));
-    text(info, 16, 65);
+    text(hoverLine, 16, 65);
+
+    fill(0, 0, 0, 200);
+    noStroke();
+    rectMode(CORNER);
+    rect(5, 80, 280, 180, 5);
+
+    fill(255, 255, 0);
+    textSize(13);
+    textAlign(LEFT, TOP);
+    let y = 88;
+    text('Level: ' + this.currentLevel, 12, y); y += 20;
+    text('GRID_OFFSET_X: ' + GRID_OFFSET_X, 12, y); y += 20;
+    text('GRID_OFFSET_Y: ' + GRID_OFFSET_Y, 12, y); y += 20;
+    text('GRID_SIZE: ' + CURRENT_GRID_SIZE, 12, y); y += 25;
+
+    fill(200, 200, 200);
+    textSize(11);
+    text('Controls:', 12, y); y += 15;
+    text('Arrow Keys = Adjust offset', 12, y); y += 15;
+    text('- / = = Adjust grid size', 12, y); y += 15;
+    text('P = Print config to console', 12, y);
 
     pop();
   }
@@ -891,14 +928,14 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
     if (this.stateJustChanged) return;
 
     if (this.pathEditMode) {
-      let col = Math.floor(mx / GRID_SIZE);
-      let row = Math.floor(my / GRID_SIZE);
+      let col = pixelToCol(mx);
+      let row = pixelToRow(my);
 
       if (col >= 0 && col < COLS && row >= 0 && row < ROWS) {
         this.pathPoints.push({ col: col, row: row });
 
-        let pixelX = col * GRID_SIZE + GRID_SIZE / 2;
-        let pixelY = row * GRID_SIZE + GRID_SIZE / 2;
+        let pixelX = colToCenterX(col);
+        let pixelY = rowToCenterY(row);
 
         console.log(`[Editor] Add waypoint #${this.pathPoints.length}: col=${col}, row=${row} -> (${pixelX}, ${pixelY})`);
       }
@@ -916,8 +953,8 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
         }
       }
 
-      let col = Math.floor(mx / GRID_SIZE);
-      let row = Math.floor(my / GRID_SIZE);
+      let col = pixelToCol(mx);
+      let row = pixelToRow(my);
 
       if (col >= 0 && col < COLS && row >= 0 && row < ROWS) {
         if (this.editGrid[row][col] === 2) {
@@ -1019,10 +1056,10 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
       if (this.ui.handleTowerPanelClick(mx, my)) return;
       if (my < HUD_HEIGHT) return;  // top HUD bar
 
-      let col  = Math.floor(mx / GRID_SIZE);
-      let row  = Math.floor(my / GRID_SIZE);
-      let gridX = col * GRID_SIZE + GRID_SIZE / 2;
-      let gridY = row * GRID_SIZE + GRID_SIZE / 2;
+      let col  = pixelToCol(mx);
+      let row  = pixelToRow(my);
+      let gridX = colToCenterX(col);
+      let gridY = rowToCenterY(row);
 
       // In debug mode: log info and exit — never place a tower
       if (this.debugMode) {
@@ -1075,8 +1112,8 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
 
   handleMouseDrag(mx, my) {
     if (this.mapEditMode && this.isDragging && this.editGrid) {
-      let col = Math.floor(mx / GRID_SIZE);
-      let row = Math.floor(my / GRID_SIZE);
+      let col = pixelToCol(mx);
+      let row = pixelToRow(my);
 
       if (col >= 0 && col < COLS && row >= 0 && row < ROWS) {
         this.editGrid[row][col] = this.dragValue;
