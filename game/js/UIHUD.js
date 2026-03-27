@@ -1165,7 +1165,7 @@ class UIHUD {
     if (!this.game.towers || this.game.towers.length === 0) return;
     let mx = getGameMouseX();
     let my = getGameMouseY();
-    let hoverRadius = GRID_SIZE * 0.6;
+    let hoverRadius = CURRENT_GRID_SIZE * 0.6;
 
     for (let tower of this.game.towers) {
       let d = dist(mx, my, tower.x, tower.y);
@@ -1467,10 +1467,10 @@ class UIHUD {
     let [r, g, b]   = cfg.color;
 
     // Snap mouse to grid centre (same formula as GameManager.handleClick)
-    let col   = Math.floor(getGameMouseX() / GRID_SIZE);
-    let row   = Math.floor(getGameMouseY() / GRID_SIZE);
-    let gridX = col * GRID_SIZE + GRID_SIZE / 2;
-    let gridY = row * GRID_SIZE + GRID_SIZE / 2;
+    let col   = pixelToCol(getGameMouseX());
+    let row   = pixelToRow(getGameMouseY());
+    let gridX = colToCenterX(col);
+    let gridY = rowToCenterY(row);
 
     // ── Buildability: use the same canBuildAt() as placement logic ──
     let tileOk = this.game.canBuildAt(col, row);
@@ -1486,13 +1486,13 @@ class UIHUD {
     } else {
       fill(220, 50, 50, 70);    // red   — blocked
     }
-    rect(gridX, gridY, GRID_SIZE, GRID_SIZE, 4);
+    rect(gridX, gridY, CURRENT_GRID_SIZE, CURRENT_GRID_SIZE, 4);
 
     // Red ✕ cross when blocked
     if (blocked) {
       stroke(240, 60, 60, 200);
       strokeWeight(2.5);
-      let s = GRID_SIZE * 0.22;
+      let s = CURRENT_GRID_SIZE * 0.22;
       line(gridX - s, gridY - s, gridX + s, gridY + s);
       line(gridX + s, gridY - s, gridX - s, gridY + s);
     }
@@ -1523,7 +1523,7 @@ class UIHUD {
       if (previewImg && previewImg.width > 0) {
         tint(r, g, b, 180);
         imageMode(CENTER);
-        let ps = GRID_SIZE - 2;
+        let ps = CURRENT_GRID_SIZE - 2;
         image(previewImg, gridX, gridY, ps, ps);
         noTint();
       } else {
