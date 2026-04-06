@@ -25,6 +25,7 @@ class UIHUD {
     this.musicSelect = null;
     this.closeSettingsBtn = null;
     this.backBtn = null;
+    this.audioStarted = false
 
     // 亮度值
     this.brightnessValue = 200;
@@ -73,7 +74,20 @@ class UIHUD {
       window.location.href = 'about:blank';
     });
   }
+  updateMusicTrack() {
+    let selectedName = this.musicSelect.value();
 
+    // 停止所有音乐
+    for (let key in this.musicTracks) {
+      this.musicTracks[key].stop();
+    }
+
+    // 播放选中的音乐并循环
+    if (this.musicTracks[selectedName]) {
+      this.musicTracks[selectedName].loop();
+      this.musicTracks[selectedName].setVolume(this.musicSlider.value());
+    }
+  }
   createSettingsUI() {
     let uiStyle = `
         background: #5D4037;
@@ -87,7 +101,13 @@ class UIHUD {
 
     // 音乐音量滑块
     this.musicSlider = createSlider(0, 1, 0.5, 0.01);
-
+    this.musicSlider.input(() => {
+      let vol = this.musicSlider.value();
+      // 遍历所有音轨更新音量（或者只更新当前播放的）
+      for (let key in this.musicTracks) {
+        this.musicTracks[key].setVolume(vol);
+      }
+    });
     // 音乐切换下拉菜单
     this.musicSelect = createSelect();
     this.musicSelect.option('Epic Battle Music');
@@ -104,7 +124,10 @@ class UIHUD {
     this.musicSelect.style('box-sizing', 'border-box');
     this.musicSelect.style('appearance', 'none');
     this.musicSelect.style('-webkit-appearance', 'none');
-
+    this.musicSelect.selected('Epic Battle Music');
+    this.musicSelect.changed(() => {
+      this.updateMusicTrack();
+    });
     // 亮度滑块
     this.brightnessSlider = createSlider(10, 230, 100);
 
@@ -153,6 +176,17 @@ class UIHUD {
    * 引擎在 GameState.MENU 时自动调用这个方法
    */
   drawMainMenu() {
+    if (!this.audioStarted) {
+      background(0);
+      fill(255);
+      textAlign(CENTER, CENTER);
+      textSize(24);
+      text("Click anywhere to start the game", CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
+      this.hideAll();
+      return;
+    }
+    if (this.bgImage) image(this.bgImage, 0, 0, width, height);
+    this.showMenuButtons();
     // 背景图
     if (this.bgImage) {
       image(this.bgImage, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);

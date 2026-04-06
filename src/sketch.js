@@ -1,9 +1,15 @@
 let game;
 let _bgImage, _settingsBgImg;
 
+let bgMusic;
+let musicTracks = {};
+
 function preload() {
   _bgImage = loadImage('../src/assets/magic_background.png');
   _settingsBgImg = loadImage('../src/assets/PNG/panelInset_brown.png');
+  musicTracks['Epic Battle Music'] = loadSound('../src/soundtracks/epic.mp3');
+  musicTracks['Peaceful Village'] = loadSound('../src/soundtracks/peace_vil.mp3');
+  musicTracks['Dark Dungeon'] = loadSound('../src/soundtracks/dark_dungeon.mp3');
 }
 
 function setup() {
@@ -12,6 +18,7 @@ function setup() {
   game = new GameManager();
   game.ui.bgImage = _bgImage;
   game.ui.settingsBgImg = _settingsBgImg;
+  game.ui.musicTracks = musicTracks;
   game.ui.setupUI();
   console.log("Game initialised");
 }
@@ -22,6 +29,15 @@ function draw() {
 }
 
 function mousePressed() {
+  if (!game.ui.audioStarted) {
+    userStartAudio().then(() => {
+      console.log("Audio Activated!");
+      game.ui.audioStarted = true;
+      game.ui.updateMusicTrack();
+    });
+
+    return;
+  }
   game.handleClick(mouseX, mouseY);
 }
 
