@@ -35,6 +35,11 @@ class UIHUD {
 
     this.levelSelectDebug = false;
 
+    // Tutorial debug mode
+    this.tutorialDebugMode = false;
+    this.tutorialDebugStep = 0;
+    this.tutorialDebugClicks = [];
+
     this.settings = {
       musicVolume: 0.5,
       brightness: 1.0,
@@ -1786,6 +1791,10 @@ class UIHUD {
     this.drawTutorialDialog(step);
     this.drawTutorialSkipBtn();
 
+    if (this.tutorialDebugMode) {
+      this.drawTutorialDebugOverlay();
+    }
+
     pop();
   }
 
@@ -1830,6 +1839,14 @@ class UIHUD {
   }
 
   getTutorialHighlightArea(highlightType) {
+    // Use custom highlightArea from step config if defined and non-zero
+    let currentStep = TUTORIAL_STEPS[game.tutorialStep];
+    if (currentStep && currentStep.highlightArea &&
+        currentStep.highlightArea.w > 0 && currentStep.highlightArea.h > 0) {
+      return currentStep.highlightArea;
+    }
+
+    // Fallback to hardcoded defaults (update after debugging with T key)
     switch (highlightType) {
       case 'landmark':
         if (typeof game !== 'undefined' && game.landmark) {
@@ -1845,9 +1862,10 @@ class UIHUD {
       case 'path':
         return { x: 100, y: 250, w: CANVAS_WIDTH - 250, h: 200 };
 
-      case 'tower_panel':
+      case 'tower_panel': {
         let panelH = 80;
         return { x: 150, y: CANVAS_HEIGHT - panelH - 5, w: CANVAS_WIDTH - 200, h: panelH + 5 };
+      }
 
       case 'buildable':
         return { x: 300, y: 350, w: 400, h: 150 };
@@ -1976,6 +1994,130 @@ class UIHUD {
     text("Skip", skipX + skipW / 2, skipY + skipH / 2);
 
     this.tutorialSkipBtn = { x: skipX, y: skipY, w: skipW, h: skipH };
+  }
+
+  drawTutorialDebugOverlay() {
+    push();
+
+    let mx = getGameMouseX();
+    let my = getGameMouseY();
+
+    // Grid lines
+    for (let x = 0; x <= CANVAS_WIDTH; x += 50) {
+      if (x % 100 === 0) {
+        stroke(255, 255, 0, 50);
+        strokeWeight(2);
+      } else {
+        stroke(255, 255, 255, 30);
+        strokeWeight(1);
+      }
+      line(x, 0, x, CANVAS_HEIGHT);
+    }
+    for (let y = 0; y <= CANVAS_HEIGHT; y += 50) {
+      if (y % 100 === 0) {
+        stroke(255, 255, 0, 50);
+        strokeWeight(2);
+      } else {
+        stroke(255, 255, 255, 30);
+        strokeWeight(1);
+      }
+      line(0, y, CANVAS_WIDTH, y);
+    }
+
+    // Crosshair at mouse
+    stroke(255, 0, 255);
+    strokeWeight(2);
+    line(mx - 30, my, mx + 30, my);
+    line(mx, my - 30, mx, my + 30);
+
+    // Recorded clicks
+    for (let i = 0; i < this.tutorialDebugClicks.length; i++) {
+      let c = this.tutorialDebugClicks[i];
+      fill(0, 255, 0);
+      stroke(255);
+      strokeWeight(2);
+      ellipse(c.x, c.y, 15, 15);
+
+      fill(255);
+      noStroke();
+      textSize(12);
+      textAlign(CENTER, CENTER);
+      text(i + 1, c.x, c.y);
+    }
+
+    // Preview rectangle when one click is recorded
+    if (this.tutorialDebugClicks.length === 1) {
+      let c1 = this.tutorialDebugClicks[0];
+      let rx = Math.min(c1.x, mx);
+      let ry = Math.min(c1.y, my);
+      let rw = Math.abs(mx - c1.x);
+      let rh = Math.abs(my - c1.y);
+
+      fill(255, 255, 0, 30);
+      stroke(255, 255, 0);
+      strokeWeight(2);
+      rectMode(CORNER);
+      rect(rx, ry, rw, rh);
+    }
+
+    // Debug info panel
+    fill(0, 0, 0, 230);
+    stroke(255, 255, 0);
+    strokeWeight(2);
+    rectMode(CORNER);
+    rect(10, 10, 320, 200, 8);
+
+    fill(255, 255, 0);
+    noStroke();
+    textAlign(LEFT, TOP);
+    textSize(16);
+    textStyle(BOLD);
+    text("TUTORIAL DEBUG MODE", 20, 20);
+    textStyle(NORMAL);
+
+    textSize(12);
+    fill(255);
+    let infoY = 45;
+    text("Current Step: " + (game.tutorialStep + 1) + "/" + TUTORIAL_STEPS.length, 20, infoY); infoY += 18;
+    text("Step ID: " + TUTORIAL_STEPS[game.tutorialStep].id, 20, infoY); infoY += 18;
+    text("Mouse: (" + Math.round(mx) + ", " + Math.round(my) + ")", 20, infoY); infoY += 18;
+    text("Clicks recorded: " + this.tutorialDebugClicks.length + "/2", 20, infoY); infoY += 25;
+
+    fill(200, 200, 200);
+    textSize(11);
+    text("Controls:", 20, infoY); infoY += 15;
+    text("T - Toggle debug mode", 20, infoY); infoY += 14;
+    text("1-8 - Jump to step", 20, infoY); infoY += 14;
+    text("Click twice - Record highlight area", 20, infoY); infoY += 14;
+    text("P - Print all configs", 20, infoY); infoY += 14;
+    text("C - Clear clicks", 20, infoY);
+
+    pop();
+  }
+
+  printTutorialHighlightConfig() {
+    console.log('='.repeat(60));
+    console.log('TUTORIAL HIGHLIGHT CONFIGURATIONS');
+    console.log('Copy these values into TUTORIAL_STEPS highlightArea in constants.js:');
+    console.log('='.repeat(60));
+    console.log('');
+
+    for (let i = 0; i < TUTORIAL_STEPS.length; i++) {
+      let step = TUTORIAL_STEPS[i];
+      if (step.highlight !== 'none') {
+        let area = this.getTutorialHighlightArea(step.highlight);
+        if (area) {
+          console.log("Step " + (i + 1) + " '" + step.id + "' (" + step.highlight + "):");
+          console.log("  highlightArea: { x: " + area.x + ", y: " + area.y +
+                      ", w: " + area.w + ", h: " + area.h + " }");
+        } else {
+          console.log("Step " + (i + 1) + " '" + step.id + "': no highlight area set");
+        }
+      }
+    }
+
+    console.log('');
+    console.log('='.repeat(60));
   }
 
   drawMonsterInfoPanel(currentLevel) {
