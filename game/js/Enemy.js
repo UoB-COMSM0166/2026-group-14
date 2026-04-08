@@ -7,16 +7,16 @@ class Enemy {
    * @param {Object} config - { type, hp, speed }
    *                          Any missing field falls back to ENEMY_STATS preset.
    */
-  constructor(path, config = {}) {
+  constructor(path, config = {}, sound = null) {
     this.path = path;
-
-    let type   = config.type || 'basic';
+    this.sound = sound;
+    let type = config.type || 'basic';
     let preset = ENEMY_STATS[type] || ENEMY_STATS.basic;
 
-    this.type   = type;
-    this.maxHp  = (config.hp    !== undefined) ? config.hp    : preset.hp;
-    this.hp     = this.maxHp;
-    this.speed  = (config.speed !== undefined) ? config.speed : preset.speed;
+    this.type = type;
+    this.maxHp = (config.hp !== undefined) ? config.hp : preset.hp;
+    this.hp = this.maxHp;
+    this.speed = (config.speed !== undefined) ? config.speed : preset.speed;
     this.baseSpeed = this.speed;
     this.reward = preset.reward;
     this.slowTimer = 0;
@@ -77,7 +77,7 @@ class Enemy {
     this.x = start.x;
     this.y = start.y;
     this.currentWaypointIndex = 1;
-    this._alive      = true;
+    this._alive = true;
     this._reachedEnd = false;
   }
 
@@ -247,6 +247,9 @@ class Enemy {
     if (this.hp <= 0) {
       this.hp = 0;
       this._alive = false;
+      if (this.sound) {
+        this.sound.play("death");
+      }
     }
     return true;
   }
@@ -275,16 +278,16 @@ class Enemy {
 
     let imgs = (typeof gameImages !== 'undefined') ? gameImages : {};
     let spriteMap = {
-      basic:  { img: imgs.enemyGuard,    w: 70, h: 90 },
-      fast:   { img: imgs.enemyPigeon,  w: 60, h: 60 },
-      tank:   { img: imgs.enemyHedgehog, w: 80, h: 80 },
-      knight: { img: imgs.monster1,     w: 70, h: 85 },
-      archer: { img: imgs.monster2,     w: 60, h: 75 },
-      giant:  { img: imgs.monster3,     w: 90, h: 100 },
-      boss:   { img: imgs.monster4 || imgs.monster3, w: 90, h: 100 },
+      basic: { img: imgs.enemyGuard, w: 70, h: 90 },
+      fast: { img: imgs.enemyPigeon, w: 60, h: 60 },
+      tank: { img: imgs.enemyHedgehog, w: 80, h: 80 },
+      knight: { img: imgs.monster1, w: 70, h: 85 },
+      archer: { img: imgs.monster2, w: 60, h: 75 },
+      giant: { img: imgs.monster3, w: 90, h: 100 },
+      boss: { img: imgs.monster4 || imgs.monster3, w: 90, h: 100 },
       goblinBomber: { img: imgs.goblinBomber, w: 70, h: 80 },
       divingLizard: { img: imgs.divingLizard, w: 75, h: 60 },
-      treantMage:   { img: imgs.treantMage,   w: 70, h: 90 },
+      treantMage: { img: imgs.treantMage, w: 70, h: 90 },
       gentlemanBug: { img: imgs.gentlemanBug, w: 100, h: 130 }
     };
     let entry = spriteMap[this.type] || spriteMap.basic;
@@ -431,18 +434,18 @@ class Enemy {
     }
 
     let halfH = useSprite ? entry.h / 2 : this.bodySize / 2;
-    let barW  = useSprite ? Math.max(entry.w, 30) : this.bodySize + 10;
-    let barH  = 5;
-    let barX  = this.x - barW / 2;
-    let barY  = this.y - halfH - 8 - (yOffset > 0 ? yOffset : 0);
+    let barW = useSprite ? Math.max(entry.w, 30) : this.bodySize + 10;
+    let barH = 5;
+    let barX = this.x - barW / 2;
+    let barY = this.y - halfH - 8 - (yOffset > 0 ? yOffset : 0);
     let ratio = this.hp / this.maxHp;
 
     noStroke();
     fill(50, 50, 50, 180);
     rect(barX, barY, barW, barH, 2);
-    if (ratio > 0.6)      fill(50, 210, 50);
+    if (ratio > 0.6) fill(50, 210, 50);
     else if (ratio > 0.3) fill(240, 200, 0);
-    else                  fill(230, 50, 50);
+    else fill(230, 50, 50);
     rect(barX, barY, barW * ratio, barH, 2);
 
     this.drawAbilityIcon(barX, barY);
@@ -474,17 +477,17 @@ class Enemy {
 
   _bodyColor() {
     switch (this.type) {
-      case 'fast':   return { r: 255, g: 140, b: 0   };
-      case 'tank':   return { r: 80,  g: 80,  b: 180 };
-      case 'boss':   return { r: 140, g: 0,   b: 200 };
-      case 'knight': return { r: 150, g: 100, b: 50  };
-      case 'archer': return { r: 50,  g: 150, b: 50  };
-      case 'giant':  return { r: 100, g: 50,  b: 150 };
-      case 'goblinBomber':  return { r: 180, g: 80,  b: 40  };
-      case 'divingLizard': return { r: 60,  g: 140, b: 120 };
-      case 'treantMage':   return { r: 80,  g: 140, b: 60  };
-      case 'gentlemanBug': return { r: 120, g: 80,  b: 100 };
-      default:       return { r: 210, g: 50,  b: 50  };
+      case 'fast': return { r: 255, g: 140, b: 0 };
+      case 'tank': return { r: 80, g: 80, b: 180 };
+      case 'boss': return { r: 140, g: 0, b: 200 };
+      case 'knight': return { r: 150, g: 100, b: 50 };
+      case 'archer': return { r: 50, g: 150, b: 50 };
+      case 'giant': return { r: 100, g: 50, b: 150 };
+      case 'goblinBomber': return { r: 180, g: 80, b: 40 };
+      case 'divingLizard': return { r: 60, g: 140, b: 120 };
+      case 'treantMage': return { r: 80, g: 140, b: 60 };
+      case 'gentlemanBug': return { r: 120, g: 80, b: 100 };
+      default: return { r: 210, g: 50, b: 50 };
     }
   }
 }

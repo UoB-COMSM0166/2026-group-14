@@ -66,7 +66,14 @@ class GameManager {
         totalWaves: 6
       }
     };
+    this.sound = new SoundManager();
 
+    this.sound.load("place", "../soundtrack/place.mp3");
+    this.sound.load("death", "../soundtrack/explode.mp3");
+    this.sound.load("click", "../soundtrack/ui_click.mp3");
+    this.sound.load("click1", "../soundtrack/ui_click2.mp3");
+    this.sound.load("win", "../soundtrack/game_win.mp3");
+    this.sound.load("lose", "../soundtrack/game_over.mp3");
     console.log("[Game] GameManager initialised");
   }
 
@@ -135,7 +142,7 @@ class GameManager {
       3: getLevel3Waves
     };
     let waveFn = waveFns[levelId] || getLevel1Waves;
-    this.waveManager = new WaveManager(waveFn());
+    this.waveManager = new WaveManager(waveFn(), this.sound);
     this.totalKills = 0;
     this.waveSurvived = 0;
     this.finalStats = null;
@@ -322,7 +329,7 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
       if (enemy.shouldSummon && enemy.ability === 'boss') {
         enemy.shouldSummon = false;
         for (let i = 0; i < 2; i++) {
-          let summon = new Enemy(this.path, { type: 'basic', hp: 80, speed: 2.0 });
+          let summon = new Enemy(this.path, { type: 'basic', hp: 80, speed: 2.0 }, this.sound);
           summon.x = enemy.x;
           summon.y = enemy.y;
           summon.currentWaypointIndex = enemy.currentWaypointIndex;
@@ -413,6 +420,7 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
       if (this.waveManager) this.waveManager.stop();
       this.recordFinalStats(GameState.LOSE);
       this.setState(GameState.LOSE);
+      this.sound.play("lose");
       return;
     }
     // Win: all waves spawned, and no live enemies remain on the field
@@ -422,6 +430,7 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
         console.log("[Game] All waves cleared - VICTORY");
         this.recordFinalStats(GameState.WIN);
         this.setState(GameState.WIN);
+        this.sound.play("win");
       }
     }
   }
@@ -508,6 +517,7 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
         this.ui.drawMonsterInfoPanel(this.currentLevel);
         break;
     }
+    this.ui.renderBrightnessOverlay();
   }
 
   drawGameScene() {
@@ -787,7 +797,7 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
     if (!this.mapGrid) return false;
 
     // Out-of-bounds
-    if (row < 0 || row >= this.mapGrid.length)    return false;
+    if (row < 0 || row >= this.mapGrid.length) return false;
     if (col < 0 || col >= this.mapGrid[0].length) return false;
 
     let cellCenterY = rowToCenterY(row);
@@ -946,7 +956,7 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
       if (this.exportButton) {
         let btn = this.exportButton;
         if (mx >= btn.x && mx <= btn.x + btn.width &&
-            my >= btn.y && my <= btn.y + btn.height) {
+          my >= btn.y && my <= btn.y + btn.height) {
           console.log('[Editor] Export button clicked');
           this.exportGridCode();
           return;
@@ -996,8 +1006,8 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
     if (this.state === GameState.LEVEL_SELECT) {
       let backBtn = this.ui.backButton;
       if (backBtn &&
-          mx > backBtn.x - backBtn.width / 2 && mx < backBtn.x + backBtn.width / 2 &&
-          my > backBtn.y - backBtn.height / 2 && my < backBtn.y + backBtn.height / 2) {
+        mx > backBtn.x - backBtn.width / 2 && mx < backBtn.x + backBtn.width / 2 &&
+        my > backBtn.y - backBtn.height / 2 && my < backBtn.y + backBtn.height / 2) {
         this.setState(GameState.MENU);
         return;
       }
@@ -1037,6 +1047,7 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
       if (this.ui.pauseBtn) {
         let btn = this.ui.pauseBtn;
         if (mx >= btn.x && mx <= btn.x + btn.w && my >= btn.y && my <= btn.y + btn.h) {
+          this.sound.play("click1");
           this.manualPaused = !this.manualPaused;
           console.log(this.manualPaused ? '[Game] Game paused' : '[Game] Game resumed');
           return;
@@ -1046,6 +1057,7 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
       if (this.ui.monsterInfoBtn) {
         let btn = this.ui.monsterInfoBtn;
         if (mx >= btn.x && mx <= btn.x + btn.w && my >= btn.y && my <= btn.y + btn.h) {
+          this.sound.play("click1");
           this.setState(GameState.MONSTER_INFO);
           return;
         }
@@ -1056,14 +1068,14 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
       if (this.ui.handleTowerPanelClick(mx, my)) return;
       if (my < HUD_HEIGHT) return;  // top HUD bar
 
-      let col  = pixelToCol(mx);
-      let row  = pixelToRow(my);
+      let col = pixelToCol(mx);
+      let row = pixelToRow(my);
       let gridX = colToCenterX(col);
       let gridY = rowToCenterY(row);
 
       // In debug mode: log info and exit — never place a tower
       if (this.debugMode) {
-        let rawTile  = this.mapGrid ? (this.mapGrid[row] ? this.mapGrid[row][col] : 'OOB') : 'no-grid';
+        let rawTile = this.mapGrid ? (this.mapGrid[row] ? this.mapGrid[row][col] : 'OOB') : 'no-grid';
         let hasTower = this.towers.some(t => t.x === gridX && t.y === gridY);
         let canBuild = this.canBuildAt(col, row);
         const DECODE = {
@@ -1081,9 +1093,9 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
       if (!this.canBuildAt(col, row)) {
         let tileType = this.mapGrid && this.mapGrid[row] ? this.mapGrid[row][col] : null;
         let reason =
-          tileType === TILE_TYPES.PATH     ? "Can't build on the path!" :
-          tileType === TILE_TYPES.OCCUPIED ? "Already occupied!"        :
-                                             "Can't build here!";
+          tileType === TILE_TYPES.PATH ? "Can't build on the path!" :
+            tileType === TILE_TYPES.OCCUPIED ? "Already occupied!" :
+              "Can't build here!";
         console.log(`[Game] ${reason} (col=${col}, row=${row}, tile=${tileType})`);
         this.ui.showPlacementError(reason);
         return;
@@ -1097,6 +1109,7 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
       if (this.ui.monsterInfoCloseBtn) {
         let btn = this.ui.monsterInfoCloseBtn;
         if (mx >= btn.x && mx <= btn.x + btn.w && my >= btn.y && my <= btn.y + btn.h) {
+          this.sound.play("click1");
           this.setState(GameState.PLAYING);
           return;
         }
@@ -1150,6 +1163,7 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
     }
 
     console.log(`[Game] Placed ${towerType} tower at (${x}, ${y})`);
+    this.sound.play("place")
     return true;
   }
 
@@ -1218,8 +1232,8 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
     let btnW = 280;
     let btnH = 60;
 
-    let hovering = getGameMouseX() > btnX - btnW/2 && getGameMouseX() < btnX + btnW/2 &&
-                   getGameMouseY() > btnY - btnH/2 && getGameMouseY() < btnY + btnH/2;
+    let hovering = getGameMouseX() > btnX - btnW / 2 && getGameMouseX() < btnX + btnW / 2 &&
+      getGameMouseY() > btnY - btnH / 2 && getGameMouseY() < btnY + btnH / 2;
 
     if (hovering) {
       fill(50, 150, 50);
@@ -1268,7 +1282,7 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
     let gold = this.economy ? this.economy.getGold() : 0;
     text("Remaining Gold: " + gold, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 30);
     text("Landmark HP: " + this.landmark.hp + "/" + this.landmark.maxHp,
-         CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 65);
+      CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 65);
 
     fill(200);
     textSize(20);
