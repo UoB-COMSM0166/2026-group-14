@@ -1083,6 +1083,33 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
       return;
     }
 
+    if (this.state === GameState.PLAYING && this.tutorialMode && this.ui.tutorialDebugMode) {
+      let clickData = { x: Math.round(mx), y: Math.round(my) };
+      this.ui.tutorialDebugClicks.push(clickData);
+
+      console.log('[Tutorial Debug] Click #' + this.ui.tutorialDebugClicks.length + ':',
+                  'x=' + clickData.x + ', y=' + clickData.y);
+
+      if (this.ui.tutorialDebugClicks.length === 2) {
+        let c1 = this.ui.tutorialDebugClicks[0];
+        let c2 = this.ui.tutorialDebugClicks[1];
+
+        let x = Math.min(c1.x, c2.x);
+        let y = Math.min(c1.y, c2.y);
+        let w = Math.abs(c2.x - c1.x);
+        let h = Math.abs(c2.y - c1.y);
+
+        console.log('='.repeat(50));
+        console.log('[Tutorial Debug] HIGHLIGHT AREA for step "' +
+                    TUTORIAL_STEPS[this.tutorialStep].id + '":');
+        console.log('{ x: ' + x + ', y: ' + y + ', w: ' + w + ', h: ' + h + ' }');
+        console.log('='.repeat(50));
+
+        this.ui.tutorialDebugClicks = [];
+      }
+      return;
+    }
+
     if (this.state === GameState.PLAYING && this.tutorialMode) {
       if (this.ui.tutorialNextBtn) {
         let btn = this.ui.tutorialNextBtn;
