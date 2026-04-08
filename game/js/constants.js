@@ -65,8 +65,69 @@ const GameState = {
   LOSE: 'lose',
   SETTINGS: 'settings',
   IN_GAME_SETTINGS: 'in_game_settings',
-  MONSTER_INFO: 'monster_info'
+  MONSTER_INFO: 'monster_info',
+  INSTRUCTIONS: 'instructions'
 };
+
+// Tutorial steps configuration
+const TUTORIAL_STEPS = [
+  {
+    id: 'welcome',
+    highlight: 'none',
+    title: 'Welcome!',
+    message: 'This is a Tower Defense game. Let me show you how to play!',
+    position: 'center'
+  },
+  {
+    id: 'landmark',
+    highlight: 'landmark',
+    title: 'Your Goal',
+    message: 'Protect the Landmark! Keep its health above 0 until all enemy waves are defeated.',
+    position: 'left'
+  },
+  {
+    id: 'path',
+    highlight: 'path',
+    title: 'Enemy Path',
+    message: 'Enemies will spawn and follow this path toward your Landmark.',
+    position: 'top'
+  },
+  {
+    id: 'tower_panel',
+    highlight: 'tower_panel',
+    title: 'Tower Selection',
+    message: 'Select a tower type here. Each tower has different abilities and costs.',
+    position: 'top'
+  },
+  {
+    id: 'buildable',
+    highlight: 'buildable',
+    title: 'Build Towers',
+    message: 'Click on the green highlighted areas to place your selected tower.',
+    position: 'center'
+  },
+  {
+    id: 'gold',
+    highlight: 'gold',
+    title: 'Gold',
+    message: 'Building towers costs gold. Kill enemies to earn more gold!',
+    position: 'top'
+  },
+  {
+    id: 'lives',
+    highlight: 'lives',
+    title: 'Lives',
+    message: 'You lose a life when an enemy reaches the Landmark. Game over when lives reach 0!',
+    position: 'left'
+  },
+  {
+    id: 'ready',
+    highlight: 'none',
+    title: 'Ready to Play!',
+    message: 'Now try it yourself! Build towers and defend your Landmark. Good luck!',
+    position: 'center'
+  }
+];
 
 // Enemies available in each level (only enemies with images)
 const LEVEL_ENEMIES = {
