@@ -37,6 +37,11 @@ class GameManager {
     this.editModePaused = false;
     this.manualPaused = false;
 
+    // Tutorial system
+    this.tutorialMode = false;
+    this.tutorialStep = 0;
+    this.tutorialComplete = false;
+
     this.levelConfigs = {
       1: {
         name: "Level 1 — Big Ben",
@@ -467,7 +472,7 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
       case GameState.PLAYING:
         this.drawGame();
         this.ui.drawHUD();
-        if (this.manualPaused) {
+        if (this.manualPaused && !this.tutorialMode) {
           fill(0, 0, 0, 100);
           noStroke();
           rectMode(CORNER);
@@ -481,6 +486,9 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
           textSize(20);
           fill(200, 200, 200);
           text("Click the Resume button or press SPACE to continue", CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 10);
+        }
+        if (this.tutorialMode) {
+          this.ui.drawTutorialOverlay();
         }
         break;
       case GameState.SETTINGS:
@@ -908,6 +916,37 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
     pop();
   }
 
+  startTutorial() {
+    this.tutorialMode = true;
+    this.tutorialStep = 0;
+    this.tutorialComplete = false;
+    this.manualPaused = true;
+    console.log('[Tutorial] Started');
+  }
+
+  nextTutorialStep() {
+    this.tutorialStep++;
+    if (this.tutorialStep >= TUTORIAL_STEPS.length) {
+      this.endTutorial();
+    } else {
+      console.log('[Tutorial] Step:', TUTORIAL_STEPS[this.tutorialStep].id);
+    }
+  }
+
+  endTutorial() {
+    this.tutorialMode = false;
+    this.tutorialComplete = true;
+    this.manualPaused = false;
+    console.log('[Tutorial] Completed');
+  }
+
+  skipTutorial() {
+    this.tutorialMode = false;
+    this.tutorialComplete = true;
+    this.manualPaused = false;
+    console.log('[Tutorial] Skipped');
+  }
+
   toggleDebugMode() {
     this.debugMode = !this.debugMode;
     console.log(`[Debug] Debug mode ${this.debugMode ? 'ON' : 'OFF'}`);
@@ -1000,6 +1039,19 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
         console.log('[Debug] Button code: { x: ' + mx + ', y: ' + my + ', w: 150, h: 50 }');
       }
 
+      // Game Instructions button — starts Level 1 with tutorial
+      let instrBtnX = 636;
+      let instrBtnY = 827;
+      let instrBtnW = 328;
+      let instrBtnH = 55;
+
+      if (mx >= instrBtnX && mx <= instrBtnX + instrBtnW &&
+          my >= instrBtnY && my <= instrBtnY + instrBtnH) {
+        this.startLevel(1);
+        this.startTutorial();
+        return;
+      }
+
       let backBtn = this.ui.backButton;
       if (backBtn &&
           mx > backBtn.x - backBtn.width / 2 && mx < backBtn.x + backBtn.width / 2 &&
@@ -1026,6 +1078,24 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
               return;
             }
           }
+        }
+      }
+      return;
+    }
+
+    if (this.state === GameState.PLAYING && this.tutorialMode) {
+      if (this.ui.tutorialNextBtn) {
+        let btn = this.ui.tutorialNextBtn;
+        if (mx >= btn.x && mx <= btn.x + btn.w && my >= btn.y && my <= btn.y + btn.h) {
+          this.nextTutorialStep();
+          return;
+        }
+      }
+      if (this.ui.tutorialSkipBtn) {
+        let btn = this.ui.tutorialSkipBtn;
+        if (mx >= btn.x && mx <= btn.x + btn.w && my >= btn.y && my <= btn.y + btn.h) {
+          this.skipTutorial();
+          return;
         }
       }
       return;

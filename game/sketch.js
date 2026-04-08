@@ -282,6 +282,17 @@ function keyPressed() {
     }
     return;
   }
+  if (state === GameState.PLAYING && game.tutorialMode) {
+    if (key === ' ' || keyCode === ENTER) {
+      game.nextTutorialStep();
+      return false;
+    }
+    if (keyCode === ESCAPE) {
+      game.skipTutorial();
+      return false;
+    }
+    return false;
+  }
   if (state === GameState.PLAYING) {
     if (key === ' ') {
       game.manualPaused = !game.manualPaused;
