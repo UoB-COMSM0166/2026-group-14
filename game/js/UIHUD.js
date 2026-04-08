@@ -38,6 +38,8 @@ class UIHUD {
       brightness: 1.0,
       musicTrack: 0
     };
+    this.trackNames = ['Epic Battle Music', 'Peaceful Village', 'Dark Dungeon'];
+    this.currentTrackIndex = 0;
     this._settingsDragTarget = null;  // 'music' | 'brightness' | null
   }
 
@@ -55,7 +57,29 @@ class UIHUD {
   }
 
   //Returns main menu button click regions for handleClick detection
+  updateMusicTrack(newTrackName = null) {
+    let selectedName = newTrackName || this.musicSelect.value();
+    console.log("selectedName =", selectedName);
+    console.log("musicTracks keys =", Object.keys(this.musicTracks));
 
+    for (let key in this.musicTracks) {
+      this.musicTracks[key].stop();
+    }
+
+    let track = this.musicTracks[selectedName];
+    console.log("track =", track);
+
+    if (track) {
+      track.loop();
+
+      let vol = this.settings ? this.settings.musicVolume : this.musicSlider.value();
+      track.setVolume(vol);
+
+      console.log("成功播放音轨:", selectedName);
+    } else {
+      console.error("未找到音轨:", selectedName);
+    }
+  }
   getMenuButtonRects() {
     const BW = 225;
     const BH = 63;
@@ -81,7 +105,13 @@ class UIHUD {
       `;
 
     this.musicSlider = createSlider(0, 1, 0.5, 0.01);
-
+    this.musicSlider.input(() => {
+      let vol = this.musicSlider.value();
+      // 遍历所有音轨更新音量（或者只更新当前播放的）
+      for (let key in this.musicTracks) {
+        this.musicTracks[key].setVolume(vol);
+      }
+    });
     this.musicSelect = createSelect();
     this.musicSelect.option('Epic Battle Music');
     this.musicSelect.option('Peaceful Village');
@@ -97,7 +127,10 @@ class UIHUD {
     this.musicSelect.style('box-sizing', 'border-box');
     this.musicSelect.style('appearance', 'none');
     this.musicSelect.style('-webkit-appearance', 'none');
-
+    this.musicSelect.selected('Epic Battle Music');
+    this.musicSelect.changed(() => {
+      this.updateMusicTrack();
+    });
     this.brightnessSlider = createSlider(10, 230, 100);
 
     this.closeSettingsBtn = createButton('');
@@ -108,6 +141,7 @@ class UIHUD {
     this.closeSettingsBtn.style('height', '30px');
     this.closeSettingsBtn.style('cursor', 'pointer');
     this.closeSettingsBtn.mousePressed(() => {
+      this.game.sound.play("click");
       this.game.setState(GameState.MENU);
     });
     this.closeSettingsBtn.mouseOver(() => {
@@ -128,6 +162,7 @@ class UIHUD {
     this.backBtn.style('cursor', 'pointer');
     this.backBtn.style('font-family', "'Georgia', serif");
     this.backBtn.mousePressed(() => {
+      this.game.sound.play("click");
       this.game.setState(GameState.MENU);
     });
     this.backBtn.mouseOver(() => this.backBtn.style('background', '#A1887F'));
@@ -187,7 +222,7 @@ class UIHUD {
       const cy = centerYs[i];
       const rect = this.getMenuButtonRects()[i];
       const hovered = getGameMouseX() >= rect.x && getGameMouseX() <= rect.x + rect.w &&
-                      getGameMouseY() >= rect.y && getGameMouseY() <= rect.y + rect.h;
+        getGameMouseY() >= rect.y && getGameMouseY() <= rect.y + rect.h;
       const pressed = hovered && mouseIsPressed;
 
       let scaleFactor = 1;
@@ -313,9 +348,9 @@ class UIHUD {
     let mx = typeof getGameMouseX === 'function' ? getGameMouseX() : mouseX;
     let my = typeof getGameMouseY === 'function' ? getGameMouseY() : mouseY;
     let backHover = mx > this.backButton.x - this.backButton.width / 2 &&
-                    mx < this.backButton.x + this.backButton.width / 2 &&
-                    my > this.backButton.y - this.backButton.height / 2 &&
-                    my < this.backButton.y + this.backButton.height / 2;
+      mx < this.backButton.x + this.backButton.width / 2 &&
+      my > this.backButton.y - this.backButton.height / 2 &&
+      my < this.backButton.y + this.backButton.height / 2;
 
     fill(backHover ? color(80, 60, 40, 230) : color(50, 40, 30, 204));
     stroke(backHover ? '#FFD700' : '#C8A84E');
@@ -335,10 +370,12 @@ class UIHUD {
   /**
    * Handle main menu click, return true if handled
    */
+
   handleMenuClick(mx, my) {
     const rects = this.getMenuButtonRects();
     for (const r of rects) {
       if (mx >= r.x && mx <= r.x + r.w && my >= r.y && my <= r.y + r.h) {
+        this.game.sound.play("click");
         if (r.action === 'start') this.game.setState(GameState.LEVEL_SELECT);
         else if (r.action === 'settings') this.game.setState(GameState.SETTINGS);
         else if (r.action === 'exit') window.location.href = 'about:blank';
@@ -352,42 +389,27 @@ class UIHUD {
    * Settings page - called when GameState.SETTINGS
    */
   drawSettings() {
-    this.endScreenButtons = [];
-
+    push();
+    // 渲染背景
     if (this.bgImage) {
       image(this.bgImage, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
     } else {
       background(40, 30, 20);
     }
 
-    this.applyBrightness();
-    this.hideMenuButtons();
-
-    let imgW = 500;
-    let imgH = 600;
-    if (this.settingsBgImg) {
-      imageMode(CENTER);
-      image(this.settingsBgImg, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, imgW, imgH);
-      imageMode(CORNER);
-    }
-
-    textAlign(CENTER, CENTER);
-    fill(255);
-    textSize(32);
-    textStyle(BOLD);
-    text("SETTINGS", CANVAS_WIDTH / 2 + 2, CANVAS_HEIGHT / 2 - imgH / 2 + 102);
-    textStyle(NORMAL);
-
-    textSize(18);
-    let labelX = CANVAS_WIDTH / 2 - 150;
+    // 计算布局坐标 (与 In-Game 保持一致)
     let startY = CANVAS_HEIGHT / 2 - 100;
-    let spacing = 55;
+    let spacing = 85;
 
-    text("Music Volume :", labelX, startY);
-    text("Switch Track :", labelX, startY + spacing);
-    text("Brightness :", labelX, startY + spacing * 2);
+    // 这里的文字提示 (Music Volume 等) 也要用 Canvas 画
+    // ... 你的文字代码 ...
 
-    this.showSettingsUI(startY, spacing);
+    // 调用上面改好的函数
+    this.showSettingsUI();
+
+    // 最后渲染亮度罩子 (确保覆盖全屏)
+    this.applyBrightness();
+    pop();
   }
 
   /**
@@ -727,38 +749,85 @@ class UIHUD {
     if (this.exitButton) this.exitButton.hide();
   }
 
-  showSettingsUI(startY, spacing) {
-    let sliderX = DESIGN_WIDTH / 2 - 50;
-    let imgW = 500;
-    let imgH = 600;
+  showSettingsUI() {
+    let panelW = 520;
+    let panelH = 450;
 
-    const toScreen = typeof toScreenCoords === 'function' ? toScreenCoords : (x, y) => ({ x, y });
+    let panelX = Math.floor((CANVAS_WIDTH - panelW) / 2);
+    let panelY = Math.floor((CANVAS_HEIGHT - panelH) / 2);
 
-    if (this.musicSlider) {
-      this.musicSlider.show();
-      let pos = toScreen(sliderX, startY - 10);
-      this.musicSlider.position(pos.x, pos.y);
-    }
-    if (this.musicSelect) {
-      this.musicSelect.show();
-      let pos = toScreen(sliderX, startY + spacing - 10);
-      this.musicSelect.position(pos.x, pos.y);
-    }
-    if (this.brightnessSlider) {
-      this.brightnessSlider.show();
-      let pos = toScreen(sliderX, startY + spacing * 2 - 10);
-      this.brightnessSlider.position(pos.x, pos.y);
-    }
-    if (this.closeSettingsBtn) {
-      this.closeSettingsBtn.show();
-      let pos = toScreen(DESIGN_WIDTH / 2 - imgW / 2 + 25, DESIGN_HEIGHT / 2 - imgH / 2 + 25);
-      this.closeSettingsBtn.position(pos.x, pos.y);
-    }
-    if (this.backBtn) {
-      this.backBtn.show();
-      let pos = toScreen(DESIGN_WIDTH / 2 - 70, DESIGN_HEIGHT / 2 + 100);
-      this.backBtn.position(pos.x, pos.y);
-    }
+    let centerX = panelX + panelW / 2;
+    fill(0, 0, 0, 100);
+    noStroke();
+    rectMode(CORNER);
+    rect(panelX + 10, panelY + 10, panelW, panelH, 15);
+
+    fill(80, 60, 45, 250);
+    stroke(180, 150, 100);
+    strokeWeight(4);
+    rect(panelX, panelY, panelW, panelH, 15);
+
+    stroke(120, 90, 60);
+    strokeWeight(2);
+    rect(panelX + 12, panelY + 12, panelW - 24, panelH - 24, 10);
+    noStroke();
+
+    fill(255, 220, 150);
+    textAlign(CENTER, CENTER);
+    textSize(36);
+    textStyle(BOLD);
+    text("SETTINGS", centerX, panelY + 55);
+    textStyle(NORMAL);
+
+    stroke(150, 120, 80);
+    strokeWeight(2);
+    line(panelX + 40, panelY + 95, panelX + panelW - 40, panelY + 95);
+    noStroke();
+
+    let labelX = panelX + 50;
+    let sliderX = panelX + 200;
+    let sliderW = 230;
+    let startY = panelY + 145;
+    let spacing = 85;
+
+    // Music Volume
+    fill(255);
+    textAlign(LEFT, CENTER);
+    textSize(20);
+    text("Music Volume", labelX, startY);
+    this.drawCustomSlider(sliderX, startY - 12, sliderW, 24, this.settings.musicVolume, 'music');
+    fill(200);
+    textSize(16);
+    textAlign(LEFT, CENTER);
+    text(Math.round(this.settings.musicVolume * 100) + '%', sliderX + sliderW + 15, startY);
+
+    // Music Track
+    fill(255);
+    textAlign(LEFT, CENTER);
+    textSize(20);
+    text("Music Track", labelX, startY + spacing);
+    this.drawTrackSelector(sliderX, startY + spacing - 18, sliderW, 36);
+
+    // Brightness
+    fill(255);
+    textAlign(LEFT, CENTER);
+    textSize(20);
+    text("Brightness", labelX, startY + spacing * 2);
+    let brightnessNorm = (this.settings.brightness - 0.5) / 1.0;
+    this.drawCustomSlider(sliderX, startY + spacing * 2 - 12, sliderW, 24, brightnessNorm, 'brightness');
+    fill(200);
+    textSize(16);
+    textAlign(LEFT, CENTER);
+    text(Math.round(this.settings.brightness * 100) + '%', sliderX + sliderW + 15, startY + spacing * 2);
+
+
+    let btnW = 200;
+    let btnH = 55;
+    let btnX = centerX - btnW / 2;
+    let btnY = panelY + panelH - 90;
+    this.drawSettingsButton(btnX, btnY, btnW, btnH, "Resume Game", 'back');
+    this.drawCloseButton(panelX + panelW - 48, panelY + 18, 32);
+    this.handleSliderInteraction();
   }
 
   hideSettingsUI() {
@@ -780,13 +849,13 @@ class UIHUD {
 
   getTowerPanelTabs() {
     const availableTowers = (this.game && this.game.availableTowers) || LEVEL_AVAILABLE_TOWERS[1];
-    const BTN_W  = 130;
-    const BTN_H  = 70;
+    const BTN_W = 130;
+    const BTN_H = 70;
     const BTN_GAP = 25;
     const count = availableTowers.length;
-    const totalW  = BTN_W * count + BTN_GAP * (count - 1);
-    const startX  = Math.floor((CANVAS_WIDTH - totalW) / 2);
-    const tabY    = TOWER_PANEL_TOP + Math.floor((TOWER_PANEL_HEIGHT - BTN_H) / 2);
+    const totalW = BTN_W * count + BTN_GAP * (count - 1);
+    const startX = Math.floor((CANVAS_WIDTH - totalW) / 2);
+    const tabY = TOWER_PANEL_TOP + Math.floor((TOWER_PANEL_HEIGHT - BTN_H) / 2);
 
     return availableTowers.map((type, i) => ({
       type,
@@ -950,7 +1019,7 @@ class UIHUD {
     // --- Settings button ---
     let settingsBtnX = btnStartX;
     let isSettingsHover = mx >= settingsBtnX && mx <= settingsBtnX + btnW &&
-                          my >= btnY && my <= btnY + btnH;
+      my >= btnY && my <= btnY + btnH;
 
     fill(isSettingsHover ? color(100, 80, 60) : color(55, 45, 35));
     stroke(isSettingsHover ? color(220, 180, 100) : color(120, 100, 70));
@@ -971,7 +1040,7 @@ class UIHUD {
     // --- Pause/Resume button ---
     let pauseBtnX = settingsBtnX + btnW + btnGap;
     let isPauseHover = mx >= pauseBtnX && mx <= pauseBtnX + btnW &&
-                       my >= btnY && my <= btnY + btnH;
+      my >= btnY && my <= btnY + btnH;
 
     let isPaused = (typeof game !== 'undefined' && game.manualPaused);
 
@@ -999,7 +1068,7 @@ class UIHUD {
     // --- Monster Info button - use monster image instead of "!" ---
     let monsterBtnX = pauseBtnX + btnW + btnGap;
     let isMonsterHover = mx >= monsterBtnX && mx <= monsterBtnX + btnW &&
-                         my >= btnY && my <= btnY + btnH;
+      my >= btnY && my <= btnY + btnH;
 
     fill(isMonsterHover ? color(100, 80, 60) : color(55, 45, 35));
     stroke(isMonsterHover ? color(220, 180, 100) : color(120, 100, 70));
@@ -1032,8 +1101,8 @@ class UIHUD {
 
     // --- Coin + gold (right of buttons) ---
     let coinStartX = monsterBtnX + btnW + btnGap + 25;
-    let coinCX     = coinStartX + 37;  // coin center at coinCX-22, amount at coinCX-8
-    let coinCY     = panelCY;
+    let coinCX = coinStartX + 37;  // coin center at coinCX-22, amount at coinCX-8
+    let coinCY = panelCY;
 
     // Coin circle
     fill(255, 210, 0);
@@ -1056,22 +1125,22 @@ class UIHUD {
     // ── Tower buttons ─────────────────────────────────────────────
     const thumbImgMap = {
       basic: imgs.towerBasic,
-      slow:  imgs.towerSlow,
-      area:  imgs.towerAreaFire,
+      slow: imgs.towerSlow,
+      area: imgs.towerAreaFire,
       crystal: imgs.towerCrystal || imgs.towerCrystalActive,
       steam: imgs.towerSteam || imgs.towerSteamFire,
       alchemist: imgs.towerAlchemist || imgs.towerAlchemistFire
     };
-    const THUMB      = 40;
+    const THUMB = 40;
     const THUMB_CX_OFF = 8 + THUMB / 2;  // px from button left edge to thumb centre
 
     for (let i = 0; i < tabs.length; i++) {
       let tab = tabs[i];
       let cfg = TOWER_TYPES[tab.type];
       let affordable = currentGold >= cfg.cost;
-      let selected   = this.game.selectedTowerType === tab.type;
-      let hovering   = getGameMouseX() >= tab.x && getGameMouseX() <= tab.x + tab.w &&
-                       getGameMouseY() >= tab.y && getGameMouseY() <= tab.y + tab.h;
+      let selected = this.game.selectedTowerType === tab.type;
+      let hovering = getGameMouseX() >= tab.x && getGameMouseX() <= tab.x + tab.w &&
+        getGameMouseY() >= tab.y && getGameMouseY() <= tab.y + tab.h;
 
       if (hovering) this.hoveredTower = tab.type;
 
@@ -1096,7 +1165,7 @@ class UIHUD {
       // ── Thumbnail (left 1/3 of button) ──
       let thumbCX = tab.x + THUMB_CX_OFF;
       let thumbCY = tab.y + tab.h / 2;
-      let thumb   = thumbImgMap[tab.type];
+      let thumb = thumbImgMap[tab.type];
 
       if (thumb && thumb.width > 0) {
         tint(255, affordable ? 255 : 100);
@@ -1110,8 +1179,8 @@ class UIHUD {
       }
 
       // ── Text area (right 2/3 of button) ──
-      let textX  = tab.x + THUMB_CX_OFF + THUMB / 2 + 8;
-      let nameY  = tab.y + tab.h / 2 - 10;
+      let textX = tab.x + THUMB_CX_OFF + THUMB / 2 + 8;
+      let nameY = tab.y + tab.h / 2 - 10;
       let priceY = tab.y + tab.h / 2 + 11;
 
       // Tower name
@@ -1218,6 +1287,91 @@ class UIHUD {
     pop();
   }
 
+  handleSliderInteraction() {
+    let mx = getGameMouseX();
+    let my = getGameMouseY();
+
+    if (mouseIsPressed) {
+      if (!this._wasPressed) {
+        this._wasPressed = true; // 锁定，防止连点
+
+        // --- 专门处理音轨点击 ---
+        let tr = this._sliderRects['track'];
+        if (tr && mx > tr.x && mx < tr.x + tr.w &&
+          my > tr.y && my < tr.y + tr.h) {
+          console.log("切换音轨按钮被点击");
+          this.handleTrackSwitch();
+          return; // 触发后直接返回，避免干扰滑块
+        }
+      }
+
+      // --- 处理滑块滑动 ---
+      for (let id in this._sliderRects) {
+        if (id === 'track') continue; // 跳过按钮
+
+        let r = this._sliderRects[id];
+        if (mx > r.x && mx < r.x + r.w &&
+          my > r.y - 10 && my < r.y + r.h + 10) {
+
+          let newValue = constrain((mx - r.x) / r.w, 0, 1);
+
+          if (id === 'music') {
+            this.settings.musicVolume = newValue;
+            this.updateGlobalMusicVolume(newValue);
+          } else if (id === 'brightness') {
+            this.settings.brightness = map(newValue, 0, 1, 0.5, 1.5);
+          }
+        }
+      }
+    } else {
+      this._wasPressed = false;
+    }
+  }
+  updateGlobalMusicVolume(vol) {
+    // 遍历所有音轨并设置音量
+    for (let key in this.musicTracks) {
+      this.musicTracks[key].setVolume(vol);
+    }
+  }
+  renderBrightnessOverlay() {
+    let b = this.settings.brightness;
+
+    // 只有当亮度不等于 1.0 时才渲染，节省性能
+    if (Math.abs(b - 1.0) < 0.01) return;
+
+    push(); // 开启独立绘图状态，防止污染其他 UI
+    resetMatrix(); // 关键：重置所有 translate/scale，确保从 (0,0) 开始覆盖全屏
+
+    if (b < 1.0) {
+      // 变暗：盖黑色半透明 (映射 0.5->1.0 为 200->0 透明度)
+      let alpha = map(b, 0.5, 1.0, 200, 0);
+      fill(0, 0, 0, alpha);
+    } else {
+      // 变亮：盖白色半透明 (映射 1.0->1.5 为 0->100 透明度)
+      let alpha = map(b, 1.0, 1.5, 0, 100);
+      fill(255, 255, 255, alpha);
+    }
+
+    noStroke();
+    rectMode(CORNER);
+    // 使用 width 和 height 确保覆盖当前画布所有可见区域
+    rect(0, 0, width, height);
+
+    pop();
+  }
+  handleTrackSwitch() {
+    this.currentTrackIndex = (this.currentTrackIndex + 1) % this.trackNames.length;
+
+    // 同步给 settings，确保 drawTrackSelector 里的文字会变
+    this.settings.musicTrack = this.currentTrackIndex;
+
+    let newName = this.trackNames[this.currentTrackIndex];
+    this.updateMusicTrack(newName);
+
+    if (this.musicSelect) {
+      this.musicSelect.selected(newName);
+    }
+  }
   //In-game settings panel (canvas)
 
   drawInGameSettings() {
@@ -1230,7 +1384,6 @@ class UIHUD {
     let panelY = Math.floor((CANVAS_HEIGHT - panelH) / 2);
 
     let centerX = panelX + panelW / 2;
-
     fill(0, 0, 0, 100);
     noStroke();
     rectMode(CORNER);
@@ -1294,14 +1447,14 @@ class UIHUD {
     textAlign(LEFT, CENTER);
     text(Math.round(this.settings.brightness * 100) + '%', sliderX + sliderW + 15, startY + spacing * 2);
 
+
     let btnW = 200;
     let btnH = 55;
     let btnX = centerX - btnW / 2;
     let btnY = panelY + panelH - 90;
     this.drawSettingsButton(btnX, btnY, btnW, btnH, "Resume Game", 'back');
-
     this.drawCloseButton(panelX + panelW - 48, panelY + 18, 32);
-
+    this.handleSliderInteraction();
     pop();
   }
 
@@ -1321,6 +1474,8 @@ class UIHUD {
   }
 
   drawTrackSelector(x, y, w, h) {
+    this._sliderRects = this._sliderRects || {};
+    this._sliderRects['track'] = { x, y, w, h };
     this._trackSelectorRect = { x, y, w, h };
     let tracks = ['Epic Battle Music', 'Peaceful Village', 'Dark Dungeon'];
     let idx = Math.min(this.settings.musicTrack, tracks.length - 1);
@@ -1334,7 +1489,7 @@ class UIHUD {
     fill(255, 230, 180);
     textAlign(CENTER, CENTER);
     textSize(14);
-    text(tracks[idx], x + w / 2, y + h / 2);
+    text(this.trackNames[idx], x + w / 2, y + h / 2);
   }
 
   drawSettingsButton(x, y, w, h, label, action) {
@@ -1377,12 +1532,14 @@ class UIHUD {
     if (this._settingsCloseBtn) {
       let b = this._settingsCloseBtn;
       if (mx >= b.x && mx <= b.x + b.w && my >= b.y && my <= b.y + b.h) {
+        this.game.sound.play("click");
         return 'close';
       }
     }
     if (this._settingsBackBtn) {
       let b = this._settingsBackBtn;
       if (mx >= b.x && mx <= b.x + b.w && my >= b.y && my <= b.y + b.h) {
+        this.game.sound.play("click");
         return 'back';
       }
     }
@@ -1447,7 +1604,8 @@ class UIHUD {
 
     for (let btn of buttons) {
       if (mx >= btn.x && mx <= btn.x + btn.w &&
-          my >= btn.y && my <= btn.y + btn.h) {
+        my >= btn.y && my <= btn.y + btn.h) {
+        this.game.sound.play("click1");
         this.game.setSelectedTowerType(btn.type);
         return true;
       }
@@ -1461,21 +1619,21 @@ class UIHUD {
     if (getGameMouseY() < HUD_HEIGHT || getGameMouseY() > TOWER_PANEL_TOP) return;
 
     let type = this.game.selectedTowerType;
-    let cfg  = TOWER_TYPES[type] || TOWER_TYPES.basic;
+    let cfg = TOWER_TYPES[type] || TOWER_TYPES.basic;
     let currentGold = this.game.economy ? this.game.economy.getGold() : 0;
-    let canAfford   = currentGold >= cfg.cost;
-    let [r, g, b]   = cfg.color;
+    let canAfford = currentGold >= cfg.cost;
+    let [r, g, b] = cfg.color;
 
     // Snap mouse to grid centre (same formula as GameManager.handleClick)
-    let col   = pixelToCol(getGameMouseX());
-    let row   = pixelToRow(getGameMouseY());
+    let col = pixelToCol(getGameMouseX());
+    let row = pixelToRow(getGameMouseY());
     let gridX = colToCenterX(col);
     let gridY = rowToCenterY(row);
 
     // ── Buildability: use the same canBuildAt() as placement logic ──
     let tileOk = this.game.canBuildAt(col, row);
     let canPlace = tileOk && canAfford;
-    let blocked  = !canPlace;
+    let blocked = !canPlace;
 
     // ── Cell highlight overlay ─────────────────────────────────────
     push();
@@ -1537,7 +1695,8 @@ class UIHUD {
   handleEndScreenClick(mx, my) {
     for (let button of this.endScreenButtons) {
       if (mx >= button.x && mx <= button.x + button.w &&
-          my >= button.y && my <= button.y + button.h) {
+        my >= button.y && my <= button.y + button.h) {
+        this.game.sound.play("click2");
         if (button.action === 'restart') this.game.restart();
         if (button.action === 'menu') this.game.returnToMenu();
         return true;
@@ -1561,7 +1720,7 @@ class UIHUD {
 
   _drawEndScreenButton(button, baseColor) {
     let hovering = getGameMouseX() >= button.x && getGameMouseX() <= button.x + button.w &&
-                   getGameMouseY() >= button.y && getGameMouseY() <= button.y + button.h;
+      getGameMouseY() >= button.y && getGameMouseY() <= button.y + button.h;
 
     this.endScreenButtons.push(button);
     stroke(255, 235, 170);
@@ -1758,7 +1917,7 @@ class UIHUD {
     let mx = getGameMouseX();
     let my = getGameMouseY();
     let isCloseHover = mx >= closeBtnX && mx <= closeBtnX + closeBtnW &&
-                       my >= closeBtnY && my <= closeBtnY + closeBtnH;
+      my >= closeBtnY && my <= closeBtnY + closeBtnH;
 
     fill(isCloseHover ? color(110, 90, 65) : color(80, 65, 50));
     stroke(160, 135, 100);

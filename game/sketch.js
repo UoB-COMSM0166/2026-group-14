@@ -6,9 +6,17 @@ let canvas;
 let scaleFactor = 1;
 let canvasWidth, canvasHeight;
 
+let bgMusic;
+let musicTracks = {};
+
 function preload() {
   _bgImage = loadImage('assets/magic_background.png');
   _settingsBgImg = loadImage('assets/PNG/panelInset_brown.png');
+
+  musicTracks['Epic Battle Music'] = loadSound('soundtrack/epic.mp3');
+  musicTracks['Peaceful Village'] = loadSound('soundtrack/peace_vil.mp3');
+  musicTracks['Dark Dungeon'] = loadSound('soundtrack/dark.mp3');
+
   gameImages.mainBackground = loadImage('assets/main_background.png');
   gameImages.btnStart = loadImage('assets/start.png',
     () => console.log('[Load] start.png loaded'),
@@ -27,14 +35,14 @@ function preload() {
     () => console.log('[Load] level_selection.JPG loaded'),
     () => console.log('[Error] level_selection.JPG failed to load')
   );
-  gameImages.bigben          = loadImage('assets/bigben.png');
-  gameImages.gherkin         = loadImage('assets/gherkin.png');
-  gameImages.towerBasic      = loadImage('assets/tower_basic.png');
-  gameImages.towerBasicFire  = loadImage('assets/tower_basic_fire.png');
-  gameImages.towerSlow       = loadImage('assets/tower_slow.png');
+  gameImages.bigben = loadImage('assets/bigben.png');
+  gameImages.gherkin = loadImage('assets/gherkin.png');
+  gameImages.towerBasic = loadImage('assets/tower_basic.png');
+  gameImages.towerBasicFire = loadImage('assets/tower_basic_fire.png');
+  gameImages.towerSlow = loadImage('assets/tower_slow.png');
   gameImages.towerSlowActive = loadImage('assets/tower_slow_active.png');
-  gameImages.towerAreaFire   = loadImage('assets/tower_area_fire.png');
-  gameImages.towerCrystal   = loadImage('assets/tower3.png',
+  gameImages.towerAreaFire = loadImage('assets/tower_area_fire.png');
+  gameImages.towerCrystal = loadImage('assets/tower3.png',
     () => console.log('[Load] tower3.png loaded'),
     () => console.log('[Error] tower3.png failed to load')
   );
@@ -42,31 +50,31 @@ function preload() {
     () => console.log('[Load] tower3_active.png loaded'),
     () => console.log('[Error] tower3_active.png failed to load')
   );
-  gameImages.enemyGuard      = loadImage('assets/enemy_guard.png');
-  gameImages.enemyPigeon     = loadImage('assets/enemy_pigeon.png');
-  gameImages.enemyHedgehog   = loadImage('assets/enemy_hedgehog.png');
-  gameImages.mapLevel1       = loadImage('assets/map_bg_level1.png');
-  gameImages.mapLevel2       = loadImage('assets/level2_map.png',
+  gameImages.enemyGuard = loadImage('assets/enemy_guard.png');
+  gameImages.enemyPigeon = loadImage('assets/enemy_pigeon.png');
+  gameImages.enemyHedgehog = loadImage('assets/enemy_hedgehog.png');
+  gameImages.mapLevel1 = loadImage('assets/map_bg_level1.png');
+  gameImages.mapLevel2 = loadImage('assets/level2_map.png',
     () => console.log('[Load] level2_map.png loaded'),
     () => console.log('[Error] level2_map.png failed to load')
   );
-  gameImages.mapLevel3       = loadImage('assets/level3_map.png',
+  gameImages.mapLevel3 = loadImage('assets/level3_map.png',
     () => console.log('[Load] level3_map.png loaded'),
     () => console.log('[Error] level3_map.png failed to load')
   );
-  gameImages.monster1        = loadImage('assets/monster1.png',
+  gameImages.monster1 = loadImage('assets/monster1.png',
     () => console.log('[Load] monster1.png loaded'),
     () => console.log('[Error] monster1.png failed to load')
   );
-  gameImages.monster2        = loadImage('assets/monster2.png',
+  gameImages.monster2 = loadImage('assets/monster2.png',
     () => console.log('[Load] monster2.png loaded'),
     () => console.log('[Error] monster2.png failed to load')
   );
-  gameImages.monster3        = loadImage('assets/monster3.png',
+  gameImages.monster3 = loadImage('assets/monster3.png',
     () => console.log('[Load] monster3.png loaded'),
     () => console.log('[Error] monster3.png failed to load')
   );
-  gameImages.monster4        = loadImage('assets/monster4.png',
+  gameImages.monster4 = loadImage('assets/monster4.png',
     () => console.log('[Load] monster4.png loaded'),
     () => console.log('[Error] monster4.png failed to load')
   );
@@ -102,7 +110,7 @@ function preload() {
     () => console.log('[Load] gentleman_bug.png loaded'),
     () => console.log('[Error] gentleman_bug.png failed to load')
   );
-  gameImages.panelBottom     = loadImage('assets/ui_panel_bottom.png');
+  gameImages.panelBottom = loadImage('assets/ui_panel_bottom.png');
 }
 
 function setup() {
@@ -131,6 +139,7 @@ function setup() {
   game = new GameManager();
   game.ui.bgImage = _bgImage;
   game.ui.settingsBgImg = _settingsBgImg;
+  game.ui.musicTracks = musicTracks;
   game.ui.setupUI();
 
   console.log("[Game] Game initialised");
@@ -153,6 +162,15 @@ function draw() {
 }
 
 function mousePressed() {
+  if (!game.ui.audioStarted) {
+    userStartAudio().then(() => {
+      console.log("Audio Activated!");
+      game.ui.audioStarted = true;
+      game.ui.updateMusicTrack();
+    });
+    return;
+  }
+
   if (canvas && canvas.elt) canvas.elt.focus();
   let mx = getGameMouseX();
   let my = getGameMouseY();

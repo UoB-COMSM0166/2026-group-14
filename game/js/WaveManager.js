@@ -2,20 +2,20 @@
 
 class WaveManager {
   //@param {Wave[]} waves - Ordered array of Wave objects for this level
-  constructor(waves) {
+  constructor(waves, sound = null) {
     this.waves = waves;
-
-    this.currentWaveIndex     = 0;
+    this.sound = sound;
+    this.currentWaveIndex = 0;
     this.enemiesSpawnedInWave = 0;
-    this.spawnTimer           = 0;
+    this.spawnTimer = 0;
 
     // "waiting" | "spawning" | "active"
-    this.waveState            = 'waiting';
+    this.waveState = 'waiting';
 
     // First wave: 3 s prep time (180 frames @ 60 fps)
-    this.waitTimer            = 180;
+    this.waitTimer = 180;
 
-    this.allWavesComplete     = false;
+    this.allWavesComplete = false;
     this._waveClearedThisFrame = false;
     this._stopped = false;
   }
@@ -34,7 +34,7 @@ class WaveManager {
     if (this.waveState === 'waiting') {
       this.waitTimer--;
       if (this.waitTimer <= 0) {
-        this.waveState  = 'spawning';
+        this.waveState = 'spawning';
         this.spawnTimer = 0; // spawn first enemy immediately
         console.log(`[Game] Wave ${wave.waveNumber} starting`);
       }
@@ -46,7 +46,7 @@ class WaveManager {
 
       if (this.spawnTimer <= 0) {
         let config = wave.enemyList[this.enemiesSpawnedInWave];
-        enemies.push(new Enemy(path, config));
+        enemies.push(new Enemy(path, config, this.sound));
         this.enemiesSpawnedInWave++;
         this.spawnTimer = wave.spawnInterval;
 
@@ -73,10 +73,10 @@ class WaveManager {
           console.log('[Game] All waves complete - victory!');
         } else {
           // Reset for the next wave (5 s gap = 300 frames)
-          this.waveState            = 'waiting';
-          this.waitTimer            = 300;
+          this.waveState = 'waiting';
+          this.waitTimer = 300;
           this.enemiesSpawnedInWave = 0;
-          this.spawnTimer           = 0;
+          this.spawnTimer = 0;
           console.log(`[Game] Preparing wave ${this.waves[this.currentWaveIndex].waveNumber}`);
         }
       }
