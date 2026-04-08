@@ -268,6 +268,12 @@ function keyPressed() {
     return;
   }
   if (state === GameState.LEVEL_SELECT) {
+    // Toggle level select debug grid
+    if (key === 'g' || key === 'G') {
+      game.ui.levelSelectDebug = !game.ui.levelSelectDebug;
+      console.log('[Debug] Level select grid:', game.ui.levelSelectDebug ? 'ON' : 'OFF');
+      return false;
+    }
     if (key === '1') game.startLevel(1);
     if (key === '2') game.startLevel(2);
     if (key === '3') game.startLevel(3);

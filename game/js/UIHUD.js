@@ -33,6 +33,8 @@ class UIHUD {
     this.towerPanelTabs = [];
     this._panelLogged = false;  // print tab rects once to console
 
+    this.levelSelectDebug = false;
+
     this.settings = {
       musicVolume: 0.5,
       brightness: 1.0,
@@ -328,6 +330,107 @@ class UIHUD {
     textAlign(CENTER, CENTER);
     textSize(18);
     text("← Back", this.backButton.x, this.backButton.y);
+
+    pop();
+
+    // Debug grid overlay (call at the very end so it's on top)
+    this.drawLevelSelectDebugGrid();
+  }
+
+  drawLevelSelectDebugGrid() {
+    if (!this.levelSelectDebug) return;
+
+    push();
+
+    let gridSize = 50;  // 50px grid
+    let mx = getGameMouseX();
+    let my = getGameMouseY();
+
+    // Draw vertical lines
+    stroke(255, 255, 255, 40);
+    strokeWeight(1);
+    for (let x = 0; x <= CANVAS_WIDTH; x += gridSize) {
+      // Highlight every 100px
+      if (x % 100 === 0) {
+        stroke(255, 255, 0, 80);
+        strokeWeight(2);
+      } else {
+        stroke(255, 255, 255, 40);
+        strokeWeight(1);
+      }
+      line(x, 0, x, CANVAS_HEIGHT);
+
+      // X coordinate label
+      if (x % 100 === 0) {
+        fill(255, 255, 0, 200);
+        noStroke();
+        textSize(10);
+        textAlign(CENTER, TOP);
+        text(x, x, 5);
+      }
+    }
+
+    // Draw horizontal lines
+    for (let y = 0; y <= CANVAS_HEIGHT; y += gridSize) {
+      if (y % 100 === 0) {
+        stroke(255, 255, 0, 80);
+        strokeWeight(2);
+      } else {
+        stroke(255, 255, 255, 40);
+        strokeWeight(1);
+      }
+      line(0, y, CANVAS_WIDTH, y);
+
+      // Y coordinate label
+      if (y % 100 === 0) {
+        fill(255, 255, 0, 200);
+        noStroke();
+        textSize(10);
+        textAlign(LEFT, CENTER);
+        text(y, 5, y);
+      }
+    }
+
+    // Draw crosshair at mouse position
+    stroke(255, 0, 255);
+    strokeWeight(2);
+    line(mx - 30, my, mx + 30, my);
+    line(mx, my - 30, mx, my + 30);
+
+    // Draw mouse coordinate info box
+    let infoW = 200;
+    let infoH = 80;
+    let infoX = 10;
+    let infoY = CANVAS_HEIGHT - infoH - 10;
+
+    fill(0, 0, 0, 220);
+    stroke(255, 255, 0);
+    strokeWeight(2);
+    rectMode(CORNER);
+    rect(infoX, infoY, infoW, infoH, 5);
+
+    fill(255, 255, 0);
+    noStroke();
+    textAlign(LEFT, TOP);
+    textSize(14);
+    textStyle(BOLD);
+    text("DEBUG MODE", infoX + 10, infoY + 10);
+    textStyle(NORMAL);
+
+    fill(255);
+    textSize(12);
+    text("Mouse X: " + Math.round(mx), infoX + 10, infoY + 32);
+    text("Mouse Y: " + Math.round(my), infoX + 10, infoY + 48);
+
+    fill(150, 150, 150);
+    textSize(10);
+    text("Press G to toggle grid", infoX + 10, infoY + 65);
+
+    // Show click position helper
+    fill(255, 100, 255);
+    textAlign(LEFT, BOTTOM);
+    textSize(11);
+    text("Click position: (" + Math.round(mx) + ", " + Math.round(my) + ")", mx + 15, my - 5);
 
     pop();
   }

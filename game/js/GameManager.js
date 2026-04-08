@@ -994,6 +994,12 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
     }
 
     if (this.state === GameState.LEVEL_SELECT) {
+      // Debug: log click position
+      if (this.ui.levelSelectDebug) {
+        console.log('[Debug] Clicked at: x=' + mx + ', y=' + my);
+        console.log('[Debug] Button code: { x: ' + mx + ', y: ' + my + ', w: 150, h: 50 }');
+      }
+
       let backBtn = this.ui.backButton;
       if (backBtn &&
           mx > backBtn.x - backBtn.width / 2 && mx < backBtn.x + backBtn.width / 2 &&
