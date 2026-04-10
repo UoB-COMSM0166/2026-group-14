@@ -286,6 +286,12 @@ function keyPressed() {
     return;
   }
   if (state === GameState.LEVEL_SELECT) {
+    // Toggle level select debug grid
+    if (key === 'g' || key === 'G') {
+      game.ui.levelSelectDebug = !game.ui.levelSelectDebug;
+      console.log('[Debug] Level select grid:', game.ui.levelSelectDebug ? 'ON' : 'OFF');
+      return false;
+    }
     if (key === '1') game.startLevel(1);
     if (key === '2') game.startLevel(2);
     if (key === '3') game.startLevel(3);
@@ -293,6 +299,45 @@ function keyPressed() {
       game.setState(GameState.MENU);
     }
     return;
+  }
+  if (state === GameState.PLAYING && game.tutorialMode) {
+    // Toggle tutorial debug mode
+    if (key === 't' || key === 'T') {
+      game.ui.tutorialDebugMode = !game.ui.tutorialDebugMode;
+      game.ui.tutorialDebugClicks = [];
+      console.log('[Tutorial Debug] Mode:', game.ui.tutorialDebugMode ? 'ON' : 'OFF');
+      console.log('[Tutorial Debug] Current step:', TUTORIAL_STEPS[game.tutorialStep].id);
+      return false;
+    }
+
+    if (game.ui.tutorialDebugMode) {
+      let num = parseInt(key);
+      if (num >= 1 && num <= TUTORIAL_STEPS.length) {
+        game.tutorialStep = num - 1;
+        game.ui.tutorialDebugClicks = [];
+        console.log('[Tutorial Debug] Jumped to step:', TUTORIAL_STEPS[game.tutorialStep].id);
+        return false;
+      }
+      if (key === 'p' || key === 'P') {
+        game.ui.printTutorialHighlightConfig();
+        return false;
+      }
+      if (key === 'c' || key === 'C') {
+        game.ui.tutorialDebugClicks = [];
+        console.log('[Tutorial Debug] Clicks cleared');
+        return false;
+      }
+    }
+
+    if (key === ' ' || keyCode === ENTER) {
+      game.nextTutorialStep();
+      return false;
+    }
+    if (keyCode === ESCAPE) {
+      game.skipTutorial();
+      return false;
+    }
+    return false;
   }
   if (state === GameState.PLAYING) {
     if (key === ' ') {

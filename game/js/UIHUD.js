@@ -33,6 +33,13 @@ class UIHUD {
     this.towerPanelTabs = [];
     this._panelLogged = false;  // print tab rects once to console
 
+    this.levelSelectDebug = false;
+
+    // Tutorial debug mode
+    this.tutorialDebugMode = false;
+    this.tutorialDebugStep = 0;
+    this.tutorialDebugClicks = [];
+
     this.settings = {
       musicVolume: 0.5,
       brightness: 1.0,
@@ -363,6 +370,107 @@ class UIHUD {
     textAlign(CENTER, CENTER);
     textSize(18);
     text("← Back", this.backButton.x, this.backButton.y);
+
+    pop();
+
+    // Debug grid overlay (call at the very end so it's on top)
+    this.drawLevelSelectDebugGrid();
+  }
+
+  drawLevelSelectDebugGrid() {
+    if (!this.levelSelectDebug) return;
+
+    push();
+
+    let gridSize = 50;  // 50px grid
+    let mx = getGameMouseX();
+    let my = getGameMouseY();
+
+    // Draw vertical lines
+    stroke(255, 255, 255, 40);
+    strokeWeight(1);
+    for (let x = 0; x <= CANVAS_WIDTH; x += gridSize) {
+      // Highlight every 100px
+      if (x % 100 === 0) {
+        stroke(255, 255, 0, 80);
+        strokeWeight(2);
+      } else {
+        stroke(255, 255, 255, 40);
+        strokeWeight(1);
+      }
+      line(x, 0, x, CANVAS_HEIGHT);
+
+      // X coordinate label
+      if (x % 100 === 0) {
+        fill(255, 255, 0, 200);
+        noStroke();
+        textSize(10);
+        textAlign(CENTER, TOP);
+        text(x, x, 5);
+      }
+    }
+
+    // Draw horizontal lines
+    for (let y = 0; y <= CANVAS_HEIGHT; y += gridSize) {
+      if (y % 100 === 0) {
+        stroke(255, 255, 0, 80);
+        strokeWeight(2);
+      } else {
+        stroke(255, 255, 255, 40);
+        strokeWeight(1);
+      }
+      line(0, y, CANVAS_WIDTH, y);
+
+      // Y coordinate label
+      if (y % 100 === 0) {
+        fill(255, 255, 0, 200);
+        noStroke();
+        textSize(10);
+        textAlign(LEFT, CENTER);
+        text(y, 5, y);
+      }
+    }
+
+    // Draw crosshair at mouse position
+    stroke(255, 0, 255);
+    strokeWeight(2);
+    line(mx - 30, my, mx + 30, my);
+    line(mx, my - 30, mx, my + 30);
+
+    // Draw mouse coordinate info box
+    let infoW = 200;
+    let infoH = 80;
+    let infoX = 10;
+    let infoY = CANVAS_HEIGHT - infoH - 10;
+
+    fill(0, 0, 0, 220);
+    stroke(255, 255, 0);
+    strokeWeight(2);
+    rectMode(CORNER);
+    rect(infoX, infoY, infoW, infoH, 5);
+
+    fill(255, 255, 0);
+    noStroke();
+    textAlign(LEFT, TOP);
+    textSize(14);
+    textStyle(BOLD);
+    text("DEBUG MODE", infoX + 10, infoY + 10);
+    textStyle(NORMAL);
+
+    fill(255);
+    textSize(12);
+    text("Mouse X: " + Math.round(mx), infoX + 10, infoY + 32);
+    text("Mouse Y: " + Math.round(my), infoX + 10, infoY + 48);
+
+    fill(150, 150, 150);
+    textSize(10);
+    text("Press G to toggle grid", infoX + 10, infoY + 65);
+
+    // Show click position helper
+    fill(255, 100, 255);
+    textAlign(LEFT, BOTTOM);
+    textSize(11);
+    text("Click position: (" + Math.round(mx) + ", " + Math.round(my) + ")", mx + 15, my - 5);
 
     pop();
   }
@@ -1828,6 +1936,347 @@ class UIHUD {
     }
 
     pop();
+  }
+
+  drawTutorialOverlay() {
+    if (typeof game === 'undefined' || !game.tutorialMode) return;
+
+    let step = TUTORIAL_STEPS[game.tutorialStep];
+    if (!step) return;
+
+    push();
+
+    this.drawTutorialDarkOverlay(step.highlight);
+    this.drawTutorialDialog(step);
+    this.drawTutorialSkipBtn();
+
+    if (this.tutorialDebugMode) {
+      this.drawTutorialDebugOverlay();
+    }
+
+    pop();
+  }
+
+  drawTutorialDarkOverlay(highlightType) {
+    fill(0, 0, 0, 180);
+    noStroke();
+    rectMode(CORNER);
+
+    let highlightArea = this.getTutorialHighlightArea(highlightType);
+
+    if (highlightArea && highlightType !== 'none') {
+      let hx = highlightArea.x;
+      let hy = highlightArea.y;
+      let hw = highlightArea.w;
+      let hh = highlightArea.h;
+      let pad = 10;
+
+      // Top
+      rect(0, 0, CANVAS_WIDTH, hy - pad);
+      // Bottom
+      rect(0, hy + hh + pad, CANVAS_WIDTH, CANVAS_HEIGHT - (hy + hh + pad));
+      // Left
+      rect(0, hy - pad, hx - pad, hh + pad * 2);
+      // Right
+      rect(hx + hw + pad, hy - pad, CANVAS_WIDTH - (hx + hw + pad), hh + pad * 2);
+
+      // Highlight border
+      stroke(255, 220, 100);
+      strokeWeight(4);
+      noFill();
+      rect(hx - pad, hy - pad, hw + pad * 2, hh + pad * 2, 8);
+
+      // Pulsing glow
+      let pulse = (sin(frameCount * 0.1) + 1) * 0.5;
+      stroke(255, 220, 100, 100 + pulse * 100);
+      strokeWeight(8);
+      rect(hx - pad - 4, hy - pad - 4, hw + pad * 2 + 8, hh + pad * 2 + 8, 12);
+      noStroke();
+    } else {
+      rect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    }
+  }
+
+  getTutorialHighlightArea(highlightType) {
+    // Use custom highlightArea from step config if defined and non-zero
+    let currentStep = TUTORIAL_STEPS[game.tutorialStep];
+    if (currentStep && currentStep.highlightArea &&
+        currentStep.highlightArea.w > 0 && currentStep.highlightArea.h > 0) {
+      return currentStep.highlightArea;
+    }
+
+    // Fallback to hardcoded defaults (update after debugging with T key)
+    switch (highlightType) {
+      case 'landmark':
+        if (typeof game !== 'undefined' && game.landmark) {
+          return {
+            x: game.landmark.x - 60,
+            y: game.landmark.y - 80,
+            w: 120,
+            h: 160
+          };
+        }
+        return { x: CANVAS_WIDTH - 200, y: 300, w: 150, h: 200 };
+
+      case 'path':
+        return { x: 100, y: 250, w: CANVAS_WIDTH - 250, h: 200 };
+
+      case 'tower_panel': {
+        let panelH = 80;
+        return { x: 150, y: CANVAS_HEIGHT - panelH - 5, w: CANVAS_WIDTH - 200, h: panelH + 5 };
+      }
+
+      case 'buildable':
+        return { x: 300, y: 350, w: 400, h: 150 };
+
+      case 'gold':
+        return { x: 150, y: CANVAS_HEIGHT - 75, w: 120, h: 60 };
+
+      case 'lives':
+        return { x: 10, y: 10, w: 200, h: 60 };
+
+      case 'none':
+      default:
+        return null;
+    }
+  }
+
+  drawTutorialDialog(step) {
+    let mx = getGameMouseX();
+    let my = getGameMouseY();
+
+    let dialogW = 450;
+    let dialogH = 180;
+    let dialogX, dialogY;
+
+    switch (step.position) {
+      case 'left':
+        dialogX = 50;
+        dialogY = CANVAS_HEIGHT / 2 - dialogH / 2;
+        break;
+      case 'right':
+        dialogX = CANVAS_WIDTH - dialogW - 50;
+        dialogY = CANVAS_HEIGHT / 2 - dialogH / 2;
+        break;
+      case 'top':
+        dialogX = CANVAS_WIDTH / 2 - dialogW / 2;
+        dialogY = 100;
+        break;
+      case 'bottom':
+        dialogX = CANVAS_WIDTH / 2 - dialogW / 2;
+        dialogY = CANVAS_HEIGHT - dialogH - 150;
+        break;
+      case 'center':
+      default:
+        dialogX = CANVAS_WIDTH / 2 - dialogW / 2;
+        dialogY = CANVAS_HEIGHT / 2 - dialogH / 2;
+    }
+
+    fill(35, 30, 25, 245);
+    stroke(200, 170, 120);
+    strokeWeight(4);
+    rectMode(CORNER);
+    rect(dialogX, dialogY, dialogW, dialogH, 12);
+
+    stroke(120, 100, 70);
+    strokeWeight(2);
+    rect(dialogX + 8, dialogY + 8, dialogW - 16, dialogH - 16, 8);
+    noStroke();
+
+    // Step indicator
+    fill(150, 150, 150);
+    textAlign(RIGHT, TOP);
+    textSize(12);
+    text((game.tutorialStep + 1) + "/" + TUTORIAL_STEPS.length, dialogX + dialogW - 20, dialogY + 15);
+
+    // Title
+    fill(255, 220, 150);
+    textAlign(LEFT, TOP);
+    textSize(22);
+    textStyle(BOLD);
+    text(step.title, dialogX + 25, dialogY + 20);
+    textStyle(NORMAL);
+
+    // Message
+    fill(220, 220, 220);
+    textSize(15);
+    textLeading(22);
+    text(step.message, dialogX + 25, dialogY + 55, dialogW - 50, 80);
+
+    // Next / Start button
+    let nextBtnW = 120;
+    let nextBtnH = 40;
+    let nextBtnX = dialogX + dialogW - nextBtnW - 20;
+    let nextBtnY = dialogY + dialogH - nextBtnH - 20;
+    let isNextHover = mx >= nextBtnX && mx <= nextBtnX + nextBtnW &&
+                      my >= nextBtnY && my <= nextBtnY + nextBtnH;
+
+    fill(isNextHover ? color(80, 140, 80) : color(60, 110, 60));
+    stroke(isNextHover ? color(140, 200, 140) : color(100, 160, 100));
+    strokeWeight(2);
+    rect(nextBtnX, nextBtnY, nextBtnW, nextBtnH, 8);
+
+    fill(255);
+    noStroke();
+    textAlign(CENTER, CENTER);
+    textSize(16);
+    textStyle(BOLD);
+    let btnText = (game.tutorialStep >= TUTORIAL_STEPS.length - 1) ? "Start!" : "Next";
+    text(btnText, nextBtnX + nextBtnW / 2, nextBtnY + nextBtnH / 2);
+    textStyle(NORMAL);
+
+    this.tutorialNextBtn = { x: nextBtnX, y: nextBtnY, w: nextBtnW, h: nextBtnH };
+  }
+
+  drawTutorialSkipBtn() {
+    let mx = getGameMouseX();
+    let my = getGameMouseY();
+
+    let skipW = 80;
+    let skipH = 30;
+    let skipX = CANVAS_WIDTH - skipW - 20;
+    let skipY = 20;
+
+    let isSkipHover = mx >= skipX && mx <= skipX + skipW &&
+                      my >= skipY && my <= skipY + skipH;
+
+    fill(isSkipHover ? color(100, 80, 80) : color(70, 55, 55));
+    stroke(isSkipHover ? color(180, 140, 140) : color(130, 100, 100));
+    strokeWeight(2);
+    rectMode(CORNER);
+    rect(skipX, skipY, skipW, skipH, 5);
+
+    fill(isSkipHover ? 255 : 200);
+    noStroke();
+    textAlign(CENTER, CENTER);
+    textSize(12);
+    text("Skip", skipX + skipW / 2, skipY + skipH / 2);
+
+    this.tutorialSkipBtn = { x: skipX, y: skipY, w: skipW, h: skipH };
+  }
+
+  drawTutorialDebugOverlay() {
+    push();
+
+    let mx = getGameMouseX();
+    let my = getGameMouseY();
+
+    // Grid lines
+    for (let x = 0; x <= CANVAS_WIDTH; x += 50) {
+      if (x % 100 === 0) {
+        stroke(255, 255, 0, 50);
+        strokeWeight(2);
+      } else {
+        stroke(255, 255, 255, 30);
+        strokeWeight(1);
+      }
+      line(x, 0, x, CANVAS_HEIGHT);
+    }
+    for (let y = 0; y <= CANVAS_HEIGHT; y += 50) {
+      if (y % 100 === 0) {
+        stroke(255, 255, 0, 50);
+        strokeWeight(2);
+      } else {
+        stroke(255, 255, 255, 30);
+        strokeWeight(1);
+      }
+      line(0, y, CANVAS_WIDTH, y);
+    }
+
+    // Crosshair at mouse
+    stroke(255, 0, 255);
+    strokeWeight(2);
+    line(mx - 30, my, mx + 30, my);
+    line(mx, my - 30, mx, my + 30);
+
+    // Recorded clicks
+    for (let i = 0; i < this.tutorialDebugClicks.length; i++) {
+      let c = this.tutorialDebugClicks[i];
+      fill(0, 255, 0);
+      stroke(255);
+      strokeWeight(2);
+      ellipse(c.x, c.y, 15, 15);
+
+      fill(255);
+      noStroke();
+      textSize(12);
+      textAlign(CENTER, CENTER);
+      text(i + 1, c.x, c.y);
+    }
+
+    // Preview rectangle when one click is recorded
+    if (this.tutorialDebugClicks.length === 1) {
+      let c1 = this.tutorialDebugClicks[0];
+      let rx = Math.min(c1.x, mx);
+      let ry = Math.min(c1.y, my);
+      let rw = Math.abs(mx - c1.x);
+      let rh = Math.abs(my - c1.y);
+
+      fill(255, 255, 0, 30);
+      stroke(255, 255, 0);
+      strokeWeight(2);
+      rectMode(CORNER);
+      rect(rx, ry, rw, rh);
+    }
+
+    // Debug info panel
+    fill(0, 0, 0, 230);
+    stroke(255, 255, 0);
+    strokeWeight(2);
+    rectMode(CORNER);
+    rect(10, 10, 320, 200, 8);
+
+    fill(255, 255, 0);
+    noStroke();
+    textAlign(LEFT, TOP);
+    textSize(16);
+    textStyle(BOLD);
+    text("TUTORIAL DEBUG MODE", 20, 20);
+    textStyle(NORMAL);
+
+    textSize(12);
+    fill(255);
+    let infoY = 45;
+    text("Current Step: " + (game.tutorialStep + 1) + "/" + TUTORIAL_STEPS.length, 20, infoY); infoY += 18;
+    text("Step ID: " + TUTORIAL_STEPS[game.tutorialStep].id, 20, infoY); infoY += 18;
+    text("Mouse: (" + Math.round(mx) + ", " + Math.round(my) + ")", 20, infoY); infoY += 18;
+    text("Clicks recorded: " + this.tutorialDebugClicks.length + "/2", 20, infoY); infoY += 25;
+
+    fill(200, 200, 200);
+    textSize(11);
+    text("Controls:", 20, infoY); infoY += 15;
+    text("T - Toggle debug mode", 20, infoY); infoY += 14;
+    text("1-8 - Jump to step", 20, infoY); infoY += 14;
+    text("Click twice - Record highlight area", 20, infoY); infoY += 14;
+    text("P - Print all configs", 20, infoY); infoY += 14;
+    text("C - Clear clicks", 20, infoY);
+
+    pop();
+  }
+
+  printTutorialHighlightConfig() {
+    console.log('='.repeat(60));
+    console.log('TUTORIAL HIGHLIGHT CONFIGURATIONS');
+    console.log('Copy these values into TUTORIAL_STEPS highlightArea in constants.js:');
+    console.log('='.repeat(60));
+    console.log('');
+
+    for (let i = 0; i < TUTORIAL_STEPS.length; i++) {
+      let step = TUTORIAL_STEPS[i];
+      if (step.highlight !== 'none') {
+        let area = this.getTutorialHighlightArea(step.highlight);
+        if (area) {
+          console.log("Step " + (i + 1) + " '" + step.id + "' (" + step.highlight + "):");
+          console.log("  highlightArea: { x: " + area.x + ", y: " + area.y +
+                      ", w: " + area.w + ", h: " + area.h + " }");
+        } else {
+          console.log("Step " + (i + 1) + " '" + step.id + "': no highlight area set");
+        }
+      }
+    }
+
+    console.log('');
+    console.log('='.repeat(60));
   }
 
   drawMonsterInfoPanel(currentLevel) {
