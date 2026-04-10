@@ -65,8 +65,75 @@ const GameState = {
   LOSE: 'lose',
   SETTINGS: 'settings',
   IN_GAME_SETTINGS: 'in_game_settings',
-  MONSTER_INFO: 'monster_info'
+  MONSTER_INFO: 'monster_info',
+  INSTRUCTIONS: 'instructions'
 };
+
+// Tutorial steps — highlightArea tuned for Level 1 (design canvas 1920×900)
+const TUTORIAL_STEPS = [
+  {
+    id: 'welcome',
+    highlight: 'none',
+    title: 'Welcome!',
+    message: 'This is a Tower Defense game. Let me show you how to play!',
+    position: 'center'
+  },
+  {
+    id: 'landmark',
+    highlight: 'landmark',
+    highlightArea: { x: 1602, y: 100, w: 314, h: 402 },
+    title: 'Your Goal',
+    message: 'Protect the Landmark! Keep its health above 0 until all enemy waves are defeated.',
+    position: 'left'
+  },
+  {
+    id: 'path',
+    highlight: 'path',
+    highlightArea: { x: 5, y: 41, w: 1903, h: 770 },
+    title: 'Enemy Path',
+    message: 'Enemies will spawn and follow this path toward your Landmark.',
+    position: 'top'
+  },
+  {
+    id: 'tower_panel',
+    highlight: 'tower_panel',
+    highlightArea: { x: 8, y: 811, w: 1904, h: 92 },
+    title: 'Tower Selection',
+    message: 'Select a tower type here. Each tower has different abilities and costs.',
+    position: 'top'
+  },
+  {
+    id: 'buildable',
+    highlight: 'buildable',
+    highlightArea: { x: 0, y: 42, w: 1911, h: 762 },
+    title: 'Build Towers',
+    message: 'Click on the green highlighted areas to place your selected tower.',
+    position: 'center'
+  },
+  {
+    id: 'gold',
+    highlight: 'gold',
+    highlightArea: { x: 238, y: 817, w: 117, h: 83 },
+    title: 'Gold',
+    message: 'Building towers costs gold. Kill enemies to earn more gold!',
+    position: 'top'
+  },
+  {
+    id: 'lives',
+    highlight: 'lives',
+    highlightArea: { x: 746, y: 5, w: 448, h: 37 },
+    title: 'Lives',
+    message: 'You lose a life when an enemy reaches the Landmark. Game over when lives reach 0!',
+    position: 'left'
+  },
+  {
+    id: 'ready',
+    highlight: 'none',
+    title: 'Ready to Play!',
+    message: 'Now try it yourself! Build towers and defend your Landmark. Good luck!',
+    position: 'center'
+  }
+];
 
 // Enemies available in each level (only enemies with images)
 const LEVEL_ENEMIES = {
