@@ -73,12 +73,14 @@ class GameManager {
     };
     this.sound = new SoundManager();
 
-    this.sound.load("place", "../soundtrack/place.mp3");
-    this.sound.load("death", "../soundtrack/explode.mp3");
-    this.sound.load("click", "../soundtrack/ui_click.mp3");
-    this.sound.load("click1", "../soundtrack/ui_click2.mp3");
-    this.sound.load("win", "../soundtrack/game_win.mp3");
-    this.sound.load("lose", "../soundtrack/game_over.mp3");
+    this.sound.load("place", "soundtrack/place.mp3");
+    this.sound.load("death", "soundtrack/explode.mp3");
+    this.sound.load("click", "soundtrack/ui_click.mp3");
+    this.sound.load("click1", "soundtrack/ui_click2.mp3");
+    this.sound.load("win", "soundtrack/game_win.mp3");
+    this.sound.load("lose", "soundtrack/game_over.mp3");
+    this.sound.load("bonus", "soundtrack/coins.mp3");
+    this.sound.load("begin", "soundtrack/begin.mp3");
     console.log("[Game] GameManager initialised");
   }
 
@@ -104,7 +106,7 @@ class GameManager {
       console.log(`[Game] Level ${levelId} does not exist`);
       return;
     }
-
+    this.sound.play("begin");
     console.log(`[Game] Starting: ${config.name}`);
 
     this.currentLevel = levelId;
@@ -304,6 +306,7 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
     if (this.waveManager) {
       this.waveManager.update(this.enemies, this.path);
       if (this.waveManager.consumeWaveClearEvent()) {
+        this.sound.play("bonus");
         this.waveSurvived++;
         this.economy.addGold(WAVE_CLEAR_BONUS_GOLD);
         this.ui.showWaveBonus(`+${WAVE_CLEAR_BONUS_GOLD} Wave Bonus!`);
@@ -1056,7 +1059,8 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
       let instrBtnH = 55;
 
       if (mx >= instrBtnX && mx <= instrBtnX + instrBtnW &&
-          my >= instrBtnY && my <= instrBtnY + instrBtnH) {
+        my >= instrBtnY && my <= instrBtnY + instrBtnH) {
+        this.sound.play("click1");
         this.startLevel(1);
         this.startTutorial();
         return;
@@ -1066,6 +1070,7 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
       if (backBtn &&
         mx > backBtn.x - backBtn.width / 2 && mx < backBtn.x + backBtn.width / 2 &&
         my > backBtn.y - backBtn.height / 2 && my < backBtn.y + backBtn.height / 2) {
+        this.sound.play("click1");
         this.setState(GameState.MENU);
         return;
       }
@@ -1081,6 +1086,7 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
           if (mx >= left && mx <= right && my >= top && my <= bottom) {
             if (btn.unlocked) {
               console.log(`[Game] Starting Level ${btn.level}: ${btn.name}`);
+              this.sound.play("click1");
               this.startLevel(btn.level);
               return;
             } else {
@@ -1098,7 +1104,7 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
       this.ui.tutorialDebugClicks.push(clickData);
 
       console.log('[Tutorial Debug] Click #' + this.ui.tutorialDebugClicks.length + ':',
-                  'x=' + clickData.x + ', y=' + clickData.y);
+        'x=' + clickData.x + ', y=' + clickData.y);
 
       if (this.ui.tutorialDebugClicks.length === 2) {
         let c1 = this.ui.tutorialDebugClicks[0];
@@ -1111,7 +1117,7 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
 
         console.log('='.repeat(50));
         console.log('[Tutorial Debug] HIGHLIGHT AREA for step "' +
-                    TUTORIAL_STEPS[this.tutorialStep].id + '":');
+          TUTORIAL_STEPS[this.tutorialStep].id + '":');
         console.log('{ x: ' + x + ', y: ' + y + ', w: ' + w + ', h: ' + h + ' }');
         console.log('='.repeat(50));
 
@@ -1124,6 +1130,7 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
       if (this.ui.tutorialNextBtn) {
         let btn = this.ui.tutorialNextBtn;
         if (mx >= btn.x && mx <= btn.x + btn.w && my >= btn.y && my <= btn.y + btn.h) {
+          this.sound.play("click1");
           this.nextTutorialStep();
           return;
         }
@@ -1131,6 +1138,7 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
       if (this.ui.tutorialSkipBtn) {
         let btn = this.ui.tutorialSkipBtn;
         if (mx >= btn.x && mx <= btn.x + btn.w && my >= btn.y && my <= btn.y + btn.h) {
+          this.sound.play("click1");
           this.skipTutorial();
           return;
         }
