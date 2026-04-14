@@ -15,6 +15,8 @@ const ROWS = CANVAS_HEIGHT / GRID_SIZE;  // 约 13 行
 // --- 游戏状态 ---
 const GameState = {
   MENU: 'menu',
+  LOGIN: 'login',
+  LEVEL_SELECT: 'level_select',
   PLAYING: 'playing',
   PAUSED: 'paused',
   WIN: 'win',

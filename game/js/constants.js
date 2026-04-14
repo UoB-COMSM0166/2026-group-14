@@ -58,6 +58,7 @@ const HUD_HEIGHT = 45;
 
 const GameState = {
   MENU: 'menu',
+  LOGIN: 'login',
   LEVEL_SELECT: 'level_select',
   PLAYING: 'playing',
   PAUSED: 'paused',

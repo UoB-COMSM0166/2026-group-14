@@ -161,15 +161,19 @@ function draw() {
   pop();
 }
 
+function ensureAudioStarted() {
+  if (!game || !game.ui) return;
+  if (game.ui.audioStarted) return;
+  userStartAudio().then(() => {
+    console.log("Audio Activated!");
+    game.ui.audioStarted = true;
+    game.ui.updateMusicTrack();
+  });
+}
+
 function mousePressed() {
-  if (!game.ui.audioStarted) {
-    userStartAudio().then(() => {
-      console.log("Audio Activated!");
-      game.ui.audioStarted = true;
-      game.ui.updateMusicTrack();
-    });
-    return;
-  }
+  // Attempt to start audio on the first user interaction, but don't block clicks.
+  ensureAudioStarted();
 
   if (canvas && canvas.elt) canvas.elt.focus();
   let mx = getGameMouseX();
@@ -285,6 +289,12 @@ function keyPressed() {
     if (key === 's' || key === 'S') game.setState(GameState.LEVEL_SELECT);
     return;
   }
+  if (state === GameState.LOGIN) {
+    if (keyCode === ESCAPE) {
+      game.setState(GameState.MENU);
+    }
+    return;
+  }
   if (state === GameState.LEVEL_SELECT) {
     // Toggle level select debug grid
     if (key === 'g' || key === 'G') {
@@ -292,9 +302,13 @@ function keyPressed() {
       console.log('[Debug] Level select grid:', game.ui.levelSelectDebug ? 'ON' : 'OFF');
       return false;
     }
-    if (key === '1') game.startLevel(1);
-    if (key === '2') game.startLevel(2);
-    if (key === '3') game.startLevel(3);
+    if (key === 'c' || key === 'C') {
+      if (game && typeof game.continueRun === 'function') game.continueRun();
+      return;
+    }
+    if (key === '1') game.tryStartLevel(1);
+    if (key === '2') game.tryStartLevel(2);
+    if (key === '3') game.tryStartLevel(3);
     if (key === 'b' || key === 'B' || key === 'Escape') {
       game.setState(GameState.MENU);
     }

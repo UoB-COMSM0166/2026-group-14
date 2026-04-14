@@ -28,10 +28,26 @@ function mousePressed() {
 function keyPressed() {
   let state = game.getState();
 
+  if (key === 'l' || key === 'L') {
+    game.logoutAndReturnToLogin();
+    return;
+  }
+
   if (state === GameState.MENU) {
-    if (key === '1') game.startLevel(1);
-    if (key === '2') game.startLevel(2);
-    if (key === '3') game.startLevel(3);
+    if (key === '1') game.tryStartLevel(1);
+    if (key === '2') game.tryStartLevel(2);
+    if (key === '3') game.tryStartLevel(3);
+    return;
+  }
+  if (state === GameState.LOGIN) {
+    if (keyCode === ESCAPE) game.setState(GameState.MENU);
+    return;
+  }
+  if (state === GameState.LEVEL_SELECT) {
+    if (key === '1') game.tryStartLevel(1);
+    if (key === '2') game.tryStartLevel(2);
+    if (key === '3') game.tryStartLevel(3);
+    if (keyCode === ESCAPE || key === 'b' || key === 'B') game.setState(GameState.MENU);
     return;
   }
   if (state === GameState.PLAYING) {
