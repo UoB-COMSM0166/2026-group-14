@@ -47,6 +47,8 @@ class Enemy {
     this.diveTimer = 0;
     this.isDiving = false;
     this.diveEffectTimer = 0;
+    // Treat Diving Lizard "dive" as an invis/untargetable window.
+    // During this window it cannot be targeted/selected or damaged.
 
     // Treant Mage - heal
     this.healRadius = preset.healRadius || 0;
@@ -79,6 +81,14 @@ class Enemy {
     this.currentWaypointIndex = 1;
     this._alive = true;
     this._reachedEnd = false;
+  }
+
+  /**
+   * Whether towers/player can currently target/select this enemy.
+   * "Diving" is an untargetable (invisible) phase.
+   */
+  isTargetable() {
+    return this._alive && !this._reachedEnd && !this.isDiving;
   }
 
   update() {
@@ -222,11 +232,8 @@ class Enemy {
   }
 
   takeDamage(amount) {
-    // Diving Lizard immune when submerged
-    if (this.isDiving) {
-      console.log('[Combat] Attack passed through submerged Diving Lizard');
-      return false;
-    }
+    // Untargetable/invisible window: cannot be damaged
+    if (!this.isTargetable()) return false;
 
     // Boss phase 2: 50% damage reduction
     if (this.ability === 'boss' && this.phase === 2) {
@@ -301,34 +308,12 @@ class Enemy {
 
     // Dive effect (transparent + ripple)
     if (this.isDiving) {
-      tint(255, 255, 255, 80);
-      if (entry.img && entry.img.width > 0) {
-        imageMode(CENTER);
-        image(entry.img, this.x, this.y, entry.w, entry.h);
-      }
-      noTint();
-
+      // Invisible/untargetable window: do not render the body or HP bar.
       noFill();
       stroke(100, 200, 255, 100);
       strokeWeight(2);
       let rippleSize = (this.diveDuration - this.diveEffectTimer) * 0.5;
       ellipse(this.x, this.y + 20, 60 + rippleSize, 30 + rippleSize / 2);
-
-      // HP bar and ability icon still needed
-      let halfH = entry.h / 2;
-      let barW = Math.max(entry.w, 30);
-      let barH = 5;
-      let barX = this.x - barW / 2;
-      let barY = this.y - halfH - 8;
-      let ratio = this.hp / this.maxHp;
-      noStroke();
-      fill(50, 50, 50, 180);
-      rect(barX, barY, barW, barH, 2);
-      if (ratio > 0.6) fill(50, 210, 50);
-      else if (ratio > 0.3) fill(240, 200, 0);
-      else fill(230, 50, 50);
-      rect(barX, barY, barW * ratio, barH, 2);
-      this.drawAbilityIcon(barX, barY);
       pop();
       return;
     }
