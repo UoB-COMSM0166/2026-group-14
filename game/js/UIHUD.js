@@ -41,7 +41,7 @@ class UIHUD {
     this.tutorialDebugClicks = [];
 
     this.settings = {
-      musicVolume: 0.5,
+      musicVolume: 0.08,
       brightness: 1.0,
       musicTrack: 0
     };
@@ -111,7 +111,7 @@ class UIHUD {
         font-size: 16px;
       `;
 
-    this.musicSlider = createSlider(0, 1, 0.5, 0.01);
+    this.musicSlider = createSlider(0, 1, 0.08, 0.01);
     this.musicSlider.input(() => {
       let vol = this.musicSlider.value();
       // 遍历所有音轨更新音量（或者只更新当前播放的）
@@ -2001,7 +2001,7 @@ class UIHUD {
     // Use custom highlightArea from step config if defined and non-zero
     let currentStep = TUTORIAL_STEPS[game.tutorialStep];
     if (currentStep && currentStep.highlightArea &&
-        currentStep.highlightArea.w > 0 && currentStep.highlightArea.h > 0) {
+      currentStep.highlightArea.w > 0 && currentStep.highlightArea.h > 0) {
       return currentStep.highlightArea;
     }
 
@@ -2109,7 +2109,7 @@ class UIHUD {
     let nextBtnX = dialogX + dialogW - nextBtnW - 20;
     let nextBtnY = dialogY + dialogH - nextBtnH - 20;
     let isNextHover = mx >= nextBtnX && mx <= nextBtnX + nextBtnW &&
-                      my >= nextBtnY && my <= nextBtnY + nextBtnH;
+      my >= nextBtnY && my <= nextBtnY + nextBtnH;
 
     fill(isNextHover ? color(80, 140, 80) : color(60, 110, 60));
     stroke(isNextHover ? color(140, 200, 140) : color(100, 160, 100));
@@ -2138,7 +2138,7 @@ class UIHUD {
     let skipY = 20;
 
     let isSkipHover = mx >= skipX && mx <= skipX + skipW &&
-                      my >= skipY && my <= skipY + skipH;
+      my >= skipY && my <= skipY + skipH;
 
     fill(isSkipHover ? color(100, 80, 80) : color(70, 55, 55));
     stroke(isSkipHover ? color(180, 140, 140) : color(130, 100, 100));
@@ -2268,7 +2268,7 @@ class UIHUD {
         if (area) {
           console.log("Step " + (i + 1) + " '" + step.id + "' (" + step.highlight + "):");
           console.log("  highlightArea: { x: " + area.x + ", y: " + area.y +
-                      ", w: " + area.w + ", h: " + area.h + " }");
+            ", w: " + area.w + ", h: " + area.h + " }");
         } else {
           console.log("Step " + (i + 1) + " '" + step.id + "': no highlight area set");
         }

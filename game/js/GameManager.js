@@ -81,6 +81,7 @@ class GameManager {
     this.sound.load("lose", "soundtrack/game_over.mp3");
     this.sound.load("bonus", "soundtrack/coins.mp3");
     this.sound.load("begin", "soundtrack/begin.mp3");
+    this.sound.load("destruction", "soundtrack/destruction.mp3");
     console.log("[Game] GameManager initialised");
   }
 
@@ -115,7 +116,8 @@ class GameManager {
       config.landmarkName,
       config.landmarkHp,
       config.landmarkX,
-      config.landmarkY
+      config.landmarkY,
+      this.sound
     );
     this.towers = [];
     this.enemies = [];
