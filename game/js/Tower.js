@@ -88,6 +88,10 @@ class Tower {
     return Math.sqrt(dx * dx + dy * dy);
   }
 
+  isEnemyTargetable(enemy) {
+    return enemy && typeof enemy.isTargetable === 'function' ? enemy.isTargetable() : true;
+  }
+
   isInRange(enemy) {
     return this.getDistanceTo(enemy) <= this.range;
   }
@@ -143,6 +147,7 @@ class Tower {
       !this.target ||
       this.target.isDead() ||
       this.target.reachedEnd() ||
+      !this.isEnemyTargetable(this.target) ||
       !this.isInRange(this.target);
 
     if (targetInvalid) {
@@ -150,6 +155,7 @@ class Tower {
       let closestDist = Infinity;
       for (let enemy of enemies) {
         if (enemy.isDead() || enemy.reachedEnd()) continue;
+        if (!this.isEnemyTargetable(enemy)) continue;
         let d = this.getDistanceTo(enemy);
         if (d <= this.range && d < closestDist) {
           closestDist = d;
@@ -179,7 +185,7 @@ class Tower {
       proj.trail.push({ x: proj.x, y: proj.y });
       if (proj.trail.length > 5) proj.trail.shift();
 
-      if (proj.targetEnemy.isDead() || proj.targetEnemy.reachedEnd()) {
+      if (proj.targetEnemy.isDead() || proj.targetEnemy.reachedEnd() || !this.isEnemyTargetable(proj.targetEnemy)) {
         proj.alive = false;
         continue;
       }
@@ -235,7 +241,9 @@ class Tower {
             let decay = 1 - this.pierceDamageDecay;
             let currentDecay = decay;
             let baseDmg = this.damage * this.boostedDamageMultiplier * (1 - this.tauntDebuff);
-            let candidates = enemies.filter(e => !e.isDead() && !e.reachedEnd() && !hitEnemies.includes(e));
+          let candidates = enemies.filter(e =>
+            !e.isDead() && !e.reachedEnd() && !hitEnemies.includes(e) && this.isEnemyTargetable(e)
+          );
             candidates.sort((a, b) => {
               let da = (a.x - proj.x) ** 2 + (a.y - proj.y) ** 2;
               let db = (b.x - proj.x) ** 2 + (b.y - proj.y) ** 2;
@@ -272,7 +280,7 @@ class Tower {
     if (this.fireTimer > 0) return;
 
     let targets = enemies.filter(enemy =>
-      !enemy.isDead() && !enemy.reachedEnd() && this.isInRange(enemy)
+      !enemy.isDead() && !enemy.reachedEnd() && this.isEnemyTargetable(enemy) && this.isInRange(enemy)
     );
 
     if (targets.length === 0) return;
