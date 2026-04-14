@@ -7,11 +7,16 @@ class GameManager {
     this.state = GameState.MENU;
     this.currentLevel = 1;
 
+    // --- Player profile (nickname-based) ---
+    this.playerProfile = null;
+    this.playerNickname = '';
+    this._loadActivePlayer();
+
     this.economy = null;
     this.landmark = null;
     this.towers = [];
     this.enemies = [];
-  this.ui = new UIHUD(this);
+    this.ui = new UIHUD(this);
 
     this.levelConfigs = {
       1: {
@@ -46,6 +51,60 @@ class GameManager {
     console.log("GameManager initialised");
   }
 
+  _loadActivePlayer() {
+    if (typeof SaveSystem === 'undefined') return;
+    let nick = SaveSystem.getActiveNickname();
+    if (!nick) return;
+    let profile = SaveSystem.loadProfile(nick);
+    if (!profile) return;
+    this.playerNickname = nick;
+    this.playerProfile = profile;
+  }
+
+  isLoggedIn() {
+    return !!(this.playerProfile && this.playerNickname);
+  }
+
+  login(nickname) {
+    if (typeof SaveSystem === 'undefined') return false;
+    let prof = SaveSystem.login(nickname);
+    if (!prof) return false;
+    this.playerNickname = prof.nickname;
+    this.playerProfile = prof;
+    console.log('[Save] Logged in as:', this.playerNickname);
+    return true;
+  }
+
+  logout() {
+    if (typeof SaveSystem === 'undefined') return;
+    SaveSystem.logout();
+    this.playerNickname = '';
+    this.playerProfile = null;
+    console.log('[Save] Logged out');
+  }
+
+  logoutAndReturnToLogin() {
+    this.logout();
+    this.setState(GameState.LOGIN);
+    if (this.ui && typeof this.ui.clearLoginInput === 'function') {
+      this.ui.clearLoginInput();
+    }
+  }
+
+  getUnlockedUpTo() {
+    if (!this.playerProfile) return 1;
+    let u = this.playerProfile.unlockedUpTo || 1;
+    if (u < 1) u = 1;
+    if (u > TOTAL_LEVELS) u = TOTAL_LEVELS;
+    return u;
+  }
+
+  canPlayLevel(levelId) {
+    if (!Number.isFinite(levelId)) return false;
+    if (levelId < 1 || levelId > TOTAL_LEVELS) return false;
+    return levelId <= this.getUnlockedUpTo();
+  }
+
   // --- State ---
 
   getState() {
@@ -58,6 +117,20 @@ class GameManager {
   }
 
   // --- Level management ---
+
+  tryStartLevel(levelId) {
+    if (!this.isLoggedIn()) {
+      console.log('[Save] No player logged in. Redirecting to login.');
+      this.setState(GameState.LOGIN);
+      return false;
+    }
+    if (!this.canPlayLevel(levelId)) {
+      console.log(`[Game] Level ${levelId} is locked for ${this.playerNickname}.`);
+      return false;
+    }
+    this.startLevel(levelId);
+    return true;
+  }
 
   startLevel(levelId) {
     let config = this.levelConfigs[levelId];
@@ -123,6 +196,12 @@ class GameManager {
       case GameState.MENU:
         this.ui.drawMainMenu();
         break;
+      case GameState.LOGIN:
+        this.ui.drawLoginScreen();
+        break;
+      case GameState.LEVEL_SELECT:
+        this.ui.drawLevelSelect();
+        break;
       case GameState.PLAYING:
         this.drawGame();
         this.ui.drawHUD();
@@ -136,6 +215,7 @@ class GameManager {
         break;
       case GameState.WIN:
         this.drawGame();
+        this._onVictory();
         this.ui.drawWinScreen();
         break;
       case GameState.LOSE:
@@ -145,6 +225,10 @@ class GameManager {
     }
   }
 
+  _onVictory() {
+    if (!this.playerProfile || typeof SaveSystem === 'undefined') return;
+    SaveSystem.unlockNextLevel(this.playerProfile, this.currentLevel);
+  }
 
 
   drawGame() {
@@ -219,8 +303,19 @@ class GameManager {
 
       if (mx > btnX - btnW/2 && mx < btnX + btnW/2 &&
           my > btnY - btnH/2 && my < btnY + btnH/2) {
-        this.startLevel(1);
+        if (!this.isLoggedIn()) this.setState(GameState.LOGIN);
+        else this.setState(GameState.LEVEL_SELECT);
       }
+      return;
+    }
+
+    if (this.state === GameState.LOGIN) {
+      this.ui.handleLoginClick(mx, my);
+      return;
+    }
+
+    if (this.state === GameState.LEVEL_SELECT) {
+      this.ui.handleLevelSelectClick(mx, my);
       return;
     }
 
@@ -297,7 +392,7 @@ class GameManager {
 
   nextLevel() {
     if (this.currentLevel < TOTAL_LEVELS) {
-      this.startLevel(this.currentLevel + 1);
+      this.tryStartLevel(this.currentLevel + 1);
     } else {
       console.log("All levels complete!");
       this.setState(GameState.MENU);

@@ -48,12 +48,26 @@ class UIHUD {
     this.trackNames = ['Epic Battle Music', 'Peaceful Village', 'Dark Dungeon'];
     this.currentTrackIndex = 0;
     this._settingsDragTarget = null;  // 'music' | 'brightness' | null
+
+    // Nickname login UI (p5 DOM)
+    this.nicknameInput = null;
+    this.nicknameLoginBtn = null;
+    this.nicknameBackBtn = null;
+    this._loginErrorMsg = '';
+
+    // Level select extra buttons (canvas hit rects)
+    this.continueButton = null;
+
+    // Switch player button (p5 DOM)
+    this.switchPlayerBtn = null;
   }
 
 
   setupUI() {
     this.createMenuButtons();
     this.createSettingsUI();
+    this.createLoginUI();
+    this.createSwitchPlayerUI();
     this.hideAll();
   }
 
@@ -176,6 +190,105 @@ class UIHUD {
     this.backBtn.mouseOut(() => this.backBtn.style('background', '#795548'));
   }
 
+  createLoginUI() {
+    // Build once; show/hide based on GameState.LOGIN
+    let uiStyle = `
+        background: #5D4037;
+        color: #FFECB3;
+        border: 3px solid #9b7b12;
+        font-family: 'Georgia', serif;
+        padding: 8px 10px;
+        font-size: 16px;
+        border-radius: 8px;
+        outline: none;
+      `;
+
+    this.nicknameInput = createInput('');
+    this.nicknameInput.attribute('placeholder', 'Enter nickname (1-20 chars)');
+    this.nicknameInput.style(uiStyle);
+    this.nicknameInput.style('width', '280px');
+
+    this.nicknameLoginBtn = createButton('Login');
+    this.nicknameLoginBtn.style(uiStyle);
+    this.nicknameLoginBtn.style('cursor', 'pointer');
+    this.nicknameLoginBtn.mousePressed(() => {
+      if (typeof ensureAudioStarted === 'function') ensureAudioStarted();
+      let nick = this.nicknameInput ? this.nicknameInput.value() : '';
+      let ok = this.game.login(nick);
+      if (!ok) {
+        this._loginErrorMsg = 'Invalid nickname. Please use 1-20 characters.';
+        return;
+      }
+      this._loginErrorMsg = '';
+      this.game.setState(GameState.LEVEL_SELECT);
+    });
+
+    this.nicknameBackBtn = createButton('Back');
+    this.nicknameBackBtn.style(uiStyle);
+    this.nicknameBackBtn.style('cursor', 'pointer');
+    this.nicknameBackBtn.mousePressed(() => {
+      this._loginErrorMsg = '';
+      this.game.setState(GameState.MENU);
+    });
+  }
+
+  createSwitchPlayerUI() {
+    let uiStyle = `
+        background: #5D4037;
+        color: #FFECB3;
+        border: 2px solid #9b7b12;
+        font-family: 'Georgia', serif;
+        padding: 6px 10px;
+        font-size: 14px;
+        border-radius: 8px;
+      `;
+    this.switchPlayerBtn = createButton('Switch Player');
+    this.switchPlayerBtn.style(uiStyle);
+    this.switchPlayerBtn.style('cursor', 'pointer');
+    this.switchPlayerBtn.mousePressed(() => {
+      if (this.game && typeof this.game.logout === 'function') this.game.logout();
+      this._loginErrorMsg = '';
+      this.game.setState(GameState.LOGIN);
+    });
+  }
+
+  showSwitchPlayerUI() {
+    if (this.switchPlayerBtn) {
+      this.switchPlayerBtn.show();
+      this.switchPlayerBtn.style('z-index', '1000');
+    }
+  }
+
+  hideSwitchPlayerUI() {
+    if (this.switchPlayerBtn) this.switchPlayerBtn.hide();
+  }
+
+  getDomX(designX) {
+    if (typeof canvasWidth !== 'undefined' && typeof CANVAS_WIDTH !== 'undefined') {
+      return Math.round(designX * canvasWidth / CANVAS_WIDTH);
+    }
+    return designX;
+  }
+
+  getDomY(designY) {
+    if (typeof canvasHeight !== 'undefined' && typeof CANVAS_HEIGHT !== 'undefined') {
+      return Math.round(designY * canvasHeight / CANVAS_HEIGHT);
+    }
+    return designY;
+  }
+
+  showLoginUI() {
+    if (this.nicknameInput) this.nicknameInput.show();
+    if (this.nicknameLoginBtn) this.nicknameLoginBtn.show();
+    if (this.nicknameBackBtn) this.nicknameBackBtn.show();
+  }
+
+  hideLoginUI() {
+    if (this.nicknameInput) this.nicknameInput.hide();
+    if (this.nicknameLoginBtn) this.nicknameLoginBtn.hide();
+    if (this.nicknameBackBtn) this.nicknameBackBtn.hide();
+  }
+
   //Main menu - called when GameState.MENU
 
   drawMainMenu() {
@@ -193,8 +306,41 @@ class UIHUD {
 
     this.hideSettingsUI();
     this.hideMenuButtons();
+    this.hideLoginUI();
+    this.hideSwitchPlayerUI();
 
     this.drawMenuButtons();
+    this.drawPlayerBadge();
+
+    if (this.game && typeof this.game.isLoggedIn === 'function' && this.game.isLoggedIn()) {
+      this.showSwitchPlayerUI();
+      this.switchPlayerBtn.position(this.getDomX(CANVAS_WIDTH - 160), this.getDomY(22));
+      this.switchPlayerBtn.size(140, 32);
+    }
+  }
+
+  drawPlayerBadge() {
+    let nick = this.game && this.game.playerNickname ? this.game.playerNickname : '';
+    let isLoggedIn = !!nick;
+
+    push();
+    rectMode(CORNER);
+    noStroke();
+    fill(0, 0, 0, 150);
+    rect(18, 18, 420, 62, 10);
+
+    fill(255, 220, 150);
+    textAlign(LEFT, CENTER);
+    textSize(18);
+    textStyle(BOLD);
+    text(isLoggedIn ? `Player: ${nick}` : 'Player: (not logged in)', 30, 44);
+    textStyle(NORMAL);
+
+    fill(220, 220, 220, 220);
+    textSize(12);
+    let hint = isLoggedIn ? `Unlocked: 1-${this.game.getUnlockedUpTo()}` : 'Click Start to login and save progress';
+    text(hint, 30, 66);
+    pop();
   }
 
   //Draw main menu buttons (image or fallback text)
@@ -276,6 +422,9 @@ class UIHUD {
   drawLevelSelect() {
     push();
 
+    this.hideLoginUI();
+    this.hideSwitchPlayerUI();
+
     if (typeof gameImages !== 'undefined' && gameImages.levelSelectBg && gameImages.levelSelectBg.width > 0) {
       image(gameImages.levelSelectBg, 0, 0, DESIGN_WIDTH, DESIGN_HEIGHT);
     } else {
@@ -283,6 +432,7 @@ class UIHUD {
       background(40, 35, 30);
     }
 
+    this.hideSwitchPlayerUI();
     this.levelButtons = [
       {
         level: 1,
@@ -313,6 +463,12 @@ class UIHUD {
       }
     ];
 
+    // Apply unlock status from the current player's save.
+    let unlockedUpTo = (this.game && this.game.getUnlockedUpTo) ? this.game.getUnlockedUpTo() : 1;
+    for (let btn of this.levelButtons) {
+      btn.unlocked = btn.level <= unlockedUpTo;
+    }
+
     for (let btn of this.levelButtons) {
       let mx = typeof getGameMouseX === 'function' ? getGameMouseX() : mouseX;
       let my = typeof getGameMouseY === 'function' ? getGameMouseY() : mouseY;
@@ -333,15 +489,18 @@ class UIHUD {
       }
 
       if (!btn.unlocked) {
-        fill(0, 0, 0, 150);
-        noStroke();
+        // Subtle locked styling (no big black overlay)
+        noFill();
+        stroke(180, 180, 180, 160);
+        strokeWeight(2);
         rectMode(CENTER);
         rect(btn.x, btn.y, btn.width, btn.height, 10);
+        noStroke();
 
-        fill(255, 255, 255, 200);
+        fill(230, 230, 230, 210);
         textAlign(CENTER, CENTER);
         textSize(18);
-        text("🔒 Coming Soon", btn.x, btn.y);
+        text("🔒 Locked", btn.x, btn.y);
       }
     }
 
@@ -370,6 +529,35 @@ class UIHUD {
     textAlign(CENTER, CENTER);
     textSize(18);
     text("← Back", this.backButton.x, this.backButton.y);
+
+    // Continue button (resume from autosave if available)
+    let canContinue = this.game && typeof this.game.hasRunSave === 'function' ? this.game.hasRunSave() : false;
+    let contW = 220;
+    let contH = 48;
+    let contX = CANVAS_WIDTH / 2 - contW / 2;
+    let contY = CANVAS_HEIGHT - 70;
+    this.continueButton = { x: contX, y: contY, w: contW, h: contH, enabled: canContinue };
+
+    let contHover = mx >= contX && mx <= contX + contW && my >= contY && my <= contY + contH;
+    fill(contHover ? color(80, 60, 40, 230) : color(50, 40, 30, 204));
+    stroke(contHover ? '#FFD700' : '#C8A84E');
+    strokeWeight(2);
+    rectMode(CORNER);
+    rect(contX, contY, contW, contH, 10);
+    noStroke();
+
+    fill(canContinue ? color(255, 220, 150) : color(170, 170, 170));
+    textAlign(CENTER, CENTER);
+    textSize(18);
+    text("Continue", contX + contW / 2, contY + contH / 2);
+
+    if (this.game && this.game.isLoggedIn()) {
+      this.showSwitchPlayerUI();
+      this.switchPlayerBtn.position(this.getDomX(CANVAS_WIDTH - 160), this.getDomY(22));
+      this.switchPlayerBtn.size(140, 32);
+    } else {
+      this.hideSwitchPlayerUI();
+    }
 
     pop();
 
@@ -484,7 +672,10 @@ class UIHUD {
     for (const r of rects) {
       if (mx >= r.x && mx <= r.x + r.w && my >= r.y && my <= r.y + r.h) {
         this.game.sound.play("click");
-        if (r.action === 'start') this.game.setState(GameState.LEVEL_SELECT);
+        if (r.action === 'start') {
+          if (!this.game.isLoggedIn()) this.game.setState(GameState.LOGIN);
+          else this.game.setState(GameState.LEVEL_SELECT);
+        }
         else if (r.action === 'settings') this.game.setState(GameState.SETTINGS);
         else if (r.action === 'exit') window.location.href = 'about:blank';
         return true;
@@ -493,10 +684,78 @@ class UIHUD {
     return false;
   }
 
+  drawLoginScreen() {
+    this.hideMenuButtons();
+    this.hideSettingsUI();
+    this.hideSwitchPlayerUI();
+
+    // Background
+    if (typeof gameImages !== 'undefined' && gameImages.mainBackground && gameImages.mainBackground.width > 0) {
+      image(gameImages.mainBackground, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    } else {
+      background(25, 20, 18);
+    }
+
+    // Panel
+    let panelW = 640;
+    let panelH = 320;
+    let panelX = CANVAS_WIDTH / 2 - panelW / 2;
+    let panelY = CANVAS_HEIGHT / 2 - panelH / 2;
+
+    fill(0, 0, 0, 120);
+    noStroke();
+    rectMode(CORNER);
+    rect(panelX + 10, panelY + 10, panelW, panelH, 14);
+
+    fill(60, 45, 30, 245);
+    stroke(200, 168, 78);
+    strokeWeight(4);
+    rect(panelX, panelY, panelW, panelH, 14);
+    noStroke();
+
+    fill(255, 220, 150);
+    textAlign(CENTER, CENTER);
+    textSize(38);
+    textStyle(BOLD);
+    text('Nickname Login', CANVAS_WIDTH / 2, panelY + 70);
+    textStyle(NORMAL);
+
+    fill(230);
+    textSize(16);
+    text('Progress is auto-saved (level unlocks) for this nickname.', CANVAS_WIDTH / 2, panelY + 115);
+
+    if (this._loginErrorMsg) {
+      fill(255, 120, 120);
+      textSize(14);
+      text(this._loginErrorMsg, CANVAS_WIDTH / 2, panelY + 145);
+    }
+
+    // Position DOM elements (absolute page coords)
+    let inputX = CANVAS_WIDTH / 2 - 140;
+    let inputY = panelY + 165;
+    let btnY = panelY + 225;
+
+    this.showLoginUI();
+    if (this.nicknameInput) this.nicknameInput.position(inputX, inputY);
+    if (this.nicknameLoginBtn) this.nicknameLoginBtn.position(CANVAS_WIDTH / 2 - 70, btnY);
+    if (this.nicknameBackBtn) this.nicknameBackBtn.position(CANVAS_WIDTH / 2 + 30, btnY);
+
+    if (this.nicknameLoginBtn) this.nicknameLoginBtn.size(90, 40);
+    if (this.nicknameBackBtn) this.nicknameBackBtn.size(90, 40);
+  }
+
+  handleLoginClick(mx, my) {
+    // DOM buttons handle the interactions.
+    return false;
+  }
+
   /**
    * Settings page - called when GameState.SETTINGS
    */
   drawSettings() {
+    this.hideMenuButtons();
+    this.hideLoginUI();
+    this.hideSwitchPlayerUI();
     push();
     // 渲染背景
     if (this.bgImage) {
@@ -624,6 +883,14 @@ class UIHUD {
     this.hideAll();
     this.endScreenButtons = [];
     cursor(ARROW);
+
+    if (this.game && this.game.isLoggedIn()) {
+      this.showSwitchPlayerUI();
+      this.switchPlayerBtn.position(this.getDomX(CANVAS_WIDTH - 160), this.getDomY(22));
+      this.switchPlayerBtn.size(140, 32);
+    } else {
+      this.hideSwitchPlayerUI();
+    }
 
     this.drawTopHUDBar(false);
 
@@ -949,6 +1216,7 @@ class UIHUD {
   hideAll() {
     this.hideMenuButtons();
     this.hideSettingsUI();
+    this.hideLoginUI();
   }
 
   //Calculate the clickable rect for each tower-select tab.

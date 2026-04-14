@@ -5,6 +5,13 @@ class GameManager {
     this.state = GameState.MENU;
     this.currentLevel = 1;
 
+    // --- Player profile (nickname-based) ---
+    this.playerProfile = null;
+    this.playerNickname = '';
+    this._loadActivePlayer();
+    this._lastAutoSaveFrame = 0;
+    this._autoSaveIntervalFrames = 120; // ~2s @ 60fps
+
     this.economy = null;
     this.landmark = null;
     this.towers = [];
@@ -85,6 +92,70 @@ class GameManager {
     console.log("[Game] GameManager initialised");
   }
 
+  _loadActivePlayer() {
+    if (typeof SaveSystem === 'undefined') return;
+    let nick = SaveSystem.getActiveNickname();
+    if (!nick) return;
+    let profile = SaveSystem.loadProfile(nick);
+    if (!profile) return;
+    this.playerNickname = nick;
+    this.playerProfile = profile;
+  }
+
+  isLoggedIn() {
+    return !!(this.playerProfile && this.playerNickname);
+  }
+
+  login(nickname) {
+    if (typeof SaveSystem === 'undefined') return false;
+    let prof = SaveSystem.login(nickname);
+    if (!prof) return false;
+    this.playerNickname = prof.nickname;
+    this.playerProfile = prof;
+    console.log('[Save] Logged in as:', this.playerNickname);
+    return true;
+  }
+
+  hasRunSave() {
+    if (!this.playerNickname || typeof SaveSystem === 'undefined') return false;
+    return !!SaveSystem.loadRun(this.playerNickname);
+  }
+
+  continueRun() {
+    if (typeof ensureAudioStarted === 'function') ensureAudioStarted();
+    if (!this.playerNickname || typeof SaveSystem === 'undefined') return false;
+    let run = SaveSystem.loadRun(this.playerNickname);
+    if (!run) return false;
+    return this._restoreFromRunSave(run);
+  }
+
+  clearRunSave() {
+    if (!this.playerNickname || typeof SaveSystem === 'undefined') return false;
+    return SaveSystem.clearRun(this.playerNickname);
+  }
+
+  logout() {
+    if (typeof SaveSystem === 'undefined') return;
+    SaveSystem.logout();
+    this.playerNickname = '';
+    this.playerProfile = null;
+    console.log('[Save] Logged out');
+  }
+
+  getUnlockedUpTo() {
+    if (!this.playerProfile) return 1;
+    let u = this.playerProfile.unlockedUpTo || 1;
+    if (u < 1) u = 1;
+    if (u > TOTAL_LEVELS) u = TOTAL_LEVELS;
+    return u;
+  }
+
+  canPlayLevel(levelId) {
+    if (!Number.isFinite(levelId)) return false;
+    if (levelId < 1 || levelId > TOTAL_LEVELS) return false;
+    return levelId <= this.getUnlockedUpTo();
+  }
+
   // --- State ---
 
   getState() {
@@ -98,6 +169,22 @@ class GameManager {
   }
 
   // --- Level management ---
+
+  tryStartLevel(levelId) {
+    if (typeof ensureAudioStarted === 'function') ensureAudioStarted();
+    if (!this.isLoggedIn()) {
+      console.log('[Save] No player logged in. Redirecting to login.');
+      this.setState(GameState.LOGIN);
+      return false;
+    }
+    if (!this.canPlayLevel(levelId)) {
+      console.log(`[Game] Level ${levelId} is locked for ${this.playerNickname}.`);
+      return false;
+    }
+    this.startLevel(levelId);
+    this._saveRunNow('start_level');
+    return true;
+  }
 
   startLevel(levelId) {
     applyLevelGridConfig(levelId);
@@ -167,6 +254,7 @@ class GameManager {
     this.manualPaused = false;
 
     this.setState(GameState.PLAYING);
+    this._saveRunNow('start_level');
   }
 
   toggleMapEditMode() {
@@ -391,6 +479,193 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
     }
 
     this.checkWinLose();
+    this._autoSaveTick();
+  }
+
+  _autoSaveTick() {
+    if (!this.isLoggedIn()) return;
+    if (this.manualPaused) return;
+    if (this.editModePaused) return;
+    if (frameCount - this._lastAutoSaveFrame < this._autoSaveIntervalFrames) return;
+    this._lastAutoSaveFrame = frameCount;
+    this._saveRunNow('autosave');
+  }
+
+  _saveRunNow(reason = 'manual') {
+    if (!this.isLoggedIn() || typeof SaveSystem === 'undefined') return false;
+    // Only persist meaningful in-run states
+    if (![GameState.PLAYING, GameState.PAUSED, GameState.IN_GAME_SETTINGS].includes(this.state)) return false;
+    let data = this._buildRunSave(reason);
+    return SaveSystem.saveRun(this.playerNickname, data);
+  }
+
+  _buildRunSave(reason) {
+    let towers = (this.towers || []).map(t => ({
+      type: t.type,
+      x: t.x,
+      y: t.y,
+      disabled: !!t.disabled,
+      disableTimer: t.disableTimer || 0,
+      tauntDebuff: t.tauntDebuff || 0,
+      tauntTimer: t.tauntTimer || 0,
+      chargeStacks: t.chargeStacks || 0
+    }));
+
+    let enemies = (this.enemies || []).map(e => ({
+      type: e.type,
+      x: e.x,
+      y: e.y,
+      maxHp: e.maxHp,
+      hp: e.hp,
+      speed: e.speed,
+      baseSpeed: e.baseSpeed,
+      currentWaypointIndex: e.currentWaypointIndex,
+      _alive: !e.isDead(),
+      _reachedEnd: e.reachedEnd(),
+
+      slowTimer: e.slowTimer || 0,
+      isSlowed: !!e.isSlowed,
+      isCharging: !!e.isCharging,
+      chargeTimer: e.chargeTimer || 0,
+      hasCharged: !!e.hasCharged,
+      dodgeEffectTimer: e.dodgeEffectTimer || 0,
+      leapTimer: e.leapTimer || 0,
+      leapEffectTimer: e.leapEffectTimer || 0,
+      diveTimer: e.diveTimer || 0,
+      isDiving: !!e.isDiving,
+      diveEffectTimer: e.diveEffectTimer || 0,
+      healTimer: e.healTimer || 0,
+      phase: e.phase || 1,
+      summonTimer: e.summonTimer || 0,
+      tauntTimer: e.tauntTimer || 0,
+
+      poisonDamage: e.poisonDamage || 0,
+      poisonTimer: e.poisonTimer || 0,
+      weakened: !!e.weakened,
+      weakenTimer: e.weakenTimer || 0,
+      weakenBonus: e.weakenBonus || 0
+    }));
+
+    let wave = null;
+    if (this.waveManager) {
+      wave = {
+        currentWaveIndex: this.waveManager.currentWaveIndex,
+        enemiesSpawnedInWave: this.waveManager.enemiesSpawnedInWave,
+        spawnTimer: this.waveManager.spawnTimer,
+        waveState: this.waveManager.waveState,
+        waitTimer: this.waveManager.waitTimer,
+        allWavesComplete: !!this.waveManager.allWavesComplete
+      };
+    }
+
+    return {
+      version: 1,
+      reason,
+      savedAt: Date.now(),
+      state: this.state,
+      levelId: this.currentLevel,
+      economyGold: this.economy ? this.economy.getGold() : null,
+      landmarkHp: this.landmark ? this.landmark.hp : null,
+      waveSurvived: this.waveSurvived || 0,
+      totalKills: this.totalKills || 0,
+      selectedTowerType: this.selectedTowerType || 'basic',
+      towers,
+      enemies,
+      wave
+    };
+  }
+
+  _restoreFromRunSave(run) {
+    try {
+      if (!run || !run.levelId) return false;
+      if (!this.canPlayLevel(run.levelId)) return false;
+
+      this.startLevel(run.levelId);
+
+      if (this.economy && typeof run.economyGold === 'number') {
+        this.economy.gold = run.economyGold;
+      }
+      if (this.landmark && typeof run.landmarkHp === 'number') {
+        this.landmark.hp = Math.max(0, Math.min(run.landmarkHp, this.landmark.maxHp));
+      }
+
+      this.selectedTowerType = run.selectedTowerType || 'basic';
+      this.waveSurvived = run.waveSurvived || 0;
+      this.totalKills = run.totalKills || 0;
+
+      this.towers = [];
+      if (Array.isArray(run.towers)) {
+        for (let t of run.towers) {
+          if (!t || !t.type) continue;
+          let tower = new Tower(t.x, t.y, t.type);
+          tower.disabled = !!t.disabled;
+          tower.disableTimer = t.disableTimer || 0;
+          tower.tauntDebuff = t.tauntDebuff || 0;
+          tower.tauntTimer = t.tauntTimer || 0;
+          tower.chargeStacks = t.chargeStacks || 0;
+          tower.lastTarget = null;
+          this.towers.push(tower);
+          if (this.mapGrid) occupyTile(this.mapGrid, tower.x, tower.y);
+        }
+      }
+
+      if (this.waveManager && run.wave) {
+        this.waveManager.currentWaveIndex = run.wave.currentWaveIndex || 0;
+        this.waveManager.enemiesSpawnedInWave = run.wave.enemiesSpawnedInWave || 0;
+        this.waveManager.spawnTimer = run.wave.spawnTimer || 0;
+        this.waveManager.waveState = run.wave.waveState || 'waiting';
+        this.waveManager.waitTimer = run.wave.waitTimer || 180;
+        this.waveManager.allWavesComplete = !!run.wave.allWavesComplete;
+      }
+
+      this.enemies = [];
+      if (Array.isArray(run.enemies)) {
+        for (let e of run.enemies) {
+          if (!e || !e.type) continue;
+          let enemy = new Enemy(this.path, { type: e.type, hp: e.maxHp, speed: e.baseSpeed }, this.sound);
+          enemy.x = e.x;
+          enemy.y = e.y;
+          enemy.maxHp = e.maxHp;
+          enemy.hp = e.hp;
+          enemy.speed = e.speed;
+          enemy.baseSpeed = e.baseSpeed;
+          enemy.currentWaypointIndex = e.currentWaypointIndex;
+          enemy._alive = !!e._alive;
+          enemy._reachedEnd = !!e._reachedEnd;
+
+          enemy.slowTimer = e.slowTimer || 0;
+          enemy.isSlowed = !!e.isSlowed;
+          enemy.isCharging = !!e.isCharging;
+          enemy.chargeTimer = e.chargeTimer || 0;
+          enemy.hasCharged = !!e.hasCharged;
+          enemy.dodgeEffectTimer = e.dodgeEffectTimer || 0;
+          enemy.leapTimer = e.leapTimer || 0;
+          enemy.leapEffectTimer = e.leapEffectTimer || 0;
+          enemy.diveTimer = e.diveTimer || 0;
+          enemy.isDiving = !!e.isDiving;
+          enemy.diveEffectTimer = e.diveEffectTimer || 0;
+          enemy.healTimer = e.healTimer || 0;
+          enemy.phase = e.phase || 1;
+          enemy.summonTimer = e.summonTimer || 0;
+          enemy.tauntTimer = e.tauntTimer || 0;
+
+          enemy.poisonDamage = e.poisonDamage || 0;
+          enemy.poisonTimer = e.poisonTimer || 0;
+          enemy.weakened = !!e.weakened;
+          enemy.weakenTimer = e.weakenTimer || 0;
+          enemy.weakenBonus = e.weakenBonus || 0;
+
+          this.enemies.push(enemy);
+        }
+      }
+
+      this.setState(GameState.PLAYING);
+      this._saveRunNow('restore');
+      return true;
+    } catch (e) {
+      console.warn('[Save] Failed to restore run:', e);
+      return false;
+    }
   }
 
   updateTowerBoosts() {
@@ -428,6 +703,7 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
     if (this.landmark && this.landmark.isDestroyed()) {
       console.log("[Game] Landmark destroyed - GAME OVER");
       if (this.waveManager) this.waveManager.stop();
+      this._saveRunNow('before_lose');
       this.recordFinalStats(GameState.LOSE);
       this.setState(GameState.LOSE);
       this.sound.play("lose");
@@ -439,10 +715,20 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
       if (liveEnemies.length === 0) {
         console.log("[Game] All waves cleared - VICTORY");
         this.recordFinalStats(GameState.WIN);
+        this._onVictory();
         this.setState(GameState.WIN);
         this.sound.play("win");
+        if (typeof SaveSystem !== 'undefined' && this.playerNickname) {
+          SaveSystem.clearRun(this.playerNickname);
+        }
       }
     }
+  }
+
+  _onVictory() {
+    if (!this.playerProfile || typeof SaveSystem === 'undefined') return;
+    // Auto-save progression: completion unlocks the next level.
+    SaveSystem.unlockNextLevel(this.playerProfile, this.currentLevel);
   }
 
   recordFinalStats(resultState) {
@@ -470,6 +756,9 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
     switch (this.state) {
       case GameState.MENU:
         this.ui.drawMainMenu();
+        break;
+      case GameState.LOGIN:
+        this.ui.drawLoginScreen();
         break;
       case GameState.LEVEL_SELECT:
         this.ui.drawLevelSelect();
@@ -1047,6 +1336,11 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
       return;
     }
 
+    if (this.state === GameState.LOGIN) {
+      this.ui.handleLoginClick(mx, my);
+      return;
+    }
+
     if (this.state === GameState.LEVEL_SELECT) {
       // Debug: log click position
       if (this.ui.levelSelectDebug) {
@@ -1063,7 +1357,7 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
       if (mx >= instrBtnX && mx <= instrBtnX + instrBtnW &&
         my >= instrBtnY && my <= instrBtnY + instrBtnH) {
         this.sound.play("click1");
-        this.startLevel(1);
+        this.tryStartLevel(1);
         this.startTutorial();
         return;
       }
@@ -1074,6 +1368,19 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
         my > backBtn.y - backBtn.height / 2 && my < backBtn.y + backBtn.height / 2) {
         this.sound.play("click1");
         this.setState(GameState.MENU);
+        return;
+      }
+
+      let contBtn = this.ui.continueButton;
+      if (contBtn &&
+        mx >= contBtn.x && mx <= contBtn.x + contBtn.w &&
+        my >= contBtn.y && my <= contBtn.y + contBtn.h) {
+        if (contBtn.enabled) {
+          this.sound.play("click1");
+          this.continueRun();
+        } else {
+          console.log('[Save] No run save to continue');
+        }
         return;
       }
 
@@ -1089,7 +1396,7 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
             if (btn.unlocked) {
               console.log(`[Game] Starting Level ${btn.level}: ${btn.name}`);
               this.sound.play("click1");
-              this.startLevel(btn.level);
+              this.tryStartLevel(btn.level);
               return;
             } else {
               console.log(`[Game] Level ${btn.level} is locked`);
@@ -1277,6 +1584,7 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
 
     console.log(`[Game] Placed ${towerType} tower at (${x}, ${y})`);
     this.sound.play("place")
+    this._saveRunNow('place_tower');
     return true;
   }
 
@@ -1318,7 +1626,7 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
 
   nextLevel() {
     if (this.currentLevel < TOTAL_LEVELS) {
-      this.startLevel(this.currentLevel + 1);
+      this.tryStartLevel(this.currentLevel + 1);
     } else {
       console.log("[Game] All levels complete!");
       this.returnToMenu();
