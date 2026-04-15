@@ -213,6 +213,7 @@ class UIHUD {
     this.nicknameLoginBtn.style('cursor', 'pointer');
     this.nicknameLoginBtn.mousePressed(() => {
       if (typeof ensureAudioStarted === 'function') ensureAudioStarted();
+      if (this.game && this.game.sound && typeof this.game.sound.play === 'function') this.game.sound.play('click1');
       let nick = this.nicknameInput ? this.nicknameInput.value() : '';
       let ok = this.game.login(nick);
       if (!ok) {
@@ -227,6 +228,7 @@ class UIHUD {
     this.nicknameBackBtn.style(uiStyle);
     this.nicknameBackBtn.style('cursor', 'pointer');
     this.nicknameBackBtn.mousePressed(() => {
+      if (this.game && this.game.sound && typeof this.game.sound.play === 'function') this.game.sound.play('click1');
       this._loginErrorMsg = '';
       this.game.setState(GameState.MENU);
     });
@@ -246,6 +248,7 @@ class UIHUD {
     this.switchPlayerBtn.style(uiStyle);
     this.switchPlayerBtn.style('cursor', 'pointer');
     this.switchPlayerBtn.mousePressed(() => {
+      if (this.game && this.game.sound && typeof this.game.sound.play === 'function') this.game.sound.play('click1');
       if (this.game && typeof this.game.logout === 'function') this.game.logout();
       this._loginErrorMsg = '';
       this.game.setState(GameState.LOGIN);
@@ -314,7 +317,7 @@ class UIHUD {
 
     if (this.game && typeof this.game.isLoggedIn === 'function' && this.game.isLoggedIn()) {
       this.showSwitchPlayerUI();
-      this.switchPlayerBtn.position(this.getDomX(CANVAS_WIDTH - 160), this.getDomY(22));
+      this.switchPlayerBtn.position(this.getDomX(20), this.getDomY(64));
       this.switchPlayerBtn.size(140, 32);
     }
   }
@@ -331,13 +334,13 @@ class UIHUD {
 
     fill(255, 220, 150);
     textAlign(LEFT, CENTER);
-    textSize(18);
+    textSize(22);
     textStyle(BOLD);
     text(isLoggedIn ? `Player: ${nick}` : 'Player: (not logged in)', 30, 44);
     textStyle(NORMAL);
 
     fill(220, 220, 220, 220);
-    textSize(12);
+    textSize(15);
     let hint = isLoggedIn ? `Unlocked: 1-${this.game.getUnlockedUpTo()}` : 'Click Start to login and save progress';
     text(hint, 30, 66);
     pop();
@@ -404,7 +407,7 @@ class UIHUD {
         noStroke();
         fill(255);
         textAlign(CENTER, CENTER);
-        textSize(22);
+        textSize(26);
         textStyle(BOLD);
         const labels = ['Start', 'Settings', 'Exit'];
         text(labels[i], cx, cy);
@@ -489,18 +492,14 @@ class UIHUD {
       }
 
       if (!btn.unlocked) {
-        // Subtle locked styling (no big black overlay)
-        noFill();
-        stroke(180, 180, 180, 160);
-        strokeWeight(2);
-        rectMode(CENTER);
-        rect(btn.x, btn.y, btn.width, btn.height, 10);
         noStroke();
 
-        fill(230, 230, 230, 210);
+        fill(0);
         textAlign(CENTER, CENTER);
-        textSize(18);
+        textStyle(BOLD);
+        textSize(36);
         text("🔒 Locked", btn.x, btn.y);
+        textStyle(NORMAL);
       }
     }
 
@@ -527,15 +526,15 @@ class UIHUD {
     fill(255);
     noStroke();
     textAlign(CENTER, CENTER);
-    textSize(18);
+    textSize(22);
     text("← Back", this.backButton.x, this.backButton.y);
 
     // Continue button (resume from autosave if available)
     let canContinue = this.game && typeof this.game.hasRunSave === 'function' ? this.game.hasRunSave() : false;
     let contW = 220;
     let contH = 48;
-    let contX = CANVAS_WIDTH / 2 - contW / 2;
-    let contY = CANVAS_HEIGHT - 70;
+    let contX = CANVAS_WIDTH - contW - 28;
+    let contY = CANVAS_HEIGHT - contH - 28;
     this.continueButton = { x: contX, y: contY, w: contW, h: contH, enabled: canContinue };
 
     let contHover = mx >= contX && mx <= contX + contW && my >= contY && my <= contY + contH;
@@ -548,12 +547,12 @@ class UIHUD {
 
     fill(canContinue ? color(255, 220, 150) : color(170, 170, 170));
     textAlign(CENTER, CENTER);
-    textSize(18);
+    textSize(27);
     text("Continue", contX + contW / 2, contY + contH / 2);
 
     if (this.game && this.game.isLoggedIn()) {
       this.showSwitchPlayerUI();
-      this.switchPlayerBtn.position(this.getDomX(CANVAS_WIDTH - 160), this.getDomY(22));
+      this.switchPlayerBtn.position(this.getDomX(20), this.getDomY(64));
       this.switchPlayerBtn.size(140, 32);
     } else {
       this.hideSwitchPlayerUI();
@@ -592,7 +591,7 @@ class UIHUD {
       if (x % 100 === 0) {
         fill(255, 255, 0, 200);
         noStroke();
-        textSize(10);
+        textSize(20);
         textAlign(CENTER, TOP);
         text(x, x, 5);
       }
@@ -613,7 +612,7 @@ class UIHUD {
       if (y % 100 === 0) {
         fill(255, 255, 0, 200);
         noStroke();
-        textSize(10);
+        textSize(20);
         textAlign(LEFT, CENTER);
         text(y, 5, y);
       }
@@ -640,18 +639,18 @@ class UIHUD {
     fill(255, 255, 0);
     noStroke();
     textAlign(LEFT, TOP);
-    textSize(14);
+    textSize(28);
     textStyle(BOLD);
     text("DEBUG MODE", infoX + 10, infoY + 10);
     textStyle(NORMAL);
 
     fill(255);
-    textSize(12);
+    textSize(24);
     text("Mouse X: " + Math.round(mx), infoX + 10, infoY + 32);
     text("Mouse Y: " + Math.round(my), infoX + 10, infoY + 48);
 
     fill(150, 150, 150);
-    textSize(10);
+    textSize(20);
     text("Press G to toggle grid", infoX + 10, infoY + 65);
 
     // Show click position helper
@@ -715,18 +714,18 @@ class UIHUD {
 
     fill(255, 220, 150);
     textAlign(CENTER, CENTER);
-    textSize(38);
+    textSize(45);
     textStyle(BOLD);
     text('Nickname Login', CANVAS_WIDTH / 2, panelY + 70);
     textStyle(NORMAL);
 
     fill(230);
-    textSize(16);
+    textSize(19);
     text('Progress is auto-saved (level unlocks) for this nickname.', CANVAS_WIDTH / 2, panelY + 115);
 
     if (this._loginErrorMsg) {
       fill(255, 120, 120);
-      textSize(14);
+      textSize(17);
       text(this._loginErrorMsg, CANVAS_WIDTH / 2, panelY + 145);
     }
 
@@ -811,7 +810,7 @@ class UIHUD {
 
     fill(255, 255, 255, 204);  // rgba(255,255,255,0.8)
     textAlign(CENTER, CENTER);
-    textSize(13);
+    textSize(26);
     text(name, centerX, 10);
 
     fill(60, 60, 60, 204);
@@ -827,7 +826,7 @@ class UIHUD {
     rect(barX, barY, barW * hpPercent, barH, 7);
 
     let hpText = `${hp} / ${maxHp}`;
-    textSize(10);
+    textSize(18);
     textStyle(BOLD);
     textAlign(CENTER, CENTER);
     fill(0, 0, 0, 150);
@@ -848,10 +847,10 @@ class UIHUD {
       totalWaves = this.game.waveManager.waves.length;
     }
     fill(255, 255, 255, 204);
-    textSize(13);
+    textSize(24);
     textAlign(RIGHT, CENTER);
     text('Wave', rightEdge, 10);
-    textSize(18);
+    textSize(32);
     textStyle(BOLD);
     let suffix = ' / ' + totalWaves;
     let currStr = String(currWave);
@@ -862,7 +861,7 @@ class UIHUD {
     textStyle(NORMAL);
     if (waveState && (waveState.indexOf('Next wave') !== -1 || waveState.indexOf('incoming') !== -1)) {
       fill(255, 200, 100, 179);
-      textSize(10);
+      textSize(18);
       textAlign(RIGHT, CENTER);
       text('Next wave incoming...', rightEdge, 40);
     }
@@ -870,7 +869,7 @@ class UIHUD {
     if (showPaused) {
       fill(255, 215, 0, 220);
       textAlign(CENTER, CENTER);
-      textSize(14);
+      textSize(26);
       textStyle(BOLD);
       text('⏸ PAUSED', centerX, 22);
       textStyle(NORMAL);
@@ -884,9 +883,33 @@ class UIHUD {
     this.endScreenButtons = [];
     cursor(ARROW);
 
+    let inGameBackX = 20;
+    let inGameBackY = 22;
+    let inGameBackW = 110;
+    let inGameBackH = 36;
+    let mx = getGameMouseX();
+    let my = getGameMouseY();
+    let isInGameBackHover = mx >= inGameBackX && mx <= inGameBackX + inGameBackW && my >= inGameBackY && my <= inGameBackY + inGameBackH;
+
+    fill(isInGameBackHover ? color(100, 80, 60) : color(55, 45, 35));
+    stroke(isInGameBackHover ? color(220, 180, 100) : color(120, 100, 70));
+    strokeWeight(2);
+    rectMode(CORNER);
+    rect(inGameBackX, inGameBackY, inGameBackW, inGameBackH, 6);
+
+    noStroke();
+    fill(isInGameBackHover ? color(255, 230, 180) : color(180, 160, 120));
+    textAlign(CENTER, CENTER);
+    textSize(18);
+    textStyle(BOLD);
+    text('Back', inGameBackX + inGameBackW / 2, inGameBackY + inGameBackH / 2);
+    textStyle(NORMAL);
+
+    this.inGameBackBtn = { x: inGameBackX, y: inGameBackY, w: inGameBackW, h: inGameBackH };
+
     if (this.game && this.game.isLoggedIn()) {
       this.showSwitchPlayerUI();
-      this.switchPlayerBtn.position(this.getDomX(CANVAS_WIDTH - 160), this.getDomY(22));
+      this.switchPlayerBtn.position(this.getDomX(20), this.getDomY(64));
       this.switchPlayerBtn.size(140, 32);
     } else {
       this.hideSwitchPlayerUI();
@@ -1091,7 +1114,7 @@ class UIHUD {
 
     fill(255);
     textAlign(CENTER, CENTER);
-    textSize(64);
+    textSize(45);
     textStyle(BOLD);
     text("⏸  PAUSED", CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 - 20);
 
@@ -1223,13 +1246,16 @@ class UIHUD {
   //Dynamic layout based on available towers per level.
   //Returned objects: { type, x, y, w, h }
 
-  getTowerPanelTabs() {
+ getTowerPanelTabs() {
     const availableTowers = (this.game && this.game.availableTowers) || LEVEL_AVAILABLE_TOWERS[1];
-    const BTN_W = 130;
-    const BTN_H = 70;
-    const BTN_GAP = 25;
+   
+    const BTN_W = 180; 
+    const BTN_H = 90;
+    const BTN_GAP = 20; 
     const count = availableTowers.length;
     const totalW = BTN_W * count + BTN_GAP * (count - 1);
+    
+   
     const startX = Math.floor((CANVAS_WIDTH - totalW) / 2);
     const tabY = TOWER_PANEL_TOP + Math.floor((TOWER_PANEL_HEIGHT - BTN_H) / 2);
 
@@ -1241,7 +1267,6 @@ class UIHUD {
       h: BTN_H
     }));
   }
-
   getTowerImage(towerType) {
     let imgs = (typeof gameImages !== 'undefined') ? gameImages : {};
     switch (towerType) {
@@ -1368,137 +1393,115 @@ class UIHUD {
     const PH = TOWER_PANEL_HEIGHT;
     const panelCY = PY + PH / 2;
 
-    // ── Background: dark brown, code-drawn ───────────────────────
+    // ── 背景绘制 ──
     noStroke();
     fill(40, 30, 20, 235);
     rectMode(CORNER);
     rect(0, PY, CANVAS_WIDTH, PH);
 
-    // Gold separator line at top
     stroke(200, 168, 78, 220);
-    strokeWeight(2);
+    strokeWeight(3); // 加粗分割线
     line(0, PY, CANVAS_WIDTH, PY);
     noStroke();
 
     let currentGold = this.game.economy ? this.game.economy.getGold() : 0;
 
-    // ── Left side: Settings + Pause buttons, then coin + gold ─────
-    let btnStartX = 15;
-    let btnY = PY + 8;
-    let btnW = 65;
-    let btnH = PH - 16;
-    let btnGap = 8;
+    // ── 左侧功能按钮区 (尺寸从65x70放大到95x95) ──
+    let btnStartX = 25; // 起始向右挪一点
+    let btnY = PY + 10;
+    let btnW = 95;      // 宽度增加
+    let btnH = PH - 20; // 高度增加
+    let btnGap = 12;    // 间距微调
 
     let mx = getGameMouseX();
     let my = getGameMouseY();
 
-    // --- Settings button ---
+    // --- Settings 按钮 ---
     let settingsBtnX = btnStartX;
-    let isSettingsHover = mx >= settingsBtnX && mx <= settingsBtnX + btnW &&
-      my >= btnY && my <= btnY + btnH;
-
+    let isSettingsHover = mx >= settingsBtnX && mx <= settingsBtnX + btnW && my >= btnY && my <= btnY + btnH;
     fill(isSettingsHover ? color(100, 80, 60) : color(55, 45, 35));
     stroke(isSettingsHover ? color(220, 180, 100) : color(120, 100, 70));
     strokeWeight(2);
-    rectMode(CORNER);
-    rect(settingsBtnX, btnY, btnW, btnH, 6);
+    rect(settingsBtnX, btnY, btnW, btnH, 8);
 
     fill(isSettingsHover ? color(255, 230, 180) : color(180, 160, 120));
     noStroke();
     textAlign(CENTER, CENTER);
-    textSize(20);
-    text("S", settingsBtnX + btnW / 2, btnY + btnH / 2 - 5);
-    textSize(9);
-    text("Settings", settingsBtnX + btnW / 2, btnY + btnH / 2 + 14);
-
+    textSize(40); // 字母图标放大
+    text("S", settingsBtnX + btnW / 2, btnY + btnH / 2 - 8);
+    textSize(20); // 文字标签放大
+    text("Settings", settingsBtnX + btnW / 2, btnY + btnH / 2 + 22);
     this.inGameSettingsBtn = { x: settingsBtnX, y: btnY, w: btnW, h: btnH };
 
-    // --- Pause/Resume button ---
+    // --- Pause/Resume 按钮 ---
     let pauseBtnX = settingsBtnX + btnW + btnGap;
-    let isPauseHover = mx >= pauseBtnX && mx <= pauseBtnX + btnW &&
-      my >= btnY && my <= btnY + btnH;
-
+    let isPauseHover = mx >= pauseBtnX && mx <= pauseBtnX + btnW && my >= btnY && my <= btnY + btnH;
     let isPaused = (typeof game !== 'undefined' && game.manualPaused);
-
     fill(isPauseHover ? color(100, 80, 60) : color(55, 45, 35));
     stroke(isPauseHover ? color(220, 180, 100) : color(120, 100, 70));
     strokeWeight(2);
-    rect(pauseBtnX, btnY, btnW, btnH, 6);
-
+    rect(pauseBtnX, btnY, btnW, btnH, 8);
+  // --- Pause/Resume 按钮内部 ---
     fill(isPauseHover ? color(255, 230, 180) : color(180, 160, 120));
     noStroke();
     textAlign(CENTER, CENTER);
-    textSize(20);
+
     if (isPaused) {
-      text(">", pauseBtnX + btnW / 2, btnY + btnH / 2 - 5);
-      textSize(9);
-      text("Resume", pauseBtnX + btnW / 2, btnY + btnH / 2 + 14);
+    textSize(60); // 播放按钮 ">" 可以稍微大一点
+    text(">", pauseBtnX + btnW / 2, btnY + btnH / 2 - 8);
     } else {
-      text("||", pauseBtnX + btnW / 2, btnY + btnH / 2 - 5);
-      textSize(9);
-      text("Pause", pauseBtnX + btnW / 2, btnY + btnH / 2 + 14);
+    // 关键改动：减小字号并加粗，消除“长条感”
+    textStyle(BOLD); 
+    textSize(32); // 从 50 降到 32，让它变短
+    text("| |", pauseBtnX + btnW / 2, btnY + btnH / 2 - 10);
+    textStyle(NORMAL); // 恢复普通样式给下面的文字用
     }
 
+    textSize(20); 
+    text(isPaused ? "Resume" : "Pause", pauseBtnX + btnW / 2, btnY + btnH / 2 + 25);
     this.pauseBtn = { x: pauseBtnX, y: btnY, w: btnW, h: btnH };
 
-    // --- Monster Info button - use monster image instead of "!" ---
+    // --- Monster Info 按钮 ---
     let monsterBtnX = pauseBtnX + btnW + btnGap;
-    let isMonsterHover = mx >= monsterBtnX && mx <= monsterBtnX + btnW &&
-      my >= btnY && my <= btnY + btnH;
-
+    let isMonsterHover = mx >= monsterBtnX && mx <= monsterBtnX + btnW && my >= btnY && my <= btnY + btnH;
     fill(isMonsterHover ? color(100, 80, 60) : color(55, 45, 35));
     stroke(isMonsterHover ? color(220, 180, 100) : color(120, 100, 70));
     strokeWeight(2);
-    rect(monsterBtnX, btnY, btnW, btnH, 6);
-
-    // Draw monster icon image
-    let monsterIcon = this.getEnemyImage('basic');  // Use Guard as icon
+    rect(monsterBtnX, btnY, btnW, btnH, 8);
+    let monsterIcon = this.getEnemyImage('basic');
     if (monsterIcon && monsterIcon.width > 0) {
       imageMode(CENTER);
-      let iconSize = 32;
-      image(monsterIcon, monsterBtnX + btnW / 2, btnY + btnH / 2 - 3, iconSize, iconSize);
-    } else {
-      // Fallback text if no image
-      fill(isMonsterHover ? color(255, 230, 180) : color(180, 160, 120));
-      noStroke();
-      textAlign(CENTER, CENTER);
-      textSize(16);
-      text("?", monsterBtnX + btnW / 2, btnY + btnH / 2 - 5);
+      let iconSize = 45; // 怪物图标放大
+      image(monsterIcon, monsterBtnX + btnW / 2, btnY + btnH / 2 - 5, iconSize, iconSize);
     }
-
-    // Label below icon
     fill(isMonsterHover ? color(255, 230, 180) : color(180, 160, 120));
     noStroke();
-    textAlign(CENTER, CENTER);
-    textSize(9);
-    text("Enemies", monsterBtnX + btnW / 2, btnY + btnH - 8);
-
+    textSize(14); // "Enemies" 文字放大
+    text("Enemies", monsterBtnX + btnW / 2, btnY + btnH - 12);
     this.monsterInfoBtn = { x: monsterBtnX, y: btnY, w: btnW, h: btnH };
 
-    // --- Coin + gold (right of buttons) ---
-    let coinStartX = monsterBtnX + btnW + btnGap + 25;
-    let coinCX = coinStartX + 37;  // coin center at coinCX-22, amount at coinCX-8
+    // --- 金币与数值 (右移并放大) ---
+    let coinStartX = monsterBtnX + btnW + btnGap + 40;
+    let coinCX = coinStartX + 50;
     let coinCY = panelCY;
 
-    // Coin circle
     fill(255, 210, 0);
-    ellipse(coinCX - 22, coinCY, 24, 24);
+    ellipse(coinCX - 30, coinCY, 36, 36); // 金币圆圈放大
     fill(180, 130, 0);
     textAlign(CENTER, CENTER);
-    textSize(13);
+    textSize(18);
     textStyle(BOLD);
-    text('$', coinCX - 22, coinCY);
+    text('$', coinCX - 30, coinCY);
     textStyle(NORMAL);
 
-    // Amount
     fill(255, 225, 70);
     textAlign(LEFT, CENTER);
-    textSize(20);
+    textSize(28); // 金钱数值字号放大
     textStyle(BOLD);
-    text(currentGold, coinCX - 8, coinCY);
+    text(currentGold, coinCX + 5, coinCY);
     textStyle(NORMAL);
 
-    // ── Tower buttons ─────────────────────────────────────────────
+    // ── 塔防选择卡片渲染 (尺寸依赖 getTowerPanelTabs 的新设置) ──
     const thumbImgMap = {
       basic: imgs.towerBasic,
       slow: imgs.towerSlow,
@@ -1507,38 +1510,35 @@ class UIHUD {
       steam: imgs.towerSteam || imgs.towerSteamFire,
       alchemist: imgs.towerAlchemist || imgs.towerAlchemistFire
     };
-    const THUMB = 40;
-    const THUMB_CX_OFF = 8 + THUMB / 2;  // px from button left edge to thumb centre
+    const THUMB = 60; // 图标尺寸从40放大到60
+    const THUMB_CX_OFF = 12 + THUMB / 2;
 
     for (let i = 0; i < tabs.length; i++) {
       let tab = tabs[i];
       let cfg = TOWER_TYPES[tab.type];
       let affordable = currentGold >= cfg.cost;
       let selected = this.game.selectedTowerType === tab.type;
-      let hovering = getGameMouseX() >= tab.x && getGameMouseX() <= tab.x + tab.w &&
-        getGameMouseY() >= tab.y && getGameMouseY() <= tab.y + tab.h;
+      let hovering = getGameMouseX() >= tab.x && getGameMouseX() <= tab.x + tab.w && getGameMouseY() >= tab.y && getGameMouseY() <= tab.y + tab.h;
 
       if (hovering) this.hoveredTower = tab.type;
 
-      // ── Button background ──
       rectMode(CORNER);
       if (selected) {
         fill(85, 68, 40, 240);
-        stroke(200, 168, 78);
-        strokeWeight(2);
+        stroke(255, 215, 0); // 选中时边框更亮
+        strokeWeight(3);
       } else if (hovering && affordable) {
         fill(68, 56, 36, 225);
-        stroke(180, 150, 60, 210);
-        strokeWeight(1.5);
+        stroke(200, 170, 80, 210);
+        strokeWeight(2);
       } else {
         fill(60, 50, 35, 210);
         stroke(100, 80, 40, 150);
         strokeWeight(1);
       }
-      rect(tab.x, tab.y, tab.w, tab.h, 8);
+      rect(tab.x, tab.y, tab.w, tab.h, 10);
       noStroke();
 
-      // ── Thumbnail (left 1/3 of button) ──
       let thumbCX = tab.x + THUMB_CX_OFF;
       let thumbCY = tab.y + tab.h / 2;
       let thumb = thumbImgMap[tab.type];
@@ -1548,61 +1548,39 @@ class UIHUD {
         imageMode(CENTER);
         image(thumb, thumbCX, thumbCY, THUMB, THUMB);
         noTint();
-      } else {
-        let [r, g, b] = cfg.color;
-        fill(r, g, b, affordable ? 220 : 90);
-        ellipse(thumbCX, thumbCY, 32, 32);
       }
 
-      // ── Text area (right 2/3 of button) ──
-      let textX = tab.x + THUMB_CX_OFF + THUMB / 2 + 8;
-      let nameY = tab.y + tab.h / 2 - 10;
-      let priceY = tab.y + tab.h / 2 + 11;
+      // 文字区域：根据大卡片重新定位
+      let textX = tab.x + THUMB_CX_OFF + THUMB / 2 + 12;
+      let nameY = tab.y + tab.h / 2 - 12;
+      let priceY = tab.y + tab.h / 2 + 15;
 
-      // Tower name
       fill(255, 255, 255, affordable ? 240 : 130);
       textAlign(LEFT, CENTER);
-      textSize(14);
+      textSize(18); // 塔名放大
       textStyle(BOLD);
       text(cfg.name.split(' ')[0], textX, nameY);
       textStyle(NORMAL);
 
-      // Price
       fill(255, 215, 0, affordable ? 255 : 110);
-      textSize(13);
+      textSize(16); // 价格放大
       text(`$${cfg.cost}`, textX, priceY);
 
-      // Keyboard shortcut badge (top-right corner)
+      // 快捷键提示
       fill(160, 140, 80, affordable ? 200 : 90);
       textAlign(RIGHT, TOP);
-      textSize(11);
-      text(`[${i + 1}]`, tab.x + tab.w - 5, tab.y + 4);
+      textSize(13);
+      text(`[${i + 1}]`, tab.x + tab.w - 8, tab.y + 6);
 
-      // ── Affordability dim overlay ──
       if (!affordable) {
-        noStroke();
-        fill(0, 0, 0, 120);
-        rectMode(CORNER);
-        rect(tab.x, tab.y, tab.w, tab.h, 8);
+        fill(0, 0, 0, 140);
+        rect(tab.x, tab.y, tab.w, tab.h, 10);
       }
-
       if (hovering && affordable) cursor(HAND);
     }
 
     if (this.hoveredTower) {
       this.drawTowerTooltip(this.hoveredTower, getGameMouseX(), getGameMouseY());
-    }
-
-    if (!this._panelLogged) {
-      this._panelLogged = true;
-      console.log('[Debug] Tower Panel Button Bounds');
-      for (let tab of tabs) {
-        console.log(
-          `[Debug] ${tab.type}: x=${tab.x.toFixed(0)} y=${tab.y.toFixed(0)} ` +
-          `w=${tab.w} h=${tab.h} | right=${(tab.x + tab.w).toFixed(0)} ` +
-          `bottom=${(tab.y + tab.h).toFixed(0)}`
-        );
-      }
     }
   }
 
@@ -2314,7 +2292,7 @@ class UIHUD {
     let my = getGameMouseY();
 
     let dialogW = 450;
-    let dialogH = 180;
+    let dialogH = 220;
     let dialogX, dialogY;
 
     switch (step.position) {
@@ -2354,46 +2332,30 @@ class UIHUD {
     // Step indicator
     fill(150, 150, 150);
     textAlign(RIGHT, TOP);
-    textSize(12);
+    textSize(15);
     text((game.tutorialStep + 1) + "/" + TUTORIAL_STEPS.length, dialogX + dialogW - 20, dialogY + 15);
 
     // Title
     fill(255, 220, 150);
     textAlign(LEFT, TOP);
-    textSize(22);
+    textSize(26);
     textStyle(BOLD);
     text(step.title, dialogX + 25, dialogY + 20);
     textStyle(NORMAL);
 
     // Message
     fill(220, 220, 220);
-    textSize(15);
-    textLeading(22);
-    text(step.message, dialogX + 25, dialogY + 55, dialogW - 50, 80);
+    textSize(18);
+    textLeading(28);
+    text(step.message, dialogX + 25, dialogY + 55, dialogW - 50, 120);
 
-    // Next / Start button
-    let nextBtnW = 120;
-    let nextBtnH = 40;
-    let nextBtnX = dialogX + dialogW - nextBtnW - 20;
-    let nextBtnY = dialogY + dialogH - nextBtnH - 20;
-    let isNextHover = mx >= nextBtnX && mx <= nextBtnX + nextBtnW &&
-      my >= nextBtnY && my <= nextBtnY + nextBtnH;
-
-    fill(isNextHover ? color(80, 140, 80) : color(60, 110, 60));
-    stroke(isNextHover ? color(140, 200, 140) : color(100, 160, 100));
-    strokeWeight(2);
-    rect(nextBtnX, nextBtnY, nextBtnW, nextBtnH, 8);
-
-    fill(255);
-    noStroke();
+    // Breathing prompt
+    let promptAlpha = 127 + 128 * sin(frameCount * 0.05);
+    fill(255, 255, 255, promptAlpha);
     textAlign(CENTER, CENTER);
-    textSize(16);
-    textStyle(BOLD);
-    let btnText = (game.tutorialStep >= TUTORIAL_STEPS.length - 1) ? "Start!" : "Next";
-    text(btnText, nextBtnX + nextBtnW / 2, nextBtnY + nextBtnH / 2);
-    textStyle(NORMAL);
-
-    this.tutorialNextBtn = { x: nextBtnX, y: nextBtnY, w: nextBtnW, h: nextBtnH };
+    textSize(19);
+    text("Click anywhere to continue", dialogX + dialogW / 2, dialogY + dialogH + 30);
+    textAlign(LEFT, TOP); // Reset alignment
   }
 
   drawTutorialSkipBtn() {

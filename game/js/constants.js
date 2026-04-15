@@ -307,7 +307,7 @@ const TOWER_TYPES = {
     }
   }
 };
-const TOWER_PANEL_HEIGHT = 90;
+const TOWER_PANEL_HEIGHT = 120;
 const TOWER_PANEL_TOP = CANVAS_HEIGHT - TOWER_PANEL_HEIGHT;
 const TOWER_SHORTCUT_ORDER = ['basic', 'slow', 'area', 'crystal', 'steam', 'alchemist'];
 

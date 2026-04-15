@@ -782,11 +782,11 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
           rect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
           fill(255, 255, 255, 230);
           textAlign(CENTER, CENTER);
-          textSize(48);
+          textSize(96);
           textStyle(BOLD);
           text("PAUSED", CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 - 50);
           textStyle(NORMAL);
-          textSize(20);
+          textSize(40);
           fill(200, 200, 200);
           text("Click the Resume button or press SPACE to continue", CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 10);
         }
@@ -927,7 +927,7 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
 
         fill(255, 255, 255, 200);
         noStroke();
-        textSize(9);
+        textSize(18);
         textAlign(CENTER, CENTER);
         text(`${col},${row}`, x + CURRENT_GRID_SIZE / 2, y + CURRENT_GRID_SIZE / 2);
       }
@@ -950,12 +950,12 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
     rect(10, 10, 400, 80, 8);
 
     fill(255, 255, 0);
-    textSize(16);
+    textSize(32);
     textAlign(LEFT, TOP);
     text('Map Edit Mode', 20, 18);
 
     fill(255, 255, 255);
-    textSize(12);
+    textSize(24);
     text('Click cells: toggle Buildable (green) / Non-buildable (red)', 20, 42);
     text('Press E: export code  |  Press M: exit edit mode', 20, 60);
     text(`Current: col=${hoverCol}, row=${hoverRow}`, 20, 78);
@@ -974,7 +974,7 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
 
     fill(255);
     noStroke();
-    textSize(16);
+    textSize(32);
     textAlign(CENTER, CENTER);
     text('Export Code (E)', btnX + btnW / 2, btnY + btnH / 2);
 
@@ -1008,7 +1008,7 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
 
         fill(255, 255, 255, 150);
         noStroke();
-        textSize(8);
+        textSize(16);
         textAlign(CENTER, CENTER);
         text(`${col},${row}`, x + CURRENT_GRID_SIZE / 2, y + CURRENT_GRID_SIZE / 2);
       }
@@ -1044,7 +1044,7 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
 
         fill(0);
         noStroke();
-        textSize(12);
+        textSize(24);
         textAlign(CENTER, CENTER);
         text(i + 1, x, y);
       }
@@ -1068,16 +1068,16 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
     rect(10, 10, 450, 120, 8);
 
     fill(255, 200, 0);
-    textSize(18);
+    textSize(36);
     textAlign(LEFT, TOP);
     text('Path Edit Mode', 20, 18);
 
     fill(100, 255, 100);
-    textSize(14);
+    textSize(28);
     text('Game paused - enemies not moving', 20, 42);
 
     fill(255, 255, 255);
-    textSize(13);
+    textSize(26);
     text('Click red cells (path) to add waypoints in order', 20, 65);
     text('Press Z: undo  |  E: export  |  N: exit', 20, 85);
     let coordText = (hoverCol >= 0 && hoverCol < COLS && hoverRow >= 0 && hoverRow < ROWS)
@@ -1154,14 +1154,14 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
         if (r === 0) {
           fill(255, 255, 0, 200);
           noStroke();
-          textSize(10);
+          textSize(20);
           textAlign(CENTER, TOP);
           text(c, x + CURRENT_GRID_SIZE / 2, y + 2);
         }
         if (c === 0) {
           fill(255, 255, 0, 200);
           noStroke();
-          textSize(10);
+          textSize(20);
           textAlign(LEFT, CENTER);
           text(r, x + 2, y + CURRENT_GRID_SIZE / 2);
         }
@@ -1189,7 +1189,7 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
     let hoverLine = `Grid: col=${mCol}, row=${mRow} | canBuild: ${canBuild} | mapValue: ${mapVal}`;
 
     noStroke();
-    textSize(13);
+    textSize(26);
     textAlign(LEFT, CENTER);
     fill(0, 0, 0, 180);
     rect(8, 54, 440, 22, 4);
@@ -1202,7 +1202,7 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
     rect(5, 80, 280, 180, 5);
 
     fill(255, 255, 0);
-    textSize(13);
+    textSize(26);
     textAlign(LEFT, TOP);
     let y = 88;
     text('Level: ' + this.currentLevel, 12, y); y += 20;
@@ -1211,7 +1211,7 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
     text('GRID_SIZE: ' + CURRENT_GRID_SIZE, 12, y); y += 25;
 
     fill(200, 200, 200);
-    textSize(11);
+    textSize(22);
     text('Controls:', 12, y); y += 15;
     text('Arrow Keys = Adjust offset', 12, y); y += 15;
     text('- / = = Adjust grid size', 12, y); y += 15;
@@ -1436,14 +1436,6 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
     }
 
     if (this.state === GameState.PLAYING && this.tutorialMode) {
-      if (this.ui.tutorialNextBtn) {
-        let btn = this.ui.tutorialNextBtn;
-        if (mx >= btn.x && mx <= btn.x + btn.w && my >= btn.y && my <= btn.y + btn.h) {
-          this.sound.play("click1");
-          this.nextTutorialStep();
-          return;
-        }
-      }
       if (this.ui.tutorialSkipBtn) {
         let btn = this.ui.tutorialSkipBtn;
         if (mx >= btn.x && mx <= btn.x + btn.w && my >= btn.y && my <= btn.y + btn.h) {
@@ -1452,6 +1444,9 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
           return;
         }
       }
+      // Any click advances tutorial
+      this.sound.play("click1");
+      this.nextTutorialStep();
       return;
     }
 
@@ -1460,6 +1455,16 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
         let btn = this.ui.inGameSettingsBtn;
         if (mx >= btn.x && mx <= btn.x + btn.w && my >= btn.y && my <= btn.y + btn.h) {
           this.setState(GameState.IN_GAME_SETTINGS);
+          return;
+        }
+      }
+
+      if (this.ui.inGameBackBtn) {
+        let btn = this.ui.inGameBackBtn;
+        if (mx >= btn.x && mx <= btn.x + btn.w && my >= btn.y && my <= btn.y + btn.h) {
+          this.sound.play("click1");
+          this.manualPaused = false;
+          this.setState(GameState.MENU);
           return;
         }
       }
@@ -1638,14 +1643,14 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
 
     fill(255, 215, 0);
     textAlign(CENTER, CENTER);
-    textSize(72);
+    textSize(144);
     text("DEFEND BRITAIN", CANVAS_WIDTH / 2, CANVAS_HEIGHT / 3);
 
-    textSize(48);
+    textSize(96);
     text("UK", CANVAS_WIDTH / 2, CANVAS_HEIGHT / 3 - 80);
 
     fill(200, 200, 200);
-    textSize(24);
+    textSize(48);
     text("Protect the British Landmarks!", CANVAS_WIDTH / 2, CANVAS_HEIGHT / 3 + 60);
 
     let btnX = CANVAS_WIDTH / 2;
@@ -1670,15 +1675,15 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
 
     noStroke();
     fill(255);
-    textSize(28);
+    textSize(56);
     text("▶  START GAME", btnX, btnY);
 
     fill(120);
-    textSize(16);
+    textSize(32);
     text("Press 1, 2, 3 to select level", CANVAS_WIDTH / 2, CANVAS_HEIGHT - 80);
 
     fill(80);
-    textSize(14);
+    textSize(28);
     text("2026 Group 14 — University of Bristol", CANVAS_WIDTH / 2, CANVAS_HEIGHT - 40);
 
     rectMode(CORNER);
