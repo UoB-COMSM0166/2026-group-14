@@ -118,10 +118,45 @@ The sequence diagram shows the main gameplay update cycle in Defend London. The 
 
 - 15% ~750 words
 
+After developing a deliverable prototype of the game, it was important to evaluate its functionality and playability in order to identify potential flaws at an early stage. To assess the overall quality of the game and develop a comprehensive vision for future improvements, we used both quantitative and qualitative testing methods.
+
+#### Quantitative evaluation
+For the Quantitative evaluation, we first explored potential issues through a Think Aloud study conducted with two participants from another project group. The main objective of this method was to have the users’ first gameplay experience. Through this process, we aimed to gain a fundamental understanding of the game’s quality and identify early indicators for future improvements.
+
+#### Think Aloud Evaluation 1: 15/03/2026
+- **Positive**: The game interface is visually appealing and clean, allowing players to quickly understand how to operate the game. The rules are simple and clear, making the game easy to learn and play.
+- **Negative**: Some monsters’ UI occasionally disappears, making them difficult to see.
+
+#### Think Aloud Evaluation 2: 15/03/2026
+- **Positive**: The game provides effective interactive feedback. The click sounds are clear, and there are appropriate sound effects for events such as monster deaths, tower placement, and losing HP. When a tower is placed in an invalid location, the game immediately provides a warning.
+- **Negative**: The font size for monster and tower information is a bit small, which affects readability.The game lacks flexibility, as the music volume and brightness cannot be adjusted.
+
+The feedback mainly focused on the UI design and scalability of the game. To further investigate these issues in a more systematic and detailed manner, we applied a heuristic evaluation method. This approach allows evaluators to assess the game based on established usability principles from different perspectives.
+
+The heuristic evaluation was conducted by the team members, as this method requires a deeper understanding of the game’s design and underlying technical implementation in order to identify issues more precisely. After analysing the results from the Think Aloud evaluation and conducting additional testing, we developed the following Heuristic Evaluation Table.
+
+#### Heuristic Evaluation
+| Category | Issue | Heuristic | Frequency | Impact | Persistence | Severity |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **Enemy** | diving enemies could still be targeted while they were underwater | Error prevention | 3 | 2 | 1 |
+| **Enemy** | Missing information on monster waves | User Control & Flexibility | Help and documentation | 3 | 4 | 2 |
+| **Tower** | lack of detailed stats and functional explanations for towers| Recognition rather than recall | 2 | 2 | 3 |
+| **Game** | No options to adjust volume, brightness, or select different background music (BGM). | User control and freedom | 2 | 4 | 3 |
+| **Settings** |The settings UI on the main menu does not scale properly to screen size  | Consistency and standards | 2 | 4 | 2 |
+| **Settings** |The settings menu UI is inconsistent between the main menu and the in-game interface.| Consistency and standards| 2 | 2 | 1 |
+| **Enemy** | Visual bug where certain monster images occasionally fail to render. | Consistency and standards | 2 | 2 | 3 |
+| **Menu** | Font size is too small, making it difficult to read game information comfortably. | UAesthetic and minimalist design | 1 | 2 | 2 |
+
+#### Development Focus
+Based on the results, our next development focus will be concentrated on the following aspects:
+- Fixing critical bugs to prevent game crashes and ensure stable gameplay
+- Improving UI readability and ensuring consistent rendering across different devices
+- Enhancing game flexibility by adding more background music options and a volume control system
+- Providing clear and accessible information about game mechanics
+
+
+
 - One qualitative evaluation (of your choice) 
-
-- One quantitative evaluation (of your choice) 
-
 - Description of how code was tested. 
 
 ### Process 
