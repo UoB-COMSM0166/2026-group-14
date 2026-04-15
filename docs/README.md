@@ -138,14 +138,14 @@ The heuristic evaluation was conducted by the team members, as this method requi
 #### Heuristic Evaluation
 | Category | Issue | Heuristic | Frequency | Impact | Persistence | Severity |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Enemy** | diving enemies could still be targeted while they were underwater | Error prevention | 3 | 2 | 1 |
-| **Enemy** | Missing information on monster waves | User Control & Flexibility | Help and documentation | 3 | 4 | 2 |
-| **Tower** | lack of detailed stats and functional explanations for towers| Recognition rather than recall | 2 | 2 | 3 |
-| **Game** | No options to adjust volume, brightness, or select different background music (BGM). | User control and freedom | 2 | 4 | 3 |
-| **Settings** |The settings UI on the main menu does not scale properly to screen size  | Consistency and standards | 2 | 4 | 2 |
-| **Settings** |The settings menu UI is inconsistent between the main menu and the in-game interface.| Consistency and standards| 2 | 2 | 1 |
-| **Enemy** | Visual bug where certain monster images occasionally fail to render. | Consistency and standards | 2 | 2 | 3 |
-| **Menu** | Font size is too small, making it difficult to read game information comfortably. | UAesthetic and minimalist design | 1 | 2 | 2 |
+| **Enemy** | diving enemies could still be targeted while they were underwater | Error prevention | 3 | 2 | 2 | 2.33 |
+| **Enemy** | Missing information on monster waves | Help and documentation | 2 | 2 | 3 | 2.33 |
+| **Tower** | lack of detailed stats and functional explanations for towers| Recognition rather than recall | 2 | 2 | 1 | 1.67 |
+| **Game** | No options to adjust volume, brightness, or select different background music (BGM). | User control and freedom | 3 | 4 | 3 | 3.33 |
+| **Settings** |The settings UI on the main menu does not scale properly to screen size  | Consistency and standards | 3 | 2 | 2 | 2.33 |
+| **Settings** |The settings menu UI is inconsistent between the main menu and the in-game interface.| Consistency and standards| 1 | 2 | 3 | 2 |
+| **Enemy** | Visual bug where certain monster images occasionally fail to render. | Consistency and standards | 3 | 2 | 1 | 2 |
+| **Menu** | Font size is too small, making it difficult to read game information comfortably. | UAesthetic and minimalist design | 2 | 3 | 2 | 2.33 |
 
 #### Development Focus
 Based on the results, our next development focus will be concentrated on the following aspects:
@@ -156,8 +156,8 @@ Based on the results, our next development focus will be concentrated on the fol
 
 
 
-- One qualitative evaluation (of your choice) 
-- Description of how code was tested. 
+One qualitative evaluation (of your choice) 
+Description of how code was tested. 
 
 ### Process 
 
