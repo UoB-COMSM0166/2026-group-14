@@ -54,7 +54,7 @@ function rowToTopY(row) {
 const CANVAS_WIDTH = DESIGN_WIDTH;
 const CANVAS_HEIGHT = DESIGN_HEIGHT;
 const FPS = 60;
-const HUD_HEIGHT = 45;
+const HUD_HEIGHT = 75;
 
 const GameState = {
   MENU: 'menu',

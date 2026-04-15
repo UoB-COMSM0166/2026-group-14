@@ -832,37 +832,22 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
 
 
 
-  drawBackground() {
+ drawBackground() {
     let bg = this.currentMapImage || gameImages.mapLevel1;
-    if (!bg) return;
+    if (!bg || bg.width <= 0) return;
 
-    let imgW = bg.width;   // 2976
-    let imgH = bg.height;  // 1436
-    let designRatio = DESIGN_WIDTH / DESIGN_HEIGHT;
-    let imgRatio = imgW / imgH;
+    // 1. 获取上下黑框之间的“安全区”高度
+    const safeY = HUD_HEIGHT; // 顶部黑条高度 (45px)
+    const safeHeight = TOWER_PANEL_TOP - HUD_HEIGHT; // 剩余的可见高度
 
-    let srcX, srcY, srcW, srcH;
-
-    if (Math.abs(imgRatio - designRatio) < 0.01) {
-      srcX = 0;
-      srcY = 0;
-      srcW = imgW;
-      srcH = imgH;
-    } else if (imgRatio > designRatio) {
-      srcH = imgH;
-      srcW = imgH * designRatio;
-      srcX = (imgW - srcW) / 2;
-      srcY = 0;
-    } else {
-      srcW = imgW;
-      srcH = imgW / designRatio;
-      srcX = 0;
-      srcY = (imgH - srcH) / 2;
-    }
-
-    image(bg, 0, 0, DESIGN_WIDTH, DESIGN_HEIGHT, srcX, srcY, srcW, srcH);
+    // 2. 强制将整张背景图渲染在这个安全区内
+    // 参数说明: image(图片, 目标X, 目标Y, 目标宽, 目标高, 原图X, 原图Y, 原图宽, 原图高)
+    image(
+      bg, 
+      0, safeY, DESIGN_WIDTH, safeHeight, // 目标：铺满黑框之间的区域
+      0, 0, bg.width, bg.height           // 源：使用整张背景图
+    );
   }
-
   drawGame() {
     let bg = this.currentMapImage || gameImages.mapLevel1;
     if (bg && bg.width > 0) {
@@ -1362,15 +1347,24 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
         return;
       }
 
-      let backBtn = this.ui.backButton;
-      if (backBtn &&
-        mx > backBtn.x - backBtn.width / 2 && mx < backBtn.x + backBtn.width / 2 &&
-        my > backBtn.y - backBtn.height / 2 && my < backBtn.y + backBtn.height / 2) {
-        this.sound.play("click1");
-        this.setState(GameState.MENU);
-        return;
-      }
+      // let backBtn = this.ui.backButton;
+      // if (backBtn &&
+      //   mx > backBtn.x - backBtn.width / 2 && mx < backBtn.x + backBtn.width / 2 &&
+      //   my > backBtn.y - backBtn.height / 2 && my < backBtn.y + backBtn.height / 2) {
+      //   this.sound.play("click1");
+      //   this.setState(GameState.MENU);
+      //   return;
+      // }
+      let menuBtnX = 1004; 
+      let menuBtnY = 827;
+      let menuBtnW = 328;
+      let menuBtnH = 55;
 
+      if (mx >= menuBtnX && mx <= menuBtnX + menuBtnW && my >= menuBtnY && my <= menuBtnY + menuBtnH) {
+      this.sound.play("click1");
+      this.setState(GameState.MENU); // 执行返回主菜单功能
+      return;
+  }        
       let contBtn = this.ui.continueButton;
       if (contBtn &&
         mx >= contBtn.x && mx <= contBtn.x + contBtn.w &&

@@ -266,20 +266,31 @@ class UIHUD {
     if (this.switchPlayerBtn) this.switchPlayerBtn.hide();
   }
 
-  getDomX(designX) {
-    if (typeof canvasWidth !== 'undefined' && typeof CANVAS_WIDTH !== 'undefined') {
-      return Math.round(designX * canvasWidth / CANVAS_WIDTH);
-    }
-    return designX;
-  }
+ getDomX(designX) {
+  // 获取画布元素
+  let cnv = document.querySelector('canvas');
+  if (!cnv) return designX;
+  
+  // 获取画布在网页中的实际位置和缩放后的尺寸
+  let rect = cnv.getBoundingClientRect();
+  
+  // 计算缩放比例：实际宽度 / 设计宽度 (1920)
+  let scale = rect.width / DESIGN_WIDTH;
+  
+  // 最终位置 = 画布左边距 + (设计坐标 * 缩放比例)
+  return rect.left + (designX * scale);
+}
 
   getDomY(designY) {
-    if (typeof canvasHeight !== 'undefined' && typeof CANVAS_HEIGHT !== 'undefined') {
-      return Math.round(designY * canvasHeight / CANVAS_HEIGHT);
-    }
-    return designY;
-  }
-
+  let cnv = document.querySelector('canvas');
+  if (!cnv) return designY;
+  
+  let rect = cnv.getBoundingClientRect();
+  let scale = rect.height / DESIGN_HEIGHT;
+  
+  // 最终位置 = 画布上边距 + (设计坐标 * 缩放比例)
+  return rect.top + (designY * scale);
+}
   showLoginUI() {
     if (this.nicknameInput) this.nicknameInput.show();
     if (this.nicknameLoginBtn) this.nicknameLoginBtn.show();
@@ -315,11 +326,28 @@ class UIHUD {
     this.drawMenuButtons();
     this.drawPlayerBadge();
 
-    if (this.game && typeof this.game.isLoggedIn === 'function' && this.game.isLoggedIn()) {
-      this.showSwitchPlayerUI();
-      this.switchPlayerBtn.position(this.getDomX(20), this.getDomY(64));
-      this.switchPlayerBtn.size(140, 32);
-    }
+   // UIHUD.js -> drawMainMenu() 内部逻辑
+
+  if (this.game && typeof this.game.isLoggedIn === 'function' && this.game.isLoggedIn()) {
+    this.showSwitchPlayerUI();
+  
+ 
+    let cnv = document.querySelector('canvas');
+    let rect = cnv ? cnv.getBoundingClientRect() : { width: DESIGN_WIDTH };
+    let scale = rect.width / DESIGN_WIDTH;
+
+ 
+    this.switchPlayerBtn.position(this.getDomX(453), this.getDomY(25)); 
+  
+  
+    this.switchPlayerBtn.size(220 * scale, 55 * scale);
+  
+
+    this.switchPlayerBtn.style('font-size', (24 * scale) + 'px');
+    this.switchPlayerBtn.style('font-weight', 'bold');
+  
+    this.switchPlayerBtn.style('padding', (5 * scale) + 'px');
+  }
   }
 
   drawPlayerBadge() {
@@ -425,56 +453,31 @@ class UIHUD {
   drawLevelSelect() {
     push();
 
+    // 1. 强制隐藏登录 UI 和切换玩家按钮
     this.hideLoginUI();
     this.hideSwitchPlayerUI();
 
+    // 2. 渲染背景图
     if (typeof gameImages !== 'undefined' && gameImages.levelSelectBg && gameImages.levelSelectBg.width > 0) {
       image(gameImages.levelSelectBg, 0, 0, DESIGN_WIDTH, DESIGN_HEIGHT);
     } else {
-      // Fallback background
       background(40, 35, 30);
     }
 
-    this.hideSwitchPlayerUI();
+    // 3. 定义鼠标坐标变量（这是关键！即使删了返回键，后面的 Continue 键也要用）
+    let mx = typeof getGameMouseX === 'function' ? getGameMouseX() : mouseX;
+    let my = typeof getGameMouseY === 'function' ? getGameMouseY() : mouseY;
+
+    // 4. 定义关卡按钮及其状态
     this.levelButtons = [
-      {
-        level: 1,
-        x: 409,
-        y: 457,
-        width: 160,
-        height: 150,
-        unlocked: true,
-        name: "THE OUTER DEFENSES"
-      },
-      {
-        level: 2,
-        x: 1067,
-        y: 526,
-        width: 162,
-        height: 156,
-        unlocked: true,
-        name: "RIVER THAMES PATROL"
-      },
-      {
-        level: 3,
-        x: 1566,
-        y: 282,
-        width: 300,
-        height: 189,
-        unlocked: true,
-        name: "TOWER OF LONDON SIEGE"
-      }
+      { level: 1, x: 409, y: 457, width: 160, height: 150, unlocked: true, name: "THE OUTER DEFENSES" },
+      { level: 2, x: 1067, y: 526, width: 162, height: 156, unlocked: true, name: "RIVER THAMES PATROL" },
+      { level: 3, x: 1566, y: 282, width: 300, height: 189, unlocked: true, name: "TOWER OF LONDON SIEGE" }
     ];
 
-    // Apply unlock status from the current player's save.
     let unlockedUpTo = (this.game && this.game.getUnlockedUpTo) ? this.game.getUnlockedUpTo() : 1;
     for (let btn of this.levelButtons) {
       btn.unlocked = btn.level <= unlockedUpTo;
-    }
-
-    for (let btn of this.levelButtons) {
-      let mx = typeof getGameMouseX === 'function' ? getGameMouseX() : mouseX;
-      let my = typeof getGameMouseY === 'function' ? getGameMouseY() : mouseY;
 
       let left = btn.x - btn.width / 2;
       let right = btn.x + btn.width / 2;
@@ -492,8 +495,6 @@ class UIHUD {
       }
 
       if (!btn.unlocked) {
-        noStroke();
-
         fill(0);
         textAlign(CENTER, CENTER);
         textStyle(BOLD);
@@ -503,33 +504,7 @@ class UIHUD {
       }
     }
 
-    this.backButton = {
-      x: 100,
-      y: 50,
-      width: 120,
-      height: 50
-    };
-
-    let mx = typeof getGameMouseX === 'function' ? getGameMouseX() : mouseX;
-    let my = typeof getGameMouseY === 'function' ? getGameMouseY() : mouseY;
-    let backHover = mx > this.backButton.x - this.backButton.width / 2 &&
-      mx < this.backButton.x + this.backButton.width / 2 &&
-      my > this.backButton.y - this.backButton.height / 2 &&
-      my < this.backButton.y + this.backButton.height / 2;
-
-    fill(backHover ? color(80, 60, 40, 230) : color(50, 40, 30, 204));
-    stroke(backHover ? '#FFD700' : '#C8A84E');
-    strokeWeight(2);
-    rectMode(CENTER);
-    rect(this.backButton.x, this.backButton.y, this.backButton.width, this.backButton.height, 10);
-
-    fill(255);
-    noStroke();
-    textAlign(CENTER, CENTER);
-    textSize(22);
-    text("← Back", this.backButton.x, this.backButton.y);
-
-    // Continue button (resume from autosave if available)
+    // 5. 渲染 Continue 按钮（它依赖上面的 mx 和 my）
     let canContinue = this.game && typeof this.game.hasRunSave === 'function' ? this.game.hasRunSave() : false;
     let contW = 220;
     let contH = 48;
@@ -549,18 +524,8 @@ class UIHUD {
     textAlign(CENTER, CENTER);
     textSize(27);
     text("Continue", contX + contW / 2, contY + contH / 2);
-
-    if (this.game && this.game.isLoggedIn()) {
-      this.showSwitchPlayerUI();
-      this.switchPlayerBtn.position(this.getDomX(20), this.getDomY(64));
-      this.switchPlayerBtn.size(140, 32);
-    } else {
-      this.hideSwitchPlayerUI();
-    }
-
+  
     pop();
-
-    // Debug grid overlay (call at the very end so it's on top)
     this.drawLevelSelectDebugGrid();
   }
 
@@ -688,59 +653,92 @@ class UIHUD {
     this.hideSettingsUI();
     this.hideSwitchPlayerUI();
 
-    // Background
+    // 1. 获取缩放比例 (这是解决 DOM 元素错位的关键)
+    let cnv = document.querySelector('canvas');
+    let rect = cnv ? cnv.getBoundingClientRect() : { width: DESIGN_WIDTH, height: DESIGN_HEIGHT };
+    let scale = rect.width / DESIGN_WIDTH;
+
+    // 2. 绘制背景
     if (typeof gameImages !== 'undefined' && gameImages.mainBackground && gameImages.mainBackground.width > 0) {
       image(gameImages.mainBackground, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
     } else {
       background(25, 20, 18);
     }
 
-    // Panel
+    // 3. 登录面板参数
     let panelW = 640;
-    let panelH = 320;
+    let panelH = 400; 
     let panelX = CANVAS_WIDTH / 2 - panelW / 2;
     let panelY = CANVAS_HEIGHT / 2 - panelH / 2;
 
-    fill(0, 0, 0, 120);
-    noStroke();
+    // 绘制主面板 (加上 rectMode 确保定位准确)
+    push();
     rectMode(CORNER);
-    rect(panelX + 10, panelY + 10, panelW, panelH, 14);
-
-    fill(60, 45, 30, 245);
+    fill(60, 45, 30, 250); 
     stroke(200, 168, 78);
-    strokeWeight(4);
-    rect(panelX, panelY, panelW, panelH, 14);
+    strokeWeight(5);
+    rect(panelX, panelY, panelW, panelH, 15);
     noStroke();
 
-    fill(255, 220, 150);
+    // 4. 面板标题和文字 (由 Canvas 绘制)
     textAlign(CENTER, CENTER);
-    textSize(45);
+    fill(255, 215, 100);
+    textSize(50);
     textStyle(BOLD);
     text('Nickname Login', CANVAS_WIDTH / 2, panelY + 70);
+
+    fill(200, 190, 170);
+    textSize(18);
     textStyle(NORMAL);
+    text('Your progress will be saved to this name.', CANVAS_WIDTH / 2, panelY + 130);
 
-    fill(230);
-    textSize(19);
-    text('Progress is auto-saved (level unlocks) for this nickname.', CANVAS_WIDTH / 2, panelY + 115);
+    fill(255, 230, 180);
+    textSize(22);
+    textStyle(BOLD);
+    text('NICKNAME:', CANVAS_WIDTH / 2, panelY + 185);
 
-    if (this._loginErrorMsg) {
-      fill(255, 120, 120);
-      textSize(17);
-      text(this._loginErrorMsg, CANVAS_WIDTH / 2, panelY + 145);
-    }
-
-    // Position DOM elements (absolute page coords)
-    let inputX = CANVAS_WIDTH / 2 - 140;
-    let inputY = panelY + 165;
-    let btnY = panelY + 225;
+    // 5. DOM 元素定位与尺寸 (输入框和按钮)
+    let inputW = 340;
+    let inputH = 48;
+    let btnW = 120;
+    let btnH = 50;
+    let btnGap = 40; 
 
     this.showLoginUI();
-    if (this.nicknameInput) this.nicknameInput.position(inputX, inputY);
-    if (this.nicknameLoginBtn) this.nicknameLoginBtn.position(CANVAS_WIDTH / 2 - 70, btnY);
-    if (this.nicknameBackBtn) this.nicknameBackBtn.position(CANVAS_WIDTH / 2 + 30, btnY);
 
-    if (this.nicknameLoginBtn) this.nicknameLoginBtn.size(90, 40);
-    if (this.nicknameBackBtn) this.nicknameBackBtn.size(90, 40);
+    // --- 输入框：位置和尺寸都要乘以 scale ---
+    if (this.nicknameInput) {
+      this.nicknameInput.size(inputW * scale, inputH * scale);
+      this.nicknameInput.position(this.getDomX(CANVAS_WIDTH / 2 - inputW / 2), this.getDomY(panelY + 210));
+      this.nicknameInput.style('font-size', (20 * scale) + 'px');
+      this.nicknameInput.style('text-align', 'center');
+    }
+
+    // --- 按钮布局 ---
+    let totalBtnW = (btnW * 2) + btnGap;
+    let btnStartX = CANVAS_WIDTH / 2 - totalBtnW / 2;
+    let btnY = panelY + 310;
+
+    if (this.nicknameLoginBtn) {
+      this.nicknameLoginBtn.size(btnW * scale, btnH * scale);
+      this.nicknameLoginBtn.position(this.getDomX(btnStartX), this.getDomY(btnY));
+      this.nicknameLoginBtn.style('font-size', (18 * scale) + 'px');
+    }
+
+    if (this.nicknameBackBtn) {
+      this.nicknameBackBtn.size(btnW * scale, btnH * scale);
+      this.nicknameBackBtn.position(this.getDomX(btnStartX + btnW + btnGap), this.getDomY(btnY));
+      this.nicknameBackBtn.style('font-size', (18 * scale) + 'px');
+    }
+
+    // 错误信息
+    if (this._loginErrorMsg) {
+      fill(255, 100, 100);
+      textSize(16);
+      text(this._loginErrorMsg, CANVAS_WIDTH / 2, panelY + 275);
+    }
+    
+    pop();
   }
 
   handleLoginClick(mx, my) {
@@ -782,20 +780,22 @@ class UIHUD {
    * Draw top HUD bar (45px)
    * @param {boolean} showPaused - Show PAUSED in centre
    */
+  // UIHUD.js
   drawTopHUDBar(showPaused = false) {
-    const H = HUD_HEIGHT;
+    const H = HUD_HEIGHT; // 假设已在 constants.js 中改为 75
     const leftX = 15;
 
+    // 绘制背景
     noStroke();
-    fill(30, 25, 18, 224);  // rgba(30, 25, 18, 0.88) ≈ 224
+    fill(30, 25, 18, 224);
     rectMode(CORNER);
     rect(0, 0, CANVAS_WIDTH, H);
 
-    stroke(200, 168, 78);  // #C8A84E
+    // 底部装饰线
+    stroke(200, 168, 78);
     strokeWeight(2);
     line(0, H, CANVAS_WIDTH, H);
     noStroke();
-
 
     let hp = this.game.landmark ? Math.floor(this.game.landmark.hp) : 0;
     let maxHp = this.game.landmark ? Math.floor(this.game.landmark.maxHp) : 0;
@@ -803,77 +803,59 @@ class UIHUD {
     let hpPercent = maxHp > 0 ? hp / maxHp : 0;
 
     let centerX = CANVAS_WIDTH / 2;
-    let barW = 160;
-    let barH = 14;
+    let barW = 200; // 稍微加宽血条
+    let barH = 16;  // 稍微加高血条
     let barX = centerX - barW / 2;
-    let barY = 24;
+    
+    // --- 垂直排版优化 ---
+    let nameY = 22; // 标题位置
+    let barY = 46; // 血条位置，与标题拉开间距
 
-    fill(255, 255, 255, 204);  // rgba(255,255,255,0.8)
+    // 绘制地标名称
+    fill(255, 255, 255, 220);
     textAlign(CENTER, CENTER);
-    textSize(26);
-    text(name, centerX, 10);
-
-    fill(60, 60, 60, 204);
-    rect(barX, barY, barW, barH, 7);
-
-    if (hpPercent > 0.6) {
-      fill(76, 175, 80);  // #4CAF50
-    } else if (hpPercent > 0.3) {
-      fill(255, 193, 7);  // #FFC107
-    } else {
-      fill(244, 67, 54);  // #F44336
-    }
-    rect(barX, barY, barW * hpPercent, barH, 7);
-
-    let hpText = `${hp} / ${maxHp}`;
-    textSize(18);
+    textSize(28);
     textStyle(BOLD);
-    textAlign(CENTER, CENTER);
-    fill(0, 0, 0, 150);
-    text(hpText, centerX + 1, barY + barH / 2 + 1);
+    text(name, centerX, nameY);
+
+    // 绘制血条
+    fill(60, 60, 60, 204);
+    rect(barX, barY, barW, barH, 8);
+
+    if (hpPercent > 0.6) fill(76, 175, 80);
+    else if (hpPercent > 0.3) fill(255, 193, 7);
+    else fill(244, 67, 54);
+    
+    rect(barX, barY, barW * hpPercent, barH, 8);
+
+    // 血条数值居中
+    let hpText = `${hp} / ${maxHp}`;
+    textSize(16);
     fill(255);
     text(hpText, centerX, barY + barH / 2);
     textStyle(NORMAL);
 
-    let rightEdge = CANVAS_WIDTH - 15;
-    let waveDisplay = '';
-    let waveState = '';
-    let currWave = 1;
-    let totalWaves = 1;
+    // --- 右侧波次信息优化 ---
+    let rightEdge = CANVAS_WIDTH - 25;
+    let currWave = 1, totalWaves = 1;
     if (this.game.waveManager) {
-      waveDisplay = this.game.waveManager.getCurrentWaveDisplay();
-      waveState = this.game.waveManager.getWaveStateText();
-      currWave = Math.min(this.game.waveManager.currentWaveIndex + 1, this.game.waveManager.waves.length);
-      totalWaves = this.game.waveManager.waves.length;
-    }
-    fill(255, 255, 255, 204);
-    textSize(24);
-    textAlign(RIGHT, CENTER);
-    text('Wave', rightEdge, 10);
-    textSize(32);
-    textStyle(BOLD);
-    let suffix = ' / ' + totalWaves;
-    let currStr = String(currWave);
-    fill(255);
-    text(suffix, rightEdge, 31);
-    fill(255, 215, 0);
-    text(currStr, rightEdge - textWidth(suffix), 31);
-    textStyle(NORMAL);
-    if (waveState && (waveState.indexOf('Next wave') !== -1 || waveState.indexOf('incoming') !== -1)) {
-      fill(255, 200, 100, 179);
-      textSize(18);
-      textAlign(RIGHT, CENTER);
-      text('Next wave incoming...', rightEdge, 40);
+        currWave = Math.min(this.game.waveManager.currentWaveIndex + 1, this.game.waveManager.waves.length);
+        totalWaves = this.game.waveManager.waves.length;
     }
 
-    if (showPaused) {
-      fill(255, 215, 0, 220);
-      textAlign(CENTER, CENTER);
-      textSize(26);
-      textStyle(BOLD);
-      text('⏸ PAUSED', centerX, 22);
-      textStyle(NORMAL);
-    }
+    fill(255, 255, 255, 200);
+    textSize(22);
+    textAlign(RIGHT, CENTER);
+    text('Wave', rightEdge, nameY);
+
+    textSize(34);
+    textStyle(BOLD);
+    let suffix = ' / ' + totalWaves;
+    fill(255);
+    text(suffix, rightEdge, barY + barH / 2);
+    fill(255, 215, 0);
+    text(currWave, rightEdge - textWidth(suffix), barY + barH / 2);
+    textStyle(NORMAL);
   }
 
   //In-game HUD - called when GameState.PLAYING
@@ -882,40 +864,34 @@ class UIHUD {
     this.hideAll();
     this.endScreenButtons = [];
     cursor(ARROW);
-
-    let inGameBackX = 20;
-    let inGameBackY = 22;
-    let inGameBackW = 110;
-    let inGameBackH = 36;
+    this.drawTopHUDBar(false);
+    let inGameBackX = 160;
+    let inGameBackW = 160;
+    let inGameBackH = 40; 
+    let inGameBackY = (HUD_HEIGHT - inGameBackH) / 2; 
+    
     let mx = getGameMouseX();
     let my = getGameMouseY();
     let isInGameBackHover = mx >= inGameBackX && mx <= inGameBackX + inGameBackW && my >= inGameBackY && my <= inGameBackY + inGameBackH;
 
-    fill(isInGameBackHover ? color(100, 80, 60) : color(55, 45, 35));
-    stroke(isInGameBackHover ? color(220, 180, 100) : color(120, 100, 70));
-    strokeWeight(2);
+    fill(100, 80, 60); 
+    stroke(220, 180, 100); 
+    strokeWeight(3); 
     rectMode(CORNER);
-    rect(inGameBackX, inGameBackY, inGameBackW, inGameBackH, 6);
+    rect(inGameBackX, inGameBackY, inGameBackW, inGameBackH, 8);
 
+    
     noStroke();
-    fill(isInGameBackHover ? color(255, 230, 180) : color(180, 160, 120));
+    fill(255, 230, 180); 
     textAlign(CENTER, CENTER);
-    textSize(18);
+    textSize(20); 
     textStyle(BOLD);
-    text('Back', inGameBackX + inGameBackW / 2, inGameBackY + inGameBackH / 2);
+    text('Main Menu', inGameBackX + inGameBackW / 2, inGameBackY + inGameBackH / 2);
     textStyle(NORMAL);
 
     this.inGameBackBtn = { x: inGameBackX, y: inGameBackY, w: inGameBackW, h: inGameBackH };
 
-    if (this.game && this.game.isLoggedIn()) {
-      this.showSwitchPlayerUI();
-      this.switchPlayerBtn.position(this.getDomX(20), this.getDomY(64));
-      this.switchPlayerBtn.size(140, 32);
-    } else {
-      this.hideSwitchPlayerUI();
-    }
-
-    this.drawTopHUDBar(false);
+    this.hideSwitchPlayerUI();
 
     if (this.waveBonusMessage && this.waveBonusTimer > 0) {
       push();
@@ -1968,80 +1944,89 @@ class UIHUD {
   }
 
   drawTowerPlacementPreview() {
+    // 1. 基础状态检查
     if (this.game.state !== GameState.PLAYING) return;
     if (!this.game.selectedTowerType) return;
-    if (getGameMouseY() < HUD_HEIGHT || getGameMouseY() > TOWER_PANEL_TOP) return;
+    
+    // 2. 检查鼠标是否在可放置的垂直区域内（顶栏和底栏之间）
+    let mx = getGameMouseX();
+    let my = getGameMouseY();
+    if (my < HUD_HEIGHT || my > TOWER_PANEL_TOP) return;
 
+    // 3. 获取当前塔的配置
     let type = this.game.selectedTowerType;
     let cfg = TOWER_TYPES[type] || TOWER_TYPES.basic;
     let currentGold = this.game.economy ? this.game.economy.getGold() : 0;
     let canAfford = currentGold >= cfg.cost;
     let [r, g, b] = cfg.color;
 
-    // Snap mouse to grid centre (same formula as GameManager.handleClick)
-    let col = pixelToCol(getGameMouseX());
-    let row = pixelToRow(getGameMouseY());
+    // 4. 将鼠标位置映射到网格坐标
+    let col = pixelToCol(mx);
+    let row = pixelToRow(my);
     let gridX = colToCenterX(col);
     let gridY = rowToCenterY(row);
 
-    // ── Buildability: use the same canBuildAt() as placement logic ──
+    // 5. 核心：计算背景图被压缩后的视觉格子高度
+    // 逻辑：背景图占用的总像素高度除以总行数
+    const safeHeight = TOWER_PANEL_TOP - HUD_HEIGHT; 
+    const visualGridHeight = safeHeight / ROWS; 
+
+    // 6. 检查是否可建造
     let tileOk = this.game.canBuildAt(col, row);
     let canPlace = tileOk && canAfford;
     let blocked = !canPlace;
 
-    // ── Cell highlight overlay ─────────────────────────────────────
+    // 7. 绘制格子高亮层
     push();
     rectMode(CENTER);
     noStroke();
     if (canPlace) {
-      fill(40, 220, 80, 55);    // green — OK to build
+      fill(40, 220, 80, 55);    // 绿色 - 可以建造
     } else {
-      fill(220, 50, 50, 70);    // red   — blocked
+      fill(220, 50, 50, 70);    // 红色 - 被阻挡
     }
-    rect(gridX, gridY, CURRENT_GRID_SIZE, CURRENT_GRID_SIZE, 4);
+    
+    // 关键修正：宽度使用原始尺寸，高度使用计算出的视觉高度，以对齐地图格子
+    rect(gridX, gridY, CURRENT_GRID_SIZE, visualGridHeight, 4);
 
-    // Red ✕ cross when blocked
+    // 8. 如果被阻挡，绘制红色 "✕" 叉号
     if (blocked) {
       stroke(240, 60, 60, 200);
       strokeWeight(2.5);
-      let s = CURRENT_GRID_SIZE * 0.22;
-      line(gridX - s, gridY - s, gridX + s, gridY + s);
-      line(gridX + s, gridY - s, gridX - s, gridY + s);
+      // 叉号也根据视觉高度比例缩放
+      let sW = CURRENT_GRID_SIZE * 0.22;
+      let sH = visualGridHeight * 0.22; 
+      line(gridX - sW, gridY - sH, gridX + sW, gridY + sH);
+      line(gridX + sW, gridY - sH, gridX - sW, gridY + sH);
     }
     pop();
 
-    // ── Range circle ──────────────────────────────────────────────
+    // 9. 绘制攻击范围圆圈
     noFill();
     if (blocked) {
       stroke(220, 60, 60, canAfford ? 90 : 50);
     } else {
       stroke(r, g, b, 110);
     }
-    strokeWeight(type === 'area' ? 2.2 : type === 'crystal' ? 2 : 1.5);
+    strokeWeight(type === 'area' ? 2.2 : 1.5);
     let rangeRadius = type === 'crystal' ? (cfg.boostRadius || cfg.range) : cfg.range;
     ellipse(gridX, gridY, rangeRadius * 2, rangeRadius * 2);
 
-    if (type === 'area') {
-      stroke(blocked ? 220 : r, blocked ? 60 : g, blocked ? 60 : b, canAfford ? 55 : 25);
-      strokeWeight(1);
-      ellipse(gridX, gridY, (cfg.range + 10) * 2, (cfg.range + 10) * 2);
-    }
-
-    // ── Tower preview sprite (only when placement is valid) ────────
+    // 10. 绘制防御塔预览半透明图片
     if (!blocked) {
-      let imgs = (typeof gameImages !== 'undefined') ? gameImages : {};
-      const previewImgMap = { basic: imgs.towerBasic, slow: imgs.towerSlow, area: imgs.towerAreaFire, crystal: imgs.towerCrystal || imgs.towerCrystalActive, steam: imgs.towerSteam || imgs.towerSteamFire, alchemist: imgs.towerAlchemist || imgs.towerAlchemistFire };
-      let previewImg = previewImgMap[type];
+      let previewImg = this.getTowerImage(type);
       if (previewImg && previewImg.width > 0) {
-        tint(r, g, b, 180);
+        tint(255, 180); // 设置透明度
         imageMode(CENTER);
-        let ps = CURRENT_GRID_SIZE - 2;
-        image(previewImg, gridX, gridY, ps, ps);
+        // 防御塔图片可以稍微根据视觉高度也做一点压缩，或者保持比例
+        let imgW = CURRENT_GRID_SIZE - 2;
+        let imgH = visualGridHeight - 2; 
+        image(previewImg, gridX, gridY, imgW, imgH);
         noTint();
       } else {
         noStroke();
         fill(r, g, b, 140);
-        ellipse(gridX, gridY, cfg.size + 6, cfg.size + 6);
+        ellipse(gridX, gridY, cfg.size, cfg.size);
       }
     }
   }
