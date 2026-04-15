@@ -267,30 +267,20 @@ class UIHUD {
   }
 
  getDomX(designX) {
-  // 获取画布元素
-  let cnv = document.querySelector('canvas');
-  if (!cnv) return designX;
-  
-  // 获取画布在网页中的实际位置和缩放后的尺寸
-  let rect = cnv.getBoundingClientRect();
-  
-  // 计算缩放比例：实际宽度 / 设计宽度 (1920)
-  let scale = rect.width / DESIGN_WIDTH;
-  
-  // 最终位置 = 画布左边距 + (设计坐标 * 缩放比例)
-  return rect.left + (designX * scale);
-}
+    let cnv = document.querySelector('canvas');
+    if (!cnv) return designX;
+    let cnvRect = cnv.getBoundingClientRect(); // 使用 cnvRect 变量名
+    let scale = cnvRect.width / DESIGN_WIDTH;
+    return cnvRect.left + (designX * scale);
+  }
 
   getDomY(designY) {
-  let cnv = document.querySelector('canvas');
-  if (!cnv) return designY;
-  
-  let rect = cnv.getBoundingClientRect();
-  let scale = rect.height / DESIGN_HEIGHT;
-  
-  // 最终位置 = 画布上边距 + (设计坐标 * 缩放比例)
-  return rect.top + (designY * scale);
-}
+    let cnv = document.querySelector('canvas');
+    if (!cnv) return designY;
+    let cnvRect = cnv.getBoundingClientRect();
+    let scale = cnvRect.height / DESIGN_HEIGHT;
+    return cnvRect.top + (designY * scale);
+  }
   showLoginUI() {
     if (this.nicknameInput) this.nicknameInput.show();
     if (this.nicknameLoginBtn) this.nicknameLoginBtn.show();
@@ -384,17 +374,7 @@ class UIHUD {
     const cx = CANVAS_WIDTH / 2;
 
     const imgs = typeof gameImages !== 'undefined' ? gameImages : {};
-    const hasStart = imgs.btnStart && imgs.btnStart.width > 0;
-    const hasSettings = imgs.btnSettings && imgs.btnSettings.width > 0;
-    const hasExit = imgs.btnExit && imgs.btnExit.width > 0;
-    const useImages = hasStart && hasSettings && hasExit;
-
-    if (!this._menuBtnDebugLogged) {
-      this._menuBtnDebugLogged = true;
-      console.log('[Debug] Drawing menu buttons, btnStart exists:', !!imgs.btnStart,
-        'width:', imgs.btnStart ? imgs.btnStart.width : 0,
-        'useImages:', useImages);
-    }
+    const useImages = imgs.btnStart && imgs.btnStart.width > 0;
 
     const centerYs = [
       startY + BH / 2,
@@ -402,16 +382,16 @@ class UIHUD {
       startY + (BH + GAP) * 2 + BH / 2
     ];
 
+    const rectData = this.getMenuButtonRects();
+
     for (let i = 0; i < 3; i++) {
       const cy = centerYs[i];
-      const rect = this.getMenuButtonRects()[i];
-      const hovered = getGameMouseX() >= rect.x && getGameMouseX() <= rect.x + rect.w &&
-        getGameMouseY() >= rect.y && getGameMouseY() <= rect.y + rect.h;
-      const pressed = hovered && mouseIsPressed;
+      const bRect = rectData[i]; // 将变量名 rect 改为 bRect
+      const hovered = getGameMouseX() >= bRect.x && getGameMouseX() <= bRect.x + bRect.w &&
+                      getGameMouseY() >= bRect.y && getGameMouseY() <= bRect.y + bRect.h;
 
-      let scaleFactor = 1;
-      if (pressed) scaleFactor = 0.95;
-      else if (hovered) scaleFactor = 1.08;
+      let scaleFactor = hovered ? 1.08 : 1.0;
+      if (hovered && mouseIsPressed) scaleFactor = 0.95;
 
       push();
       translate(cx, cy);
@@ -422,16 +402,14 @@ class UIHUD {
         const img = i === 0 ? imgs.btnStart : (i === 1 ? imgs.btnSettings : imgs.btnExit);
         imageMode(CENTER);
         image(img, cx, cy, BW, BH);
-        imageMode(CORNER);
       } else {
-        // Fallback: dark rounded rect + white text
         noStroke();
         fill(60, 50, 40, 230);
-        rect(rect.x, rect.y, rect.w, rect.h, 12);
+        rect(bRect.x, bRect.y, bRect.w, bRect.h, 12); // 使用修正后的 bRect 变量
         stroke(180, 160, 120);
         strokeWeight(2);
         noFill();
-        rect(rect.x, rect.y, rect.w, rect.h, 12);
+        rect(bRect.x, bRect.y, bRect.w, bRect.h, 12);
         noStroke();
         fill(255);
         textAlign(CENTER, CENTER);
@@ -439,11 +417,8 @@ class UIHUD {
         textStyle(BOLD);
         const labels = ['Start', 'Settings', 'Exit'];
         text(labels[i], cx, cy);
-        textStyle(NORMAL);
       }
-
       pop();
-
       if (hovered) cursor(HAND);
     }
   }
@@ -653,89 +628,91 @@ class UIHUD {
     this.hideSettingsUI();
     this.hideSwitchPlayerUI();
 
-    // 1. 获取缩放比例 (这是解决 DOM 元素错位的关键)
     let cnv = document.querySelector('canvas');
-    let rect = cnv ? cnv.getBoundingClientRect() : { width: DESIGN_WIDTH, height: DESIGN_HEIGHT };
-    let scale = rect.width / DESIGN_WIDTH;
+    let cnvRect = cnv ? cnv.getBoundingClientRect() : { width: DESIGN_WIDTH, height: DESIGN_HEIGHT };
+    let scale = cnvRect.width / DESIGN_WIDTH;
 
-    // 2. 绘制背景
     if (typeof gameImages !== 'undefined' && gameImages.mainBackground && gameImages.mainBackground.width > 0) {
       image(gameImages.mainBackground, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
     } else {
       background(25, 20, 18);
     }
 
-    // 3. 登录面板参数
     let panelW = 640;
-    let panelH = 400; 
+    let panelH = 440; 
     let panelX = CANVAS_WIDTH / 2 - panelW / 2;
     let panelY = CANVAS_HEIGHT / 2 - panelH / 2;
 
-    // 绘制主面板 (加上 rectMode 确保定位准确)
-    push();
-    rectMode(CORNER);
+    
     fill(60, 45, 30, 250); 
     stroke(200, 168, 78);
     strokeWeight(5);
     rect(panelX, panelY, panelW, panelH, 15);
-    noStroke();
 
-    // 4. 面板标题和文字 (由 Canvas 绘制)
-    textAlign(CENTER, CENTER);
+    // --- 核心设置：完全同步按钮文字风格 ---
+    textFont('Georgia'); // 使用与按钮一致的 Georgia 字体
+    textStyle(NORMAL);   // 强制使用常规粗细，不要加粗
+    noStroke();          // 必须取消描边，否则文字会显得粗大模糊
+
+    // 1. 主标题
     fill(255, 215, 100);
+    textAlign(CENTER, CENTER);
     textSize(50);
-    textStyle(BOLD);
     text('Nickname Login', CANVAS_WIDTH / 2, panelY + 70);
 
-    fill(200, 190, 170);
-    textSize(18);
-    textStyle(NORMAL);
-    text('Your progress will be saved to this name.', CANVAS_WIDTH / 2, panelY + 130);
+    // 2. 说明文字（使用按钮的文字颜色 #FFECB3）
+    fill(255, 236, 179); // 对应 HTML 颜色 #FFECB3
+    textSize(20);
+    text('Your progress will be saved to this name.', CANVAS_WIDTH / 2, panelY + 120);
 
-    fill(255, 230, 180);
-    textSize(22);
-    textStyle(BOLD);
-    text('NICKNAME:', CANVAS_WIDTH / 2, panelY + 185);
+    // 3. 错误信息
+    if (this._loginErrorMsg) {
+      fill(255, 120, 120);
+      textSize(20);
+      text("⚠️ " + this._loginErrorMsg, CANVAS_WIDTH / 2, panelY + 155);
+    }
 
-    // 5. DOM 元素定位与尺寸 (输入框和按钮)
+    // 4. NICKNAME 标签（同样使用 #FFECB3）
+    fill(255, 236, 179); 
+    textSize(24);
+    text('NICKNAME:', CANVAS_WIDTH / 2, panelY + 195);
+
     let inputW = 340;
     let inputH = 48;
-    let btnW = 120;
-    let btnH = 50;
-    let btnGap = 40; 
+    let btnW = 140;
+    let btnH = 55;
+    let btnGap = 60; 
 
     this.showLoginUI();
 
-    // --- 输入框：位置和尺寸都要乘以 scale ---
     if (this.nicknameInput) {
       this.nicknameInput.size(inputW * scale, inputH * scale);
-      this.nicknameInput.position(this.getDomX(CANVAS_WIDTH / 2 - inputW / 2), this.getDomY(panelY + 210));
-      this.nicknameInput.style('font-size', (20 * scale) + 'px');
+      this.nicknameInput.position(this.getDomX(CANVAS_WIDTH / 2 - inputW / 2), this.getDomY(panelY + 230));
+      this.nicknameInput.style('font-size', (22 * scale) + 'px');
       this.nicknameInput.style('text-align', 'center');
+      this.nicknameInput.style('font-family', "'Georgia', serif");
+      this.nicknameInput.style('font-weight', 'normal'); // 确保输入框也不加粗
     }
 
-    // --- 按钮布局 ---
-    let totalBtnW = (btnW * 2) + btnGap;
-    let btnStartX = CANVAS_WIDTH / 2 - totalBtnW / 2;
-    let btnY = panelY + 310;
+    let totalBtnAreaW = (btnW * 2) + btnGap;
+    let btnStartX = CANVAS_WIDTH / 2 - totalBtnAreaW / 2;
+    let btnY = panelY + 330;
 
+    // 更新 DOM 按钮样式，确保万无一失
     if (this.nicknameLoginBtn) {
       this.nicknameLoginBtn.size(btnW * scale, btnH * scale);
       this.nicknameLoginBtn.position(this.getDomX(btnStartX), this.getDomY(btnY));
-      this.nicknameLoginBtn.style('font-size', (18 * scale) + 'px');
+      this.nicknameLoginBtn.style('font-size', (20 * scale) + 'px');
+      this.nicknameLoginBtn.style('font-weight', 'normal'); 
+      this.nicknameLoginBtn.style('font-family', "'Georgia', serif");
     }
 
     if (this.nicknameBackBtn) {
       this.nicknameBackBtn.size(btnW * scale, btnH * scale);
       this.nicknameBackBtn.position(this.getDomX(btnStartX + btnW + btnGap), this.getDomY(btnY));
-      this.nicknameBackBtn.style('font-size', (18 * scale) + 'px');
-    }
-
-    // 错误信息
-    if (this._loginErrorMsg) {
-      fill(255, 100, 100);
-      textSize(16);
-      text(this._loginErrorMsg, CANVAS_WIDTH / 2, panelY + 275);
+      this.nicknameBackBtn.style('font-size', (20 * scale) + 'px');
+      this.nicknameBackBtn.style('font-weight', 'normal');
+      this.nicknameBackBtn.style('font-family', "'Georgia', serif");
     }
     
     pop();
