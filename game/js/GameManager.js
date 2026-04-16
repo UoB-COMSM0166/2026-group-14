@@ -1618,24 +1618,26 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
     this.startLevel(this.currentLevel);
   }
 
-  // GameManager.js
+ 
   returnToMenu() {
     console.log("[Game] Returning to Level Selection...");
     
-    // 1. 清理当前关卡数据
+   
     this.towers = [];
     this.projectiles = [];
     this.enemies = [];
-    this.path = null;
-    this.mapGrid = null;
-    this.waveManager = null;
-    this.economy = null;
-    this.landmark = null;
-    this.totalKills = 0;
-    this.waveSurvived = 0;
-    this.finalStats = null;
     this.selectedTowerType = null;
-    this.setState(GameState.MENU);
+    
+    if (this.waveManager) {
+      this.waveManager.stop();
+    }
+    
+    this.state = GameState.LEVEL_SELECT; 
+    this.sound.stopAll();
+    this.sound.playTrack("menu");
+  
+    cursor(ARROW);
+    this.ui.hideAll();
   }
   nextLevel() {
     if (this.currentLevel < TOTAL_LEVELS) {

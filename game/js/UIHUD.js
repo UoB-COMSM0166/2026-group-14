@@ -62,8 +62,7 @@ class UIHUD {
     this.switchPlayerBtn = null;
   }
 
-  // 获取点击了哪个主菜单按钮 (0: Start, 1: Settings, 2: Exit)
-  getClickedMenuButton(mx, my) {
+   getClickedMenuButton(mx, my) {
     const rects = this.getMenuButtonRects();
     for (let i = 0; i < rects.length; i++) {
       const r = rects[i];
@@ -89,7 +88,6 @@ class UIHUD {
       { x: cx - BW / 2, y: startY + (BH + GAP) * 2, w: BW, h: BH }   // Index 2: Exit
     ];
   }
-
   setupUI() {
     this.createMenuButtons();
     this.createSettingsUI();
@@ -1231,11 +1229,12 @@ class UIHUD {
    
     const BTN_W = 180; 
     const BTN_H = 90;
-    const BTN_GAP = 14; 
+    const BTN_GAP = 20; 
+    const count = availableTowers.length;
+    const totalW = BTN_W * count + BTN_GAP * (count - 1);
     
-    
-    const startX = 550;
-
+   
+    const startX = Math.floor((CANVAS_WIDTH - totalW) / 2);
     const tabY = TOWER_PANEL_TOP + Math.floor((TOWER_PANEL_HEIGHT - BTN_H) / 2);
 
     return availableTowers.map((type, i) => ({
