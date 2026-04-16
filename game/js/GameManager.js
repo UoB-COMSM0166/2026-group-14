@@ -1328,6 +1328,17 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
         // --- 核心修改：点击 Exit 直接跳转 GitHub ---
         window.location.href = "https://github.com/UoB-COMSM0166/2026-group-14";
       }
+      // 调用 UI 层的辅助函数获取点击了第几个按钮 (0: Start, 1: Settings, 2: Exit)
+      let btnIdx = this.ui.getClickedMenuButton(mx, my); 
+      
+      if (btnIdx === 0) {
+        this.setState(GameState.LOGIN); // 进入登录流程
+      } else if (btnIdx === 1) {
+        this.setState(GameState.SETTINGS); // 进入设置
+      } else if (btnIdx === 2) {
+        // --- 核心修改：点击 Exit 直接跳转 GitHub ---
+        window.location.href = "https://github.com/UoB-COMSM0166/2026-group-14";
+      }
       return;
     }
 
@@ -1618,8 +1629,13 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
     this.startLevel(this.currentLevel);
   }
 
+  // GameManager.js
   returnToMenu() {
+    console.log("[Game] Returning to Level Selection...");
+    
+    // 1. 清理当前关卡数据
     this.towers = [];
+    this.projectiles = [];
     this.enemies = [];
     this.path = null;
     this.mapGrid = null;
@@ -1632,7 +1648,6 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
     this.selectedTowerType = null;
     this.setState(GameState.MENU);
   }
-
   nextLevel() {
     if (this.currentLevel < TOTAL_LEVELS) {
       this.tryStartLevel(this.currentLevel + 1);
