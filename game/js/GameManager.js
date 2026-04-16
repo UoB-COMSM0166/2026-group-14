@@ -1317,7 +1317,17 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
     }
 
     if (this.state === GameState.MENU) {
-      this.ui.handleMenuClick(mx, my);
+      // 调用 UI 层的辅助函数获取点击了第几个按钮 (0: Start, 1: Settings, 2: Exit)
+      let btnIdx = this.ui.getClickedMenuButton(mx, my); 
+      
+      if (btnIdx === 0) {
+        this.setState(GameState.LOGIN); // 进入登录流程
+      } else if (btnIdx === 1) {
+        this.setState(GameState.SETTINGS); // 进入设置
+      } else if (btnIdx === 2) {
+        // --- 核心修改：点击 Exit 直接跳转 GitHub ---
+        window.location.href = "https://github.com/UoB-COMSM0166/2026-group-14";
+      }
       return;
     }
 
@@ -1608,21 +1618,32 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
     this.startLevel(this.currentLevel);
   }
 
+  // GameManager.js
   returnToMenu() {
+    console.log("[Game] Returning to Level Selection...");
+    
+    // 1. 清理当前关卡数据
     this.towers = [];
+    this.projectiles = [];
     this.enemies = [];
-    this.path = null;
-    this.mapGrid = null;
-    this.waveManager = null;
-    this.economy = null;
-    this.landmark = null;
-    this.totalKills = 0;
-    this.waveSurvived = 0;
-    this.finalStats = null;
-    this.selectedTowerType = 'basic';
-    this.setState(GameState.MENU);
+    this.selectedTowerType = null;
+    
+    if (this.waveManager) {
+      this.waveManager.stop();
+    }
+    
+    // 2. 核心修改：将目标状态改为 LEVEL_SELECT
+    // 原代码可能是：this.state = GameState.MENU;
+    this.state = GameState.LEVEL_SELECT; 
+    
+    // 3. 确保音轨切换回主菜单/选关音乐
+    this.sound.stopAll();
+    this.sound.playTrack("menu");
+    
+    // 4. 重置鼠标和 UI 状态
+    cursor(ARROW);
+    this.ui.hideAll();
   }
-
   nextLevel() {
     if (this.currentLevel < TOTAL_LEVELS) {
       this.tryStartLevel(this.currentLevel + 1);

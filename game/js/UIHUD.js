@@ -62,7 +62,34 @@ class UIHUD {
     this.switchPlayerBtn = null;
   }
 
+  // UIHUD.js
+  // 获取点击了哪个主菜单按钮 (0: Start, 1: Settings, 2: Exit)
+  getClickedMenuButton(mx, my) {
+    const rects = this.getMenuButtonRects();
+    for (let i = 0; i < rects.length; i++) {
+      const r = rects[i];
+      // 检查鼠标是否在按钮矩形范围内
+      if (mx >= r.x && mx <= r.x + r.w && my >= r.y && my <= r.y + r.h) {
+        return i;
+      }
+    }
+    return -1; // 没点到按钮
+  }
 
+  // 辅助函数：定义主菜单按钮的精确位置（必须和绘制时的坐标一致）
+  getMenuButtonRects() {
+    const BW = 225;
+    const BH = 63;
+    const GAP = 19;
+    const startY = CANVAS_HEIGHT / 2 - 50;
+    const cx = CANVAS_WIDTH / 2;
+    
+    return [
+      { x: cx - BW / 2, y: startY, w: BW, h: BH },                   // Index 0: Start
+      { x: cx - BW / 2, y: startY + BH + GAP, w: BW, h: BH },        // Index 1: Settings
+      { x: cx - BW / 2, y: startY + (BH + GAP) * 2, w: BW, h: BH }   // Index 2: Exit
+    ];
+  }
   setupUI() {
     this.createMenuButtons();
     this.createSettingsUI();
