@@ -24,7 +24,7 @@ class GameManager {
     this.totalKills = 0;
     this.waveSurvived = 0;
     this.finalStats = null;
-    this.selectedTowerType = 'basic';
+    this.selectedTowerType = null;
 
     // Prevents click-through when an HTML button callback changes state in the
     // same event that also triggers the canvas mousePressed handler.
@@ -242,7 +242,7 @@ class GameManager {
     this.totalKills = 0;
     this.waveSurvived = 0;
     this.finalStats = null;
-    this.selectedTowerType = 'basic';
+    this.selectedTowerType = null;
     this.availableTowers = LEVEL_AVAILABLE_TOWERS[levelId] || LEVEL_AVAILABLE_TOWERS[1];
     console.log(`[Game] Level ${levelId} available towers:`, this.availableTowers);
 
@@ -1619,7 +1619,7 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
     this.totalKills = 0;
     this.waveSurvived = 0;
     this.finalStats = null;
-    this.selectedTowerType = 'basic';
+    this.selectedTowerType = null;
     this.setState(GameState.MENU);
   }
 
