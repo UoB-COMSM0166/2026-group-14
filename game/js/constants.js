@@ -209,7 +209,7 @@ const ENEMY_KILL_REWARD = {
   goblinBomber: 18,
   divingLizard: 20,
   treantMage: 28,
-  gentlemanBug: 150
+  gentlemanBug: 80
 };
 const WAVE_CLEAR_BONUS_GOLD = 60;
 const WAVE_BONUS_DISPLAY_FRAMES = 120;
@@ -385,9 +385,9 @@ const ENEMY_STATS = {
     healCooldown: 180
   },
   gentlemanBug: {
-    hp: 1500,
-    speed: 0.5,
-    reward: 150,
+    hp: 2500,
+    speed: 0.8,
+    reward: 80,
     ability: 'boss',
     phase2Threshold: 0.6,
     phase3Threshold: 0.3,
@@ -545,7 +545,7 @@ const LEVEL_3_WAVE_CONFIGS = [
       { type: 'goblinBomber', count: 15, hp: 140, speed: 2.4 },
       { type: 'divingLizard', count: 10, hp: 130, speed: 2.1 },
       { type: 'treantMage', count: 6, hp: 260, speed: 1.4 },
-      { type: 'gentlemanBug', count: 2, hp: 1500, speed: 0.5 }
+      { type: 'gentlemanBug', count: 2, hp: 2500, speed: 0.8 }
     ]
   }
 ];
