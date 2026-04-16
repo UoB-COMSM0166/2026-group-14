@@ -114,7 +114,7 @@ const TUTORIAL_STEPS = [
   {
     id: 'gold',
     highlight: 'gold',
-    highlightArea: { x: 238, y: 817, w: 117, h: 83 },
+    highlightArea: { x: 395, y: 825, w: 110, h: 35 },
     title: 'Gold',
     message: 'Building towers costs gold. Kill enemies to earn more gold!',
     position: 'top'
@@ -197,7 +197,7 @@ const ENEMY_INFO = {
   }
 };
 
-const INITIAL_GOLD = 400;
+const INITIAL_GOLD = 300;
 const ENEMY_KILL_REWARD = {
   basic: 15,
   fast: 20,
@@ -219,7 +219,7 @@ const TOWER_TYPES = {
     name: "Basic Tower",
     cost: 60,
     range: 150,
-    damage: 30,
+    damage: 15,
     fireRate: 55,
     bulletSpeed: 5,
     color: [70, 130, 230],
@@ -275,7 +275,7 @@ const TOWER_TYPES = {
     name: "Steam Cannon",
     cost: 180,
     range: 220,
-    damage: 80,
+    damage: 55,
     fireRate: 200,
     bulletSpeed: 8,
     color: [180, 100, 50],
@@ -325,7 +325,7 @@ const TOWER_COST = {
   alchemist: 150
 };
 
-const LANDMARK_MAX_HP = 100;
+const LANDMARK_MAX_HP = 80;
 const ENEMY_REACH_DAMAGE = 20;
 
 const TOTAL_LEVELS = 3;

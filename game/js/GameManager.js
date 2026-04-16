@@ -62,7 +62,7 @@ class GameManager {
       2: {
         name: "Level 2 — Tower Bridge",
         landmarkName: "Tower Bridge",
-        landmarkHp: LANDMARK_MAX_HP + 5,
+        landmarkHp: LANDMARK_MAX_HP + 10,
         landmarkX: CANVAS_WIDTH - 100,
         landmarkY: CANVAS_HEIGHT / 2,
         initialGold: INITIAL_GOLD + 50,
@@ -71,10 +71,10 @@ class GameManager {
       3: {
         name: "Level 3 — Tower of London Siege",
         landmarkName: "Tower of London",
-        landmarkHp: LANDMARK_MAX_HP + 10,
+        landmarkHp: LANDMARK_MAX_HP + 20,
         landmarkX: CANVAS_WIDTH - 100,
         landmarkY: CANVAS_HEIGHT / 2,
-        initialGold: 500,
+        initialGold: INITIAL_GOLD + 100,
         totalWaves: 6
       }
     };
@@ -1317,17 +1317,6 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
     }
 
     if (this.state === GameState.MENU) {
-      // 调用 UI 层的辅助函数获取点击了第几个按钮 (0: Start, 1: Settings, 2: Exit)
-      let btnIdx = this.ui.getClickedMenuButton(mx, my); 
-      
-      if (btnIdx === 0) {
-        this.setState(GameState.LOGIN); // 进入登录流程
-      } else if (btnIdx === 1) {
-        this.setState(GameState.SETTINGS); // 进入设置
-      } else if (btnIdx === 2) {
-        // --- 核心修改：点击 Exit 直接跳转 GitHub ---
-        window.location.href = "https://github.com/UoB-COMSM0166/2026-group-14";
-      }
       // 调用 UI 层的辅助函数获取点击了第几个按钮 (0: Start, 1: Settings, 2: Exit)
       let btnIdx = this.ui.getClickedMenuButton(mx, my); 
       

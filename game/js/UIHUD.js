@@ -1231,12 +1231,11 @@ class UIHUD {
    
     const BTN_W = 180; 
     const BTN_H = 90;
-    const BTN_GAP = 20; 
-    const count = availableTowers.length;
-    const totalW = BTN_W * count + BTN_GAP * (count - 1);
+    const BTN_GAP = 14; 
     
-   
-    const startX = Math.floor((CANVAS_WIDTH - totalW) / 2);
+    
+    const startX = 550;
+
     const tabY = TOWER_PANEL_TOP + Math.floor((TOWER_PANEL_HEIGHT - BTN_H) / 2);
 
     return availableTowers.map((type, i) => ({
