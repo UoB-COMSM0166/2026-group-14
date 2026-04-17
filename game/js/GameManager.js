@@ -49,6 +49,8 @@ class GameManager {
     this.tutorialStep = 0;
     this.tutorialComplete = false;
 
+    this.dismantleMode = false;
+
     this.levelConfigs = {
       1: {
         name: "Level 1 — Big Ben",
@@ -1519,6 +1521,13 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
         return;
       }
 
+      if (this.dismantleMode) {
+        console.log(`[Game] Attempting to dismantle at (${mx}, ${my})`);
+        this.removeTower(mx, my);
+        this.dismantleMode = false; // Exit dismantle mode after one action
+        return;
+      }
+
       if (!this.canBuildAt(col, row)) {
         let tileType = this.mapGrid && this.mapGrid[row] ? this.mapGrid[row][col] : null;
         let reason =
@@ -1597,9 +1606,43 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
     return true;
   }
 
+  removeTower(x, y) {
+    let col = pixelToCol(x);
+    let row = pixelToRow(y);
+    let gridX = colToCenterX(col);
+    let gridY = rowToCenterY(row);
+
+    console.log(`[Game] Checking for tower at col=${col}, row=${row}, gridX=${gridX}, gridY=${gridY}`);
+
+    for (let i = this.towers.length - 1; i >= 0; i--) {
+      let tower = this.towers[i];
+      console.log(`[Game] Tower ${i}: x=${tower.x}, y=${tower.y}, type=${tower.type}`);
+      let dist = Math.sqrt((tower.x - gridX) ** 2 + (tower.y - gridY) ** 2);
+      if (dist < CURRENT_GRID_SIZE / 2) {  // Within half grid size
+        let config = TOWER_TYPES[tower.type];
+        let refund = Math.floor(config.cost * 0.7); // 70% refund
+        this.economy.addGold(refund);
+        this.towers.splice(i, 1);
+
+        // Free the grid cell
+        if (this.mapGrid) {
+          freeTile(this.mapGrid, tower.x, tower.y);  // Use tower's position
+        }
+
+        console.log(`[Game] Removed ${tower.type} tower at (${tower.x}, ${tower.y}), refunded ${refund} gold`);
+        this.sound.play("click1");
+        this._saveRunNow('remove_tower');
+        return true;
+      }
+    }
+    console.log(`[Game] No tower found near (${gridX}, ${gridY})`);
+    return false;
+  }
+
   setSelectedTowerType(towerType) {
     if (!TOWER_TYPES[towerType]) return;
     this.selectedTowerType = towerType;
+    this.dismantleMode = false; // Exit dismantle mode when selecting a tower
   }
 
   pause() {

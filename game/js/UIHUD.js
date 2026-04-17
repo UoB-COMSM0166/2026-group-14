@@ -1458,8 +1458,26 @@ class UIHUD {
     text("Enemies", monsterBtnX + btnW / 2, btnY + btnH - 12);
     this.monsterInfoBtn = { x: monsterBtnX, y: btnY, w: btnW, h: btnH };
 
+    // --- Dismantle 按钮 ---
+    let dismantleBtnX = monsterBtnX + btnW + btnGap;
+    let isDismantleHover = mx >= dismantleBtnX && mx <= dismantleBtnX + btnW && my >= btnY && my <= btnY + btnH;
+    let isDismantleSelected = this.game.dismantleMode;
+    fill((isDismantleHover || isDismantleSelected) ? color(100, 80, 60) : color(55, 45, 35));
+    stroke((isDismantleHover || isDismantleSelected) ? color(220, 180, 100) : color(120, 100, 70));
+    strokeWeight(2);
+    rect(dismantleBtnX, btnY, btnW, btnH, 8);
+
+    fill((isDismantleHover || isDismantleSelected) ? color(255, 230, 180) : color(180, 160, 120));
+    noStroke();
+    textAlign(CENTER, CENTER);
+    textSize(30); // 图标放大
+    text("🛠️", dismantleBtnX + btnW / 2, btnY + btnH / 2 - 8);
+    textSize(16); // 文字标签
+    text("Dismantle", dismantleBtnX + btnW / 2, btnY + btnH / 2 + 20);
+    this.dismantleBtn = { x: dismantleBtnX, y: btnY, w: btnW, h: btnH };
+
     // --- 金币与数值 (右移并放大) ---
-    let coinStartX = monsterBtnX + btnW + btnGap + 40;
+    let coinStartX = dismantleBtnX + btnW + btnGap + 40;
     let coinCX = coinStartX + 50;
     let coinCY = panelCY;
 
@@ -1478,6 +1496,14 @@ class UIHUD {
     textStyle(BOLD);
     text(currentGold, coinCX + 5, coinCY);
     textStyle(NORMAL);
+
+    // Display dismantle mode status
+    if (this.game.dismantleMode) {
+      fill(255, 100, 100);
+      textAlign(RIGHT, CENTER);
+      textSize(20);
+      text("Dismantle Mode", CANVAS_WIDTH - 20, coinCY);
+    }
 
     // ── 塔防选择卡片渲染 (尺寸依赖 getTowerPanelTabs 的新设置) ──
     const thumbImgMap = {
@@ -1931,6 +1957,37 @@ class UIHUD {
   handleTowerPanelClick(mx, my) {
     // Clicks at or below the panel top are always consumed (never place tower)
     if (my < TOWER_PANEL_TOP) return false;
+
+    // Check functional buttons
+    if (this.inGameSettingsBtn && mx >= this.inGameSettingsBtn.x && mx <= this.inGameSettingsBtn.x + this.inGameSettingsBtn.w &&
+      my >= this.inGameSettingsBtn.y && my <= this.inGameSettingsBtn.y + this.inGameSettingsBtn.h) {
+      this.game.sound.play("click1");
+      this.game.setState(GameState.IN_GAME_SETTINGS);
+      return true;
+    }
+
+    if (this.pauseBtn && mx >= this.pauseBtn.x && mx <= this.pauseBtn.x + this.pauseBtn.w &&
+      my >= this.pauseBtn.y && my <= this.pauseBtn.y + this.pauseBtn.h) {
+      this.game.sound.play("click1");
+      this.game.manualPaused = !this.game.manualPaused;
+      return true;
+    }
+
+    if (this.monsterInfoBtn && mx >= this.monsterInfoBtn.x && mx <= this.monsterInfoBtn.x + this.monsterInfoBtn.w &&
+      my >= this.monsterInfoBtn.y && my <= this.monsterInfoBtn.y + this.monsterInfoBtn.h) {
+      this.game.sound.play("click1");
+      this.game.setState(GameState.MONSTER_INFO);
+      return true;
+    }
+
+    if (this.dismantleBtn && mx >= this.dismantleBtn.x && mx <= this.dismantleBtn.x + this.dismantleBtn.w &&
+      my >= this.dismantleBtn.y && my <= this.dismantleBtn.y + this.dismantleBtn.h) {
+      this.game.sound.play("click1");
+      this.game.dismantleMode = !this.game.dismantleMode;
+      this.game.selectedTowerType = null; // Clear tower selection
+      console.log(`[UI] Dismantle mode toggled: ${this.game.dismantleMode}`);
+      return true;
+    }
 
     let buttons = this.towerButtons || this.getTowerPanelTabs();
 
