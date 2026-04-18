@@ -49,6 +49,8 @@ class GameManager {
     this.tutorialStep = 0;
     this.tutorialComplete = false;
 
+    this.confirmExit = false;
+
     this.dismantleMode = false;
 
     this.levelConfigs = {
@@ -888,6 +890,10 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
       this.drawPathEditMode();
     }
 
+    if (this.confirmExit) {
+      this.ui.drawExitConfirmationDialog();
+    }
+
     this.drawHUD();
   }
 
@@ -1469,10 +1475,27 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
         let btn = this.ui.inGameBackBtn;
         if (mx >= btn.x && mx <= btn.x + btn.w && my >= btn.y && my <= btn.y + btn.h) {
           this.sound.play("click1");
-          this.manualPaused = false;
+          this.confirmExit = true;
+          return;
+        }
+      }
+
+      if (this.confirmExit) {
+        if (this.ui.exitConfirmYesBtn && mx >= this.ui.exitConfirmYesBtn.x && mx <= this.ui.exitConfirmYesBtn.x + this.ui.exitConfirmYesBtn.w &&
+            my >= this.ui.exitConfirmYesBtn.y && my <= this.ui.exitConfirmYesBtn.y + this.ui.exitConfirmYesBtn.h) {
+          this.sound.play("click1");
+          this.confirmExit = false;
           this.setState(GameState.MENU);
           return;
         }
+        if (this.ui.exitConfirmNoBtn && mx >= this.ui.exitConfirmNoBtn.x && mx <= this.ui.exitConfirmNoBtn.x + this.ui.exitConfirmNoBtn.w &&
+            my >= this.ui.exitConfirmNoBtn.y && my <= this.ui.exitConfirmNoBtn.y + this.ui.exitConfirmNoBtn.h) {
+          this.sound.play("click1");
+          this.confirmExit = false;
+          return;
+        }
+        this.confirmExit = false;
+        return;
       }
 
       if (this.ui.pauseBtn) {

@@ -2002,6 +2002,59 @@ class UIHUD {
     return true; // always block map placement when click is in panel area
   }
 
+  drawExitConfirmationDialog() {
+    fill(0, 0, 0, 180);
+    rect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+    let dialogW = 420;
+    let dialogH = 210;
+    let dialogX = (CANVAS_WIDTH - dialogW) / 2;
+    let dialogY = (CANVAS_HEIGHT - dialogH) / 2;
+
+    fill(50, 40, 35, 240);
+    stroke(200, 170, 110);
+    strokeWeight(3);
+    rect(dialogX, dialogY, dialogW, dialogH, 14);
+
+    noStroke();
+    fill(255, 220, 180);
+    textAlign(CENTER, CENTER);
+    textSize(26);
+    text("Exit to Main Menu?", dialogX + dialogW / 2, dialogY + 45);
+
+    fill(210, 190, 160);
+    textSize(16);
+    text("This will end the current game. Continue?", dialogX + dialogW / 2, dialogY + 88);
+
+    let btnW = 120;
+    let btnH = 44;
+    let btnY = dialogY + dialogH - 60;
+    let yesX = dialogX + dialogW / 2 - btnW - 16;
+    let noX = dialogX + dialogW / 2 + 16;
+
+    let yesHover = mouseX >= yesX && mouseX <= yesX + btnW && mouseY >= btnY && mouseY <= btnY + btnH;
+    fill(yesHover ? color(110, 160, 90) : color(80, 120, 70));
+    stroke(yesHover ? color(180, 220, 140) : color(150, 180, 120));
+    strokeWeight(2);
+    rect(yesX, btnY, btnW, btnH, 8);
+    noStroke();
+    fill(255);
+    textSize(18);
+    text("Yes", yesX + btnW / 2, btnY + btnH / 2);
+
+    let noHover = mouseX >= noX && mouseX <= noX + btnW && mouseY >= btnY && mouseY <= btnY + btnH;
+    fill(noHover ? color(160, 90, 90) : color(130, 80, 80));
+    stroke(noHover ? color(220, 140, 140) : color(180, 120, 120));
+    strokeWeight(2);
+    rect(noX, btnY, btnW, btnH, 8);
+    noStroke();
+    fill(255);
+    text("No", noX + btnW / 2, btnY + btnH / 2);
+
+    this.exitConfirmYesBtn = { x: yesX, y: btnY, w: btnW, h: btnH };
+    this.exitConfirmNoBtn = { x: noX, y: btnY, w: btnW, h: btnH };
+  }
+
   drawTowerPlacementPreview() {
     // 1. 基础状态检查
     if (this.game.state !== GameState.PLAYING) return;
