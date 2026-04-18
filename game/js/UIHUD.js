@@ -1299,7 +1299,7 @@ class UIHUD {
     fill(255, 220, 150);
     noStroke();
     textAlign(CENTER, TOP);
-    textSize(18);
+    textSize(20);
     textStyle(BOLD);
     text(config.name, tipX + tipW / 2, tipY + 12);
     textStyle(NORMAL);
@@ -1310,11 +1310,11 @@ class UIHUD {
     noStroke();
 
     let attrY = tipY + 48;
-    let lineH = 20;
+    let lineH = 22;
     let labelX = tipX + 15;
     let valueX = tipX + tipW - 15;
 
-    textSize(13);
+    textSize(15);
 
     fill(200, 200, 200);
     textAlign(LEFT, TOP);
@@ -1353,7 +1353,7 @@ class UIHUD {
     if (specialText) {
       fill(255, 200, 100);
       textAlign(CENTER, TOP);
-      textSize(11);
+      textSize(13);
       text(specialText, tipX + tipW / 2, attrY + 5);
     }
 
@@ -1607,8 +1607,8 @@ class UIHUD {
     let cfg = TOWER_TYPES[tower.type] || {};
     let x = tower.x + 45;
     let y = tower.y - 30;
-    let w = 180;
-    let h = tower.type === 'crystal' ? 110 : 70;
+    let w = 200;
+    let h = tower.type === 'crystal' ? 120 : 80;
 
     push();
     fill(0, 0, 0, 200);
@@ -1620,13 +1620,13 @@ class UIHUD {
 
     fill(255);
     textAlign(LEFT, TOP);
-    textSize(14);
+    textSize(16);
     textStyle(BOLD);
     text(cfg.name || tower.type, x + 10, y + 10);
     textStyle(NORMAL);
-    textSize(12);
+    textSize(14);
     fill(200);
-    text(`$${cfg.cost}`, x + 10, y + 30);
+    text(`Cost: $${cfg.cost}`, x + 10, y + 32);
 
     if (tower.type === 'crystal') {
       let boostedCount = this.game.towers.filter(t =>
@@ -1634,13 +1634,13 @@ class UIHUD {
         dist(t.x, t.y, tower.x, tower.y) <= tower.boostRadius
       ).length;
       fill(200, 150, 255);
-      text(`Boosting ${boostedCount} towers`, x + 10, y + 50);
-      text(`+${Math.round(tower.boostDamage * 100)}% Damage`, x + 10, y + 68);
-      text(`+${Math.round(tower.boostFireRate * 100)}% Fire Rate`, x + 10, y + 86);
+      text(`Boosting: ${boostedCount} towers`, x + 10, y + 52);
+      text(`Damage: +${Math.round(tower.boostDamage * 100)}%`, x + 10, y + 70);
+      text(`Fire Rate: +${Math.round(tower.boostFireRate * 100)}%`, x + 10, y + 88);
     } else if (!tower.isSupport) {
       fill(180);
-      text(`Dmg: ${tower.getEffectiveDamage ? tower.getEffectiveDamage() : tower.damage}`, x + 10, y + 50);
-      text(`Range: ${tower.range}`, x + 10, y + 65);
+      text(`Damage: ${tower.getEffectiveDamage ? tower.getEffectiveDamage() : tower.damage}`, x + 10, y + 52);
+      text(`Range: ${tower.range}px`, x + 10, y + 70);
     }
     pop();
   }
@@ -2248,32 +2248,32 @@ class UIHUD {
     // Row 1: Enemy name
     fill(255, 220, 150);
     textAlign(LEFT, TOP);
-    textSize(14);
+    textSize(16);
     textStyle(BOLD);
     text(info.name, textLeftX, y + 12);
     textStyle(NORMAL);
 
     // Row 2: Stats (HP, SPD, Reward) - all on same line
-    let statsY = y + 32;
-    textSize(11);
+    let statsY = y + 34;
+    textSize(13);
 
     fill(255, 110, 110);
     textAlign(LEFT, TOP);
     text("HP:" + stats.hp, textLeftX, statsY);
 
     fill(110, 200, 255);
-    text("SPD:" + stats.speed, textLeftX + 55, statsY);
+    text("SPD:" + stats.speed, textLeftX + 60, statsY);
 
     fill(255, 215, 0);
-    text("$" + stats.reward, textLeftX + 115, statsY);
+    text("$" + stats.reward, textLeftX + 125, statsY);
 
     // Row 3: Ability text (below stats, within right section only)
     if (info.ability && info.ability !== 'None') {
-      let abilityY = y + 52;
+      let abilityY = y + 56;
       fill(255, 190, 100);
-      textSize(10);
+      textSize(12);
       textAlign(LEFT, TOP);
-      textLeading(12);
+      textLeading(14);
       // Constrain text to right section only
       text(info.ability, textLeftX, abilityY, textWidth - 5, h - abilityY + y - 8);
     }
