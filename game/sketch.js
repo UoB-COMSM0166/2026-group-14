@@ -2,6 +2,30 @@ let game;
 let _bgImage, _settingsBgImg;
 let gameImages = {};
 let canvas;
+/** p5.Image — custom axe cursor for dismantle mode (set in setup). */
+let dismantleCursorImg;
+
+function createDismantleAxeCursor() {
+  let g = createGraphics(40, 40);
+  g.pixelDensity(1);
+  g.clear();
+  g.strokeCap(ROUND);
+  g.stroke(88, 52, 24);
+  g.strokeWeight(5);
+  g.line(9, 33, 23, 15);
+  g.noStroke();
+  g.fill(198, 206, 218);
+  g.beginShape();
+  g.vertex(22, 11);
+  g.vertex(39, 15);
+  g.vertex(33, 26);
+  g.vertex(23, 19);
+  g.endShape(CLOSE);
+  g.stroke(62, 66, 74);
+  g.strokeWeight(1.5);
+  g.line(22, 11, 33, 26);
+  return g.get(0, 0, 40, 40);
+}
 
 let scaleFactor = 1;
 let canvasWidth, canvasHeight;
@@ -128,6 +152,8 @@ function setup() {
   canvas.elt.tabIndex = 0;
   canvas.elt.style.outline = 'none';
   frameRate(FPS);
+
+  dismantleCursorImg = createDismantleAxeCursor();
 
   console.log(`[Debug] Screen: ${windowWidth}x${windowHeight}`);
   console.log(`[Debug] Canvas: ${canvasWidth}x${canvasHeight}`);
