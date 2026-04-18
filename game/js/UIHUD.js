@@ -1034,8 +1034,8 @@ class UIHUD {
     textSize(24);
     text("London is saved!", CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 - 175);
 
-    let panelW = 440;
-    let panelH = 180;
+    let panelW = 500;
+    let panelH = 208;
     let panelX = CANVAS_WIDTH / 2 - panelW / 2;
     let panelY = CANVAS_HEIGHT / 2 - 120;
     fill(0, 0, 0, 120);
@@ -1045,21 +1045,30 @@ class UIHUD {
     noStroke();
 
     fill(235);
-    textAlign(LEFT, CENTER);
-    textSize(24);
-    let lineX = panelX + 24;
-    text(`Landmark HP: ${stats.landmarkHp}/${stats.landmarkMaxHp}`, lineX, panelY + 35);
-    text(`Enemies Defeated: ${stats.totalKills}`, lineX, panelY + 75);
-    text(`Gold Remaining: ${stats.goldRemaining}`, lineX, panelY + 115);
-    text(`Waves Survived: ${stats.waveSurvived}/${stats.totalWaves}`, lineX, panelY + 155);
+    textAlign(LEFT, TOP);
+    textSize(22);
+    textLeading(26);
+    let lineX = panelX + 28;
+    let lineY = panelY + 28;
+    let lineStep = 40;
+    text(`Landmark HP: ${stats.landmarkHp}/${stats.landmarkMaxHp}`, lineX, lineY);
+    text(`Enemies Defeated: ${stats.totalKills}`, lineX, lineY + lineStep);
+    text(`Gold Remaining: ${stats.goldRemaining}`, lineX, lineY + lineStep * 2);
+    text(`Waves Survived: ${stats.waveSurvived}/${stats.totalWaves}`, lineX, lineY + lineStep * 3);
 
-    let buttonY = panelY + panelH + 35;
+    let buttonY = panelY + panelH + 32;
+    let btnH = 48;
+    let btnWPlay = 158;
+    let btnWLevel = 178;
+    let btnGap = 22;
+    let btnRowW = btnWPlay + btnGap + btnWLevel;
+    let btnStartX = CANVAS_WIDTH / 2 - btnRowW / 2;
     this._drawEndScreenButton(
-      { label: "Play Again", x: CANVAS_WIDTH / 2 - 160, y: buttonY, w: 140, h: 46, action: "restart" },
+      { label: "Play Again", x: btnStartX, y: buttonY, w: btnWPlay, h: btnH, action: "restart" },
       { r: 40, g: 130, b: 70 }
     );
     this._drawEndScreenButton(
-      { label: "Main Menu", x: CANVAS_WIDTH / 2 + 20, y: buttonY, w: 140, h: 46, action: "menu" },
+      { label: "Level Select", x: btnStartX + btnWPlay + btnGap, y: buttonY, w: btnWLevel, h: btnH, action: "menu" },
       { r: 95, g: 80, b: 50 }
     );
   }
@@ -1089,8 +1098,8 @@ class UIHUD {
     fill(255, 170, 170);
     text("Big Ben has fallen...", CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 - 175);
 
-    let panelW = 440;
-    let panelH = 145;
+    let panelW = 500;
+    let panelH = 172;
     let panelX = CANVAS_WIDTH / 2 - panelW / 2;
     let panelY = CANVAS_HEIGHT / 2 - 105;
     fill(0, 0, 0, 120);
@@ -1100,20 +1109,29 @@ class UIHUD {
     noStroke();
 
     fill(235);
-    textAlign(LEFT, CENTER);
-    textSize(24);
-    let lineX = panelX + 24;
-    text(`Waves Survived: ${stats.waveSurvived}/${stats.totalWaves}`, lineX, panelY + 35);
-    text(`Enemies Defeated: ${stats.totalKills}`, lineX, panelY + 75);
-    text(`Gold Remaining: ${stats.goldRemaining}`, lineX, panelY + 115);
+    textAlign(LEFT, TOP);
+    textSize(22);
+    textLeading(26);
+    let lineX = panelX + 28;
+    let lineY = panelY + 32;
+    let lineStep = 44;
+    text(`Waves Survived: ${stats.waveSurvived}/${stats.totalWaves}`, lineX, lineY);
+    text(`Enemies Defeated: ${stats.totalKills}`, lineX, lineY + lineStep);
+    text(`Gold Remaining: ${stats.goldRemaining}`, lineX, lineY + lineStep * 2);
 
-    let buttonY = panelY + panelH + 35;
+    let buttonY = panelY + panelH + 32;
+    let btnH = 48;
+    let btnWTry = 158;
+    let btnWLevel = 178;
+    let btnGap = 22;
+    let btnRowW = btnWTry + btnGap + btnWLevel;
+    let btnStartX = CANVAS_WIDTH / 2 - btnRowW / 2;
     this._drawEndScreenButton(
-      { label: "Try Again", x: CANVAS_WIDTH / 2 - 160, y: buttonY, w: 140, h: 46, action: "restart" },
+      { label: "Try Again", x: btnStartX, y: buttonY, w: btnWTry, h: btnH, action: "restart" },
       { r: 135, g: 45, b: 45 }
     );
     this._drawEndScreenButton(
-      { label: "Main Menu", x: CANVAS_WIDTH / 2 + 20, y: buttonY, w: 140, h: 46, action: "menu" },
+      { label: "Level Select", x: btnStartX + btnWTry + btnGap, y: buttonY, w: btnWLevel, h: btnH, action: "menu" },
       { r: 95, g: 80, b: 50 }
     );
   }
@@ -1648,8 +1666,12 @@ class UIHUD {
     let cfg = TOWER_TYPES[tower.type] || {};
     let x = tower.x + 45;
     let y = tower.y - 30;
-    let w = 200;
-    let h = tower.type === 'crystal' ? 120 : 80;
+    let w = 236;
+    let pad = 14;
+    let titleSize = 17;
+    let bodySize = 15;
+    let lineLead = 22;
+    let h = tower.type === 'crystal' ? 156 : 118;
 
     push();
     fill(0, 0, 0, 200);
@@ -1659,15 +1681,22 @@ class UIHUD {
     rect(x, y, w, h, 8);
     noStroke();
 
+    let tx = x + pad;
+    let ty = y + pad;
+
     fill(255);
     textAlign(LEFT, TOP);
-    textSize(16);
+    textSize(titleSize);
+    textLeading(lineLead);
     textStyle(BOLD);
-    text(cfg.name || tower.type, x + 10, y + 10);
+    text(cfg.name || tower.type, tx, ty, w - pad * 2, titleSize + 8);
     textStyle(NORMAL);
-    textSize(14);
+
+    let bodyY = ty + titleSize + 10;
+    textSize(bodySize);
+    textLeading(lineLead);
     fill(200);
-    text(`Cost: $${cfg.cost}`, x + 10, y + 32);
+    text(`Cost: $${cfg.cost}`, tx, bodyY, w - pad * 2, lineLead * 2);
 
     if (tower.type === 'crystal') {
       let boostedCount = this.game.towers.filter(t =>
@@ -1675,13 +1704,18 @@ class UIHUD {
         dist(t.x, t.y, tower.x, tower.y) <= tower.boostRadius
       ).length;
       fill(200, 150, 255);
-      text(`Boosting: ${boostedCount} towers`, x + 10, y + 52);
-      text(`Damage: +${Math.round(tower.boostDamage * 100)}%`, x + 10, y + 70);
-      text(`Fire Rate: +${Math.round(tower.boostFireRate * 100)}%`, x + 10, y + 88);
+      let y1 = bodyY + lineLead;
+      let y2 = y1 + lineLead;
+      let y3 = y2 + lineLead;
+      text(`Boosting: ${boostedCount} towers`, tx, y1, w - pad * 2, lineLead * 2);
+      text(`Damage: +${Math.round(tower.boostDamage * 100)}%`, tx, y2, w - pad * 2, lineLead * 2);
+      text(`Fire Rate: +${Math.round(tower.boostFireRate * 100)}%`, tx, y3, w - pad * 2, lineLead * 2);
     } else if (!tower.isSupport) {
       fill(180);
-      text(`Damage: ${tower.getEffectiveDamage ? tower.getEffectiveDamage() : tower.damage}`, x + 10, y + 52);
-      text(`Range: ${tower.range}px`, x + 10, y + 70);
+      let y1 = bodyY + lineLead;
+      let y2 = y1 + lineLead;
+      text(`Damage: ${tower.getEffectiveDamage ? tower.getEffectiveDamage() : tower.damage}`, tx, y1, w - pad * 2, lineLead * 2);
+      text(`Range: ${tower.range}px`, tx, y2, w - pad * 2, lineLead * 2);
     }
     pop();
   }
@@ -2047,10 +2081,11 @@ class UIHUD {
     fill(0, 0, 0, 180);
     rect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-    let dialogW = 420;
-    let dialogH = 210;
+    let dialogW = 580;
+    let dialogH = 268;
     let dialogX = (CANVAS_WIDTH - dialogW) / 2;
     let dialogY = (CANVAS_HEIGHT - dialogH) / 2;
+    let innerPad = 36;
 
     fill(50, 40, 35, 240);
     stroke(200, 170, 110);
@@ -2059,43 +2094,57 @@ class UIHUD {
 
     noStroke();
     fill(255, 220, 180);
-    textAlign(CENTER, CENTER);
-    textSize(26);
-    text("Return to level select?", dialogX + dialogW / 2, dialogY + 45);
+    textAlign(CENTER, TOP);
+    textSize(28);
+    textLeading(32);
+    text("Return to level select?", dialogX + dialogW / 2, dialogY + innerPad, dialogW - innerPad * 2, 44);
 
     fill(210, 190, 160);
-    textSize(16);
-    text("Your run will end (progress is still saved on your profile). Continue?", dialogX + dialogW / 2, dialogY + 88);
+    textSize(18);
+    textLeading(24);
+    let bodyTop = dialogY + innerPad + 50;
+    let bodyW = dialogW - innerPad * 2;
+    text(
+      "Your run will end (progress is still saved on your profile). Continue?",
+      dialogX + dialogW / 2,
+      bodyTop,
+      bodyW,
+      130
+    );
 
-    let btnW = 120;
-    let btnH = 44;
-    let btnY = dialogY + dialogH - 60;
-    let yesX = dialogX + dialogW / 2 - btnW - 16;
-    let noX = dialogX + dialogW / 2 + 16;
+    let btnH = 48;
+    let btnWLevel = 178;
+    let btnWCancel = 128;
+    let btnGap = 20;
+    let btnY = dialogY + dialogH - innerPad - btnH;
+    let btnRowW = btnWLevel + btnGap + btnWCancel;
+    let levelBtnX = dialogX + (dialogW - btnRowW) / 2;
+    let cancelX = levelBtnX + btnWLevel + btnGap;
 
     let gmx = typeof getGameMouseX === 'function' ? getGameMouseX() : mouseX;
     let gmy = typeof getGameMouseY === 'function' ? getGameMouseY() : mouseY;
-    let yesHover = gmx >= yesX && gmx <= yesX + btnW && gmy >= btnY && gmy <= btnY + btnH;
+    let yesHover = gmx >= levelBtnX && gmx <= levelBtnX + btnWLevel && gmy >= btnY && gmy <= btnY + btnH;
     fill(yesHover ? color(110, 160, 90) : color(80, 120, 70));
     stroke(yesHover ? color(180, 220, 140) : color(150, 180, 120));
     strokeWeight(2);
-    rect(yesX, btnY, btnW, btnH, 8);
+    rect(levelBtnX, btnY, btnWLevel, btnH, 8);
     noStroke();
     fill(255);
+    textAlign(CENTER, CENTER);
     textSize(18);
-    text("Yes", yesX + btnW / 2, btnY + btnH / 2);
+    text("Level Select", levelBtnX + btnWLevel / 2, btnY + btnH / 2);
 
-    let noHover = gmx >= noX && gmx <= noX + btnW && gmy >= btnY && gmy <= btnY + btnH;
+    let noHover = gmx >= cancelX && gmx <= cancelX + btnWCancel && gmy >= btnY && gmy <= btnY + btnH;
     fill(noHover ? color(160, 90, 90) : color(130, 80, 80));
     stroke(noHover ? color(220, 140, 140) : color(180, 120, 120));
     strokeWeight(2);
-    rect(noX, btnY, btnW, btnH, 8);
+    rect(cancelX, btnY, btnWCancel, btnH, 8);
     noStroke();
     fill(255);
-    text("No", noX + btnW / 2, btnY + btnH / 2);
+    text("Cancel", cancelX + btnWCancel / 2, btnY + btnH / 2);
 
-    this.exitConfirmYesBtn = { x: yesX, y: btnY, w: btnW, h: btnH };
-    this.exitConfirmNoBtn = { x: noX, y: btnY, w: btnW, h: btnH };
+    this.exitConfirmYesBtn = { x: levelBtnX, y: btnY, w: btnWLevel, h: btnH };
+    this.exitConfirmNoBtn = { x: cancelX, y: btnY, w: btnWCancel, h: btnH };
   }
 
   drawTowerPlacementPreview() {
