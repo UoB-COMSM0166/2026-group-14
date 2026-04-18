@@ -29,6 +29,11 @@ class UIHUD {
     this.placementMessage = '';
     this.placementMessageUntilFrame = 0;
 
+    this.dismantleRefundTimer = 0;
+    this.dismantleRefundAmount = 0;
+    this.dismantleRefundX = 0;
+    this.dismantleRefundY = 0;
+
     this.endScreenButtons = [];
     this.towerPanelTabs = [];
     this._panelLogged = false;  // print tab rects once to console
@@ -867,8 +872,8 @@ class UIHUD {
     this.endScreenButtons = [];
     cursor(ARROW);
     this.drawTopHUDBar(false);
-    let inGameBackX = 160;
-    let inGameBackW = 160;
+    let inGameBackX = 150;
+    let inGameBackW = 180;
     let inGameBackH = 40; 
     let inGameBackY = (HUD_HEIGHT - inGameBackH) / 2; 
     
@@ -888,7 +893,7 @@ class UIHUD {
     textAlign(CENTER, CENTER);
     textSize(20); 
     textStyle(BOLD);
-    text('Main Menu', inGameBackX + inGameBackW / 2, inGameBackY + inGameBackH / 2);
+    text('Level Select', inGameBackX + inGameBackW / 2, inGameBackY + inGameBackH / 2);
     textStyle(NORMAL);
 
     this.inGameBackBtn = { x: inGameBackX, y: inGameBackY, w: inGameBackW, h: inGameBackH };
@@ -951,8 +956,44 @@ class UIHUD {
       text(this.placementMessage, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
     }
 
-    this.drawTowerPanel();
+       this.drawTowerPanel();
     this.drawTowerHoverInfo();
+
+    if (this.dismantleRefundTimer > 0) {
+      this.dismantleRefundTimer--;
+      let t = this.dismantleRefundTimer;
+      let drift = (75 - t) * 0.45;
+      let floatY = this.dismantleRefundY - drift;
+      let alpha = t < 18 ? Math.floor((t / 18) * 255) : 255;
+      push();
+      textAlign(CENTER, CENTER);
+      textSize(30);
+      textStyle(BOLD);
+      stroke(35, 25, 12, alpha);
+      strokeWeight(4);
+      fill(255, 223, 80, alpha);
+      text(`+$${this.dismantleRefundAmount}`, this.dismantleRefundX, floatY);
+      textStyle(NORMAL);
+      noStroke();
+      pop();
+    }
+
+    if (this.game.dismantleMode && !this.game.manualPaused) {
+      let cmx = getGameMouseX();
+      let cmy = getGameMouseY();
+      if (cmy >= HUD_HEIGHT && cmy < TOWER_PANEL_TOP &&
+        cmx >= 0 && cmx <= CANVAS_WIDTH &&
+        typeof dismantleCursorImg !== 'undefined' && dismantleCursorImg && dismantleCursorImg.width > 0) {
+        cursor(dismantleCursorImg, 6, 6);
+      }
+    }
+  }
+
+  showDismantleRefund(amount, x, y) {
+    this.dismantleRefundAmount = amount;
+    this.dismantleRefundX = x;
+    this.dismantleRefundY = y;
+    this.dismantleRefundTimer = 75;
   }
 
   showWaveBonus(message, durationFrames = WAVE_BONUS_DISPLAY_FRAMES) {
@@ -1471,7 +1512,7 @@ class UIHUD {
     noStroke();
     textAlign(CENTER, CENTER);
     textSize(30); // 图标放大
-    text("🛠️", dismantleBtnX + btnW / 2, btnY + btnH / 2 - 8);
+    text('\u{1FA9A}', dismantleBtnX + btnW / 2, btnY + btnH / 2 - 8);
     textSize(16); // 文字标签
     text("Dismantle", dismantleBtnX + btnW / 2, btnY + btnH / 2 + 20);
     this.dismantleBtn = { x: dismantleBtnX, y: btnY, w: btnW, h: btnH };
@@ -2020,11 +2061,11 @@ class UIHUD {
     fill(255, 220, 180);
     textAlign(CENTER, CENTER);
     textSize(26);
-    text("Exit to Main Menu?", dialogX + dialogW / 2, dialogY + 45);
+    text("Return to level select?", dialogX + dialogW / 2, dialogY + 45);
 
     fill(210, 190, 160);
     textSize(16);
-    text("This will end the current game. Continue?", dialogX + dialogW / 2, dialogY + 88);
+    text("Your run will end (progress is still saved on your profile). Continue?", dialogX + dialogW / 2, dialogY + 88);
 
     let btnW = 120;
     let btnH = 44;
@@ -2032,7 +2073,9 @@ class UIHUD {
     let yesX = dialogX + dialogW / 2 - btnW - 16;
     let noX = dialogX + dialogW / 2 + 16;
 
-    let yesHover = mouseX >= yesX && mouseX <= yesX + btnW && mouseY >= btnY && mouseY <= btnY + btnH;
+    let gmx = typeof getGameMouseX === 'function' ? getGameMouseX() : mouseX;
+    let gmy = typeof getGameMouseY === 'function' ? getGameMouseY() : mouseY;
+    let yesHover = gmx >= yesX && gmx <= yesX + btnW && gmy >= btnY && gmy <= btnY + btnH;
     fill(yesHover ? color(110, 160, 90) : color(80, 120, 70));
     stroke(yesHover ? color(180, 220, 140) : color(150, 180, 120));
     strokeWeight(2);
@@ -2042,7 +2085,7 @@ class UIHUD {
     textSize(18);
     text("Yes", yesX + btnW / 2, btnY + btnH / 2);
 
-    let noHover = mouseX >= noX && mouseX <= noX + btnW && mouseY >= btnY && mouseY <= btnY + btnH;
+    let noHover = gmx >= noX && gmx <= noX + btnW && gmy >= btnY && gmy <= btnY + btnH;
     fill(noHover ? color(160, 90, 90) : color(130, 80, 80));
     stroke(noHover ? color(220, 140, 140) : color(180, 120, 120));
     strokeWeight(2);

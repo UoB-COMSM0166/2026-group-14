@@ -1485,7 +1485,7 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
             my >= this.ui.exitConfirmYesBtn.y && my <= this.ui.exitConfirmYesBtn.y + this.ui.exitConfirmYesBtn.h) {
           this.sound.play("click1");
           this.confirmExit = false;
-          this.setState(GameState.MENU);
+          this.returnToMenu();
           return;
         }
         if (this.ui.exitConfirmNoBtn && mx >= this.ui.exitConfirmNoBtn.x && mx <= this.ui.exitConfirmNoBtn.x + this.ui.exitConfirmNoBtn.w &&
@@ -1653,7 +1653,10 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
         }
 
         console.log(`[Game] Removed ${tower.type} tower at (${tower.x}, ${tower.y}), refunded ${refund} gold`);
-        this.sound.play("click1");
+        this.sound.play("bonus", 0.65);
+        if (this.ui && typeof this.ui.showDismantleRefund === 'function') {
+          this.ui.showDismantleRefund(refund, x, y);
+        }
         this._saveRunNow('remove_tower');
         return true;
       }
@@ -1687,21 +1690,24 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
  
   returnToMenu() {
     console.log("[Game] Returning to Level Selection...");
-    
-   
+
+    if (this.isLoggedIn()) this.clearRunSave();
+
     this.towers = [];
     this.projectiles = [];
     this.enemies = [];
     this.selectedTowerType = null;
-    
+    this.dismantleMode = false;
+    this.confirmExit = false;
+
     if (this.waveManager) {
       this.waveManager.stop();
     }
-    
-    this.state = GameState.LEVEL_SELECT; 
+
+    this.setState(GameState.LEVEL_SELECT);
     this.sound.stopAll();
     this.sound.playTrack("menu");
-  
+
     cursor(ARROW);
     this.ui.hideAll();
   }
