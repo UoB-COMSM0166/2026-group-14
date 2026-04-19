@@ -255,9 +255,9 @@ Based on the results, our next development focus will be concentrated on the fol
 - Enhancing game flexibility by adding more background music options and a volume control system
 - Providing clear and accessible information about game mechanics
 
-- One quantitative evaluation (of your choice) 
+One quantitative evaluation (of your choice) 
 
-- Description of how code was tested. 
+Description of how code was tested. 
 
 ### Process 
 
