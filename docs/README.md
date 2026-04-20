@@ -161,8 +161,71 @@ This preparation work has not only improved team collaboration and consensus but
 
 ### Design
 
-- 15% ~750 words 
-- System architecture. Class diagrams, behavioural diagrams. 
+15% ~750 words 
+System architecture. Class diagrams, behavioural diagrams. 
+
+#### System architecture
+The system architecture of the tower defense London is designed as a modular and scalable structure, where each subsystem is responsible for a specific aspect of the gameplay. At the core of the system, the Game Manager acts as the central controller, coordinating the overall game flow and managing the lifecycle of different components.
+
+Once enemies are spawned, the Enemy System manages their behavior, including movement along predefined paths and handling different enemy types. In parallel, the Tower System controls the placement and attack behavior of defensive towers, continuously scanning for targets within range and initiating attacks.
+
+The Combat System serves as the interaction layer between towers and enemies, handling hit detection and damage calculation. Based on combat outcomes, the Economy System updates in-game resources such as game coins, rewarding enemy kills and managing costs for tower construction.
+
+Finally, the UI System reflects all changes in real time, providing visual feedback to the player, including health, economy, wave progression, and game status. Through this modular design, the system ensures clear separation of concerns, making the game easier to maintain, extend, and optimize.
+
+#### Class Diagram
+A more detailed explanation of our game design is provided by the Class Diagram, it effectively illustrates the game flow and core features of the system.
+
+###### Game Control
+
+The Game class is responsible for the overall flow of the program, including starting a level, updating the game during play, and ending the level with a result. The GameState enumeration supports this by defining the main states of the game, such as menu, playing, paused, win, and lose. This helps the game switch clearly between different stages.
+
+###### Level Management
+
+The Level class acts as the centre of the gameplay system. It contains the Map, Landmark, Economy, WaveManager, and the lists of towers and enemies. Because of this, it is responsible for updating the state of the level and checking whether the level has been completed.
+
+##### Map and Building
+
+The Map class stores the enemy path and the available build slots. These build slots define where towers can be placed. The BuildController handles the tower placement process by checking whether a slot is valid and whether the player has enough resources to build a tower. This separates the map layout from the player’s building actions.
+
+##### Combat System
+
+Combat is mainly handled through the interaction between Tower and Enemy. Towers have attributes such as range, damage, and cooldown, which allow them to attack enemies within range. Enemies move along the predefined path, take damage from towers, and can damage the Landmark if they reach the end of the route.
+
+##### Waves and Enemy Creation
+
+The WaveManager controls the spawning and progression of enemy waves during the level. It works together with the Wave class, which stores the number and type of enemies in each wave. The EnemyFactory is used to create enemy objects, helping separate enemy creation from wave control logic.
+
+##### Resources and Interface
+
+The Economy class manages resources such as gold and diamonds, including checking whether the player can afford certain actions and rewarding resources when needed. The UIHUD displays important gameplay information, such as current gold, landmark health, and wave information, helping the player understand the current state of the game.
+
+#### Sequence Diagram
+The following sequence diagram illustrates how the main subsystems of the tower defense game interact during gameplay. It shows the main gameplay update process in Defend London during each frame of the game loop. It explains how the game updates the level, spawns enemies, processes movement and attacks, and checks whether the player has won or lost.
+
+##### Game and Level Update
+
+The process begins when the Game class calls update(dt) on the Level class. This starts the update cycle for the current frame and allows the level to process all active gameplay elements.
+
+##### Enemy Spawning
+
+The Level class first updates the WaveManager. If new enemies need to be spawned, the WaveManager calls the EnemyFactory to create enemies of the required type. These newly created enemies are then added to the list of active enemies in the level.
+
+##### Enemy Movement
+
+After spawning, the Level updates each enemy in the active enemy list. Each enemy moves along the path by running its update(dt, path) method. If an enemy reaches the end of the path, it damages the Landmark and is removed from the level.
+
+##### Tower Attacks
+
+Once enemy movement has been processed, the Level updates each tower. Each tower checks the current list of enemies and attacks when a target is within range. The attack causes damage to the enemy through the takeDamage(damage) method.
+
+##### Enemy Removal and Rewards
+
+If a tower attack kills an enemy, the Economy system rewards the player with gold using addGold(rewardGold). After this, the defeated enemy is removed from the active enemy list. This connects combat directly with the game’s resource system.
+
+##### End Conditions
+
+At the end of the update cycle, the level checks whether the game should finish. If the Landmark has been destroyed, the Game ends the level with a lose result. If the level has been cleared, meaning all waves are completed and all enemies have been removed, the Game ends the level with a win result.
 
 ### Implementation
 
