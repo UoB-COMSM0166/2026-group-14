@@ -46,6 +46,11 @@ VIDEO. Include a demo video of your game here (you don't have to wait until the 
 
 - 5% ~250 words 
 - Describe your game, what is based on, what makes it novel? (what's the "twist"?) 
+Defend London is a London-themed tower defense game that challenges players to protect some of the city’s most iconic landmarks from continuous waves of invading enemies. The game is based on the core mechanics of traditional tower defense games, where players must strategically place and upgrade defensive structures to stop enemies from reaching key objectives. However, rather than using a generic fantasy or medieval setting, Defend London reimagines the genre through a stylized version of London, turning familiar routes, rivers, and landmarks into the foundation of its gameplay and identity.
+
+The game takes inspiration from well-known tower defense design principles such as wave-based progression, resource management, and tactical placement, but introduces a distinctive twist through its setting, visual style, and enemy variety. Each level is framed around recognizable London-inspired locations, such as outer city defenses, the River Thames, and the Tower of London, allowing the environment itself to become part of the player’s experience. This gives the game a stronger sense of place than many conventional tower defense titles.
+
+What makes Defend London novel is its combination of local cultural identity with a mixed roster of unusual enemies, ranging from fantasy-inspired creatures to other hostile forces, all threatening a modern, recognizable city. This contrast between classic tower defense mechanics and a uniquely London-centered theme creates a memorable experience that feels both familiar and original. By combining strategic gameplay, illustrated visuals, and landmark-based level design, Defend London offers a creative reinterpretation of the tower defense genre.
 
 ### Requirements 
 We use a GitHub Kanban board to track our progress; you can access it via the link here.
@@ -53,9 +58,99 @@ https://github.com/orgs/UoB-COMSM0166/projects/168
 
 - 15% ~750 words
 - Early stages design. Ideation process. How did you decide as a team what to develop? Use case diagrams, user stories.
+#### Early stages design & Ideation
+At the early stage of game development, the team discussed a wide range of game genres in terms of playability and difficulty of implementation. Our discussion included two parts. In the first part, we clarified our expectations towards the game. After a brainstorming meeting, the team agreed on the following bullet points:
+- The game genre has to be rare, one that other teams haven't tackled in the past.
+- The game should give players the freedom to build their own strategy to win the game.
+- The vision of the implementation should be clear and straightforward.
+According to these expectations the team compared different games.
 
-Reflection:
+| Game  | Description | Issue | 
+| :--- | :--- | 
+| **Action Games** | Combat-focused gameplay requiring timed attacks, parries, and pattern recognition | the enemy's fighting techniques are difficult to develop, as they have to response to player's actions in a fast and logical way in in terms of dodges, attacks and counter-attacks.|
+| **Puzzle Games** | A logic-based game where players interact with environmental elements or abstract mechanics to progress. | this type of games require a full reasonable storytelling, that includes good hint systems that lead players to solve the mistery step by step with intensity, it is time consuming and complicated to create a interesting story and banlance the puzzles betweeen being to difficult and too boring.|
+| **Shooting Games** | Combat centered on ranged weapons, requiring spatial awareness, aiming precision, and tactical positioning.| many teams already implemented this game idea in the past.|
 
+During the comparison, the team finally came to the decision to develop a tower defense game. The reasons for this decision were a mix of the pros and cons of different game genres:
+
+- Only a few teams in the past explored this topic, making it different from other groups.
+- The game is structured; the attacks and movement of enemies are predictable, making it easy to define the game rules.
+- Players can win the game by developing their own defense strategy.
+
+#### Paper prototype
+During the discussion, we analyzed a range of possible gameplay ideas and considered several different types of games that could be developed for the project. This stage helped us explore different directions and think about the kind of experience we wanted to create. After comparing these ideas, we selected two prototypes to develop further and discussed them in more detail.
+
+The first prototype was Double Steal, which focused on direct character control in a multi-level environment. In this prototype, the player would move through different floors of the map, avoid dangers, manage health, and complete objectives in various locations. The second prototype was Defend London, a tower defense game focused on defending iconic London landmarks from waves of enemies through tower placement and upgrades.
+
+<video controls src="./demo/paper-prototype.MOV" title="Tower Defense London"></video>
+
+<video controls src="./demo/paper-prototype2.mp4" title="Double Steal"></video>
+
+After comparing the two concepts, we decided to continue with Defend London because it offered a more focused and coherent gameplay structure. It also seemed more suitable for teamwork because the mechanics could be divided more naturally into separate systems, such as map design, enemy behavior, tower logic, and interface development.
+
+#### Identifying stakeholders
+We identified stakeholders using an onion model approach
+![Onion model](./images/onion_model.png)
+
+### Use Case Diagram and Use Case Specifications
+In the next step, we laid the foundation for further complicated system design. Before we stepped into detailed implementation, we created a Use Case Diagram to identify system requirements from the player's perspective.
+
+![Use Case Diagram](./images/use_case.png)
+
+The primary actor is the player, who can start the game from the menu. The player is involved in most actions of the game. After entering the game, the player must make decisions regarding placing the right towers to defend the city. Players can also choose background music in the menu to create different atmospheres for combat.
+
+#### Main Flow
+- The player starts game
+- The system starts enemy waves
+- The player selects towers 
+- The player strategically places towers to defend the city
+
+#### Alternative Flow
+- The player opens settings menu
+- The player chooses a track
+
+### Epics and User Stories
+In order to design a clear development roadmap, we created user stories to clarify the main goals of the development.
+
+The core stakeholders for the game are the players whom the game has to entertain; the development plan must rely on their expectations and requirements.
+
+- As a Casual Player, I want to have an "Auto-Collect" feature for fallen resources, so that I can focus on tower placement strategy rather than clicking every dropped coin.
+- As a Strategic Player, I want to see the "Attack Range" of a tower before I commit to placing it, so that I can optimize my defense layout without having to memorize the radius of every unit.
+- As a Strategic Player, I want to see a "Next Wave Preview" showing which enemy types are coming, so that I don't feel cheated by a sudden influx of flying enemies I wasn't prepared for.
+
+The success of game development depends on close collaboration between different roles in the team; therefore, we analyzed the requirements of our team members.
+
+- As a Developer, I want to build the enemy waves system using a "Modular Script," so that the design team can add new enemy types without requiring a complete rewrite of the core code.
+- As a Game Designer, I want to design the enemy wave with a combination of different enemy types, offering a satisfying variety of gameplay.
+
+Alongside the user stories, we created our essential epics that map to the most important game features we have to implement.
+
+#### Epic 1 - Enemy Wave System
+Description: Design and implement a scalable system that handles enemy spawning, pathfinding, and progressive difficulty scaling.
+AC 1: Support for at least three enemy archetypes (Standard, Fast, Tank) with varying health and speed.
+AC 2: Enemies must successfully navigate from a designated "Start Point" to a "Base/End Point" using pathfinding.
+
+#### Epic 2 - Tower System
+Description: It allows players to build and manage defenses. This system must be modular to allow for easy addition of new tower types during development.
+AC 1: Players can select a tower from a shop and place it on valid position.
+AC 2: Towers automatically detect and fire upon enemies within their specific range.
+
+#### Epic 3 - Game Interface
+Description: It provides real-time data (resources, health) and navigate players to different game actions.#
+AC 1: IT displays real-time updates for Player Health, coins, and Current Wave Number.
+AC 2: A functional setting menu that allows players to adjust volume or change BGM.
+
+#### Epic 4 - Game Music & Audio
+Description: The auditory layer designed to enhance immersion and provide feedback.
+AC 1: Unique sound effects for core actions: Tower Placement, Enemy Death, and Base Damage.
+AC 2: Implement BGMS to create different atomosphere.
+
+#### Epic 5 - Game Map & Environment
+Description: The tactical arena where the gameplay unfolds. It defines the "Grid" for building and the "Path" for enemies
+AC 1: A grid-based map system that distinguishes between path for enemies and tower grids.
+AC 2: Visual environment assets including trees, rocks and buildings that match the game's artistic theme.
+
+#### Reflection:
 At this stage of the project, our team has been focusing on the preparation work for developing a tower defense game. Through this process, we have gained a basic understanding of Epics, User Stories, Acceptance Criteria, and their roles in the project.
 
 At first, we regarded Epics as broad and abstract goals, and User Stories simply as a list of scattered features. Through group discussion and practice, we gradually realized that Epics represent the core value of the game, while User Stories serve as a critical bridge to translate these high-level values into user-centered and actionable tasks.
