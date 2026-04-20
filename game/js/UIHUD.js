@@ -1797,46 +1797,84 @@ class UIHUD {
 
     pop();
   }
-
+  
   drawTutorialDarkOverlay(highlightType) {
-    fill(0, 0, 0, 180);
+  if (highlightType === 'path' && this.game && this.game.path && this.game.path.waypoints) {
+    push();
+
+    let wps = this.game.path.waypoints;
+    let revealWidth = CURRENT_GRID_SIZE * 0.92;
+    let borderWidth = 8;
+
+    fill(35, 28, 20, 150);
     noStroke();
     rectMode(CORNER);
+    rect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-    let highlightArea = this.getTutorialHighlightArea(highlightType);
+    drawingContext.save();
+    drawingContext.globalCompositeOperation = 'destination-out';
 
-    if (highlightArea && highlightType !== 'none') {
-      let hx = highlightArea.x;
-      let hy = highlightArea.y;
-      let hw = highlightArea.w;
-      let hh = highlightArea.h;
-      let pad = 10;
-
-      // Top
-      rect(0, 0, CANVAS_WIDTH, hy - pad);
-      // Bottom
-      rect(0, hy + hh + pad, CANVAS_WIDTH, CANVAS_HEIGHT - (hy + hh + pad));
-      // Left
-      rect(0, hy - pad, hx - pad, hh + pad * 2);
-      // Right
-      rect(hx + hw + pad, hy - pad, CANVAS_WIDTH - (hx + hw + pad), hh + pad * 2);
-
-      // Highlight border
-      stroke(255, 220, 100);
-      strokeWeight(4);
-      noFill();
-      rect(hx - pad, hy - pad, hw + pad * 2, hh + pad * 2, 8);
-
-      // Pulsing glow
-      let pulse = (sin(frameCount * 0.1) + 1) * 0.5;
-      stroke(255, 220, 100, 100 + pulse * 100);
-      strokeWeight(8);
-      rect(hx - pad - 4, hy - pad - 4, hw + pad * 2 + 8, hh + pad * 2 + 8, 12);
-      noStroke();
-    } else {
-      rect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    noFill();
+    stroke(255);
+    strokeWeight(revealWidth);
+    strokeJoin(ROUND);
+    strokeCap(ROUND);
+    beginShape();
+    for (let wp of wps) {
+      vertex(wp.x, wp.y);
     }
+    endShape();
+
+    noStroke();
+    fill(255);
+    for (let wp of wps) {
+      ellipse(wp.x, wp.y, revealWidth, revealWidth);
+    }
+
+    drawingContext.restore();
+
+    noFill();
+    stroke(255, 220, 100, 235);
+    strokeWeight(borderWidth);
+    strokeJoin(ROUND);
+    strokeCap(ROUND);
+    beginShape();
+    for (let wp of wps) {
+      vertex(wp.x, wp.y);
+    }
+    endShape();
+
+    pop();
+    return;
   }
+
+  fill(35, 28, 20, 150);
+  noStroke();
+  rectMode(CORNER);
+
+  let highlightArea = this.getTutorialHighlightArea(highlightType);
+
+  if (highlightArea && highlightType !== 'none') {
+    let hx = highlightArea.x;
+    let hy = highlightArea.y;
+    let hw = highlightArea.w;
+    let hh = highlightArea.h;
+    let pad = 10;
+
+    rect(0, 0, CANVAS_WIDTH, hy - pad);
+    rect(0, hy + hh + pad, CANVAS_WIDTH, CANVAS_HEIGHT - (hy + hh + pad));
+    rect(0, hy - pad, hx - pad, hh + pad * 2);
+    rect(hx + hw + pad, hy - pad, CANVAS_WIDTH - (hx + hw + pad), hh + pad * 2);
+
+    stroke(255, 220, 100);
+    strokeWeight(4);
+    noFill();
+    rect(hx - pad, hy - pad, hw + pad * 2, hh + pad * 2, 8);
+    noStroke();
+  } else {
+    rect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+  }
+}
 
   getTutorialHighlightArea(highlightType) {
     // Use custom highlightArea from step config if defined and non-zero

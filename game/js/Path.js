@@ -62,8 +62,8 @@ function getLevel1Waypoints() {
     { x: 240,  y: 463 },   // → col 4
     { x: 240,  y: 123 },   // ↑ row 2
     { x: 540,  y: 123 },   // → col 9
-    { x: 540,  y: 803 },   // ↓ row 13
-    { x: 840,  y: 803 },   // → col 14
+    { x: 540,  y: 765 },   // ↓ row 13
+    { x: 840,  y: 765 },   // → col 14
     { x: 840,  y: 463 },   // ↑ row 8
     { x: 1820, y: 463 }    // Exit (Big Ben)
   ];
