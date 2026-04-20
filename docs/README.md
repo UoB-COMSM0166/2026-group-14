@@ -44,8 +44,6 @@ VIDEO. Include a demo video of your game here (you don't have to wait until the 
 
 ### Introduction
 
-- 5% ~250 words 
-- Describe your game, what is based on, what makes it novel? (what's the "twist"?) 
 Defend London is a London-themed tower defense game that challenges players to protect some of the city’s most iconic landmarks from continuous waves of invading enemies. The game is based on the core mechanics of traditional tower defense games, where players must strategically place and upgrade defensive structures to stop enemies from reaching key objectives. However, rather than using a generic fantasy or medieval setting, Defend London reimagines the genre through a stylized version of London, turning familiar routes, rivers, and landmarks into the foundation of its gameplay and identity.
 
 The game takes inspiration from well-known tower defense design principles such as wave-based progression, resource management, and tactical placement, but introduces a distinctive twist through its setting, visual style, and enemy variety. Each level is framed around recognizable London-inspired locations, such as outer city defenses, the River Thames, and the Tower of London, allowing the environment itself to become part of the player’s experience. This gives the game a stronger sense of place than many conventional tower defense titles.
@@ -66,10 +64,10 @@ At the early stage of game development, the team discussed a wide range of game 
 According to these expectations the team compared different games.
 
 | Game  | Description | Issue | 
-| :--- | :--- | 
-| **Action Games** | Combat-focused gameplay requiring timed attacks, parries, and pattern recognition | the enemy's fighting techniques are difficult to develop, as they have to response to player's actions in a fast and logical way in in terms of dodges, attacks and counter-attacks.|
-| **Puzzle Games** | A logic-based game where players interact with environmental elements or abstract mechanics to progress. | this type of games require a full reasonable storytelling, that includes good hint systems that lead players to solve the mistery step by step with intensity, it is time consuming and complicated to create a interesting story and banlance the puzzles betweeen being to difficult and too boring.|
-| **Shooting Games** | Combat centered on ranged weapons, requiring spatial awareness, aiming precision, and tactical positioning.| many teams already implemented this game idea in the past.|
+| :--- | :--- | :--- | 
+| **Action Games** | Combat-focused gameplay requiring timed attacks, parries, and pattern recognition | The enemy's fighting techniques are difficult to develop, as they have to respond to the player's actions in a fast and logical way in terms of dodging, attacking, and counter-attacking. |
+| **Puzzle Games** | A logic-based game where players interact with environmental elements or abstract mechanics to progress. | This type of game requires fully reasonable storytelling, including good hint systems that lead players to solve the mystery step by step with intensity. It is time-consuming and complicated to create an interesting story and balance the puzzles between being too difficult and too boring. |
+| **Shooting Games** | Combat centered on ranged weapons, requiring spatial awareness, aiming precision, and tactical positioning.| Many teams have already implemented this game idea in the past.|
 
 During the comparison, the team finally came to the decision to develop a tower defense game. The reasons for this decision were a mix of the pros and cons of different game genres:
 
@@ -82,9 +80,9 @@ During the discussion, we analyzed a range of possible gameplay ideas and consid
 
 The first prototype was Double Steal, which focused on direct character control in a multi-level environment. In this prototype, the player would move through different floors of the map, avoid dangers, manage health, and complete objectives in various locations. The second prototype was Defend London, a tower defense game focused on defending iconic London landmarks from waves of enemies through tower placement and upgrades.
 
-<video controls src="./demo/paper-prototype.MOV" title="Tower Defense London"></video>
+[Watch Demo - Tower Defense London](./demo/paper-prototype.MOV)
 
-<video controls src="./demo/paper-prototype2.mp4" title="Double Steal"></video>
+[Watch Demo - Double Steal](./demo/paper-prototype2.mp4)
 
 After comparing the two concepts, we decided to continue with Defend London because it offered a more focused and coherent gameplay structure. It also seemed more suitable for teamwork because the mechanics could be divided more naturally into separate systems, such as map design, enemy behavior, tower logic, and interface development.
 
@@ -127,28 +125,28 @@ Alongside the user stories, we created our essential epics that map to the most 
 
 #### Epic 1 - Enemy Wave System
 Description: Design and implement a scalable system that handles enemy spawning, pathfinding, and progressive difficulty scaling.
-AC 1: Support for at least three enemy archetypes (Standard, Fast, Tank) with varying health and speed.
-AC 2: Enemies must successfully navigate from a designated "Start Point" to a "Base/End Point" using pathfinding.
+- AC 1: Support for at least three enemy archetypes (Standard, Fast, Tank) with varying health and speed.
+- AC 2: Enemies must successfully navigate from a designated "Start Point" to a "Base/End Point" using pathfinding.
 
 #### Epic 2 - Tower System
 Description: It allows players to build and manage defenses. This system must be modular to allow for easy addition of new tower types during development.
-AC 1: Players can select a tower from a shop and place it on valid position.
-AC 2: Towers automatically detect and fire upon enemies within their specific range.
+- AC 1: Players can select a tower from a shop and place it on valid position.
+- AC 2: Towers automatically detect and fire upon enemies within their specific range.
 
 #### Epic 3 - Game Interface
 Description: It provides real-time data (resources, health) and navigate players to different game actions.#
-AC 1: IT displays real-time updates for Player Health, coins, and Current Wave Number.
-AC 2: A functional setting menu that allows players to adjust volume or change BGM.
+- AC 1: IT displays real-time updates for Player Health, coins, and Current Wave Number.
+- AC 2: A functional setting menu that allows players to adjust volume or change BGM.
 
 #### Epic 4 - Game Music & Audio
 Description: The auditory layer designed to enhance immersion and provide feedback.
-AC 1: Unique sound effects for core actions: Tower Placement, Enemy Death, and Base Damage.
-AC 2: Implement BGMS to create different atomosphere.
+- AC 1: Unique sound effects for core actions: Tower Placement, Enemy Death, and Base Damage.
+- AC 2: Implement BGMS to create different atomosphere.
 
 #### Epic 5 - Game Map & Environment
 Description: The tactical arena where the gameplay unfolds. It defines the "Grid" for building and the "Path" for enemies
-AC 1: A grid-based map system that distinguishes between path for enemies and tower grids.
-AC 2: Visual environment assets including trees, rocks and buildings that match the game's artistic theme.
+- AC 1: A grid-based map system that distinguishes between path for enemies and tower grids.
+- AC 2: Visual environment assets including trees, rocks and buildings that match the game's artistic theme.
 
 #### Reflection:
 At this stage of the project, our team has been focusing on the preparation work for developing a tower defense game. Through this process, we have gained a basic understanding of Epics, User Stories, Acceptance Criteria, and their roles in the project.
