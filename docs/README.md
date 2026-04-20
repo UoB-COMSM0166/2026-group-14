@@ -174,6 +174,7 @@ The Combat System serves as the interaction layer between towers and enemies, ha
 Finally, the UI System reflects all changes in real time, providing visual feedback to the player, including health, economy, wave progression, and game status. Through this modular design, the system ensures clear separation of concerns, making the game easier to maintain, extend, and optimize.
 
 #### Class Diagram
+![Class-Diagram](./images/class-diagram.png)
 A more detailed explanation of our game design is provided by the Class Diagram, it effectively illustrates the game flow and core features of the system.
 
 ###### Game Control
@@ -201,6 +202,7 @@ The WaveManager controls the spawning and progression of enemy waves during the 
 The Economy class manages resources such as gold and diamonds, including checking whether the player can afford certain actions and rewarding resources when needed. The UIHUD displays important gameplay information, such as current gold, landmark health, and wave information, helping the player understand the current state of the game.
 
 #### Sequence Diagram
+![Sequence-Diagram](./images/sequence-diagram.png)
 The following sequence diagram illustrates how the main subsystems of the tower defense game interact during gameplay. It shows the main gameplay update process in Defend London during each frame of the game loop. It explains how the game updates the level, spawns enemies, processes movement and attacks, and checks whether the player has won or lost.
 
 ##### Game and Level Update
