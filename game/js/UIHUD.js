@@ -251,8 +251,8 @@ class UIHUD {
     this.levelButtons = [
       {
         level: 1,
-        x: 409,
-        y: 457,
+        x: 320,
+        y: 400,
         width: 160,
         height: 150,
         unlocked: true,
@@ -261,7 +261,7 @@ class UIHUD {
       {
         level: 2,
         x: 1067,
-        y: 526,
+        y: 480,
         width: 162,
         height: 156,
         unlocked: true,
@@ -269,8 +269,8 @@ class UIHUD {
       },
       {
         level: 3,
-        x: 1566,
-        y: 282,
+        x: 1600,
+        y: 260,
         width: 300,
         height: 189,
         unlocked: true,
@@ -721,16 +721,23 @@ class UIHUD {
     text(`Enemies Defeated: ${stats.totalKills}`, lineX, panelY + 75);
     text(`Gold Remaining: ${stats.goldRemaining}`, lineX, panelY + 115);
     text(`Waves Survived: ${stats.waveSurvived}/${stats.totalWaves}`, lineX, panelY + 155);
-
+    
     let buttonY = panelY + panelH + 35;
-    this._drawEndScreenButton(
-      { label: "Play Again", x: CANVAS_WIDTH / 2 - 160, y: buttonY, w: 140, h: 46, action: "restart" },
-      { r: 40, g: 130, b: 70 }
-    );
-    this._drawEndScreenButton(
-      { label: "Main Menu", x: CANVAS_WIDTH / 2 + 20, y: buttonY, w: 140, h: 46, action: "menu" },
-      { r: 95, g: 80, b: 50 }
-    );
+
+   this._drawEndScreenButton(
+  { label: "Try Again", x: CANVAS_WIDTH / 2 - 240, y: buttonY, w: 140, h: 46, action: "restart" },
+  { r: 40, g: 130, b: 70 }
+);
+
+this._drawEndScreenButton(
+  { label: "Next Level", x: CANVAS_WIDTH / 2 - 70, y: buttonY, w: 140, h: 46, action: "next_level" },
+  { r: 70, g: 110, b: 170 }
+);
+
+this._drawEndScreenButton(
+  { label: "Level Select", x: CANVAS_WIDTH / 2 + 100, y: buttonY, w: 160, h: 46, action: "level_select" },
+  { r: 95, g: 80, b: 50 }
+);
   }
 
   //Lose screen - called when GameState.LOSE
@@ -1642,17 +1649,33 @@ class UIHUD {
     }
   }
 
-  handleEndScreenClick(mx, my) {
-    for (let button of this.endScreenButtons) {
-      if (mx >= button.x && mx <= button.x + button.w &&
-          my >= button.y && my <= button.y + button.h) {
-        if (button.action === 'restart') this.game.restart();
-        if (button.action === 'menu') this.game.returnToMenu();
-        return true;
+handleEndScreenClick(mx, my) {
+  for (let button of this.endScreenButtons) {
+    if (mx >= button.x && mx <= button.x + button.w &&
+        my >= button.y && my <= button.y + button.h) {
+
+      if (button.action === 'restart') {
+        this.game.restart();
       }
+
+      if (button.action === 'next_level') {
+        let nextLevel = this.game.currentLevel + 1;
+        if (nextLevel <= TOTAL_LEVELS) {
+          this.game.startLevel(nextLevel);
+        } else {
+          this.game.setState(GameState.LEVEL_SELECT);
+        }
+      }
+
+      if (button.action === 'level_select') {
+        this.game.setState(GameState.LEVEL_SELECT);
+      }
+
+      return true;
     }
-    return false;
   }
+  return false;
+}
 
   _getEndStats() {
     let finalStats = this.game.finalStats || {};

@@ -89,7 +89,7 @@ const TUTORIAL_STEPS = [
   {
     id: 'path',
     highlight: 'path',
-    highlightArea: { x: 5, y: 41, w: 1903, h: 770 },
+
     title: 'Enemy Path',
     message: 'Enemies will spawn and follow this path toward your Landmark.',
     position: 'top'

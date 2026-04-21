@@ -7,7 +7,7 @@ let scaleFactor = 1;
 let canvasWidth, canvasHeight;
 
 function preload() {
-  _bgImage = loadImage('assets/magic_background.png');
+  _bgImage = loadImage('assets/settings_bg_new.png');
   _settingsBgImg = loadImage('assets/PNG/panelInset_brown.png');
   gameImages.mainBackground = loadImage('assets/main_background.png');
   gameImages.btnStart = loadImage('assets/start.png',
