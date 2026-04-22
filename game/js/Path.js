@@ -74,43 +74,50 @@ return [
 
 function getLevel2Waypoints() { 
 return [
-{ x: 795, y: 885 },  // Entry (GameManager.js, line 372)
-{ x: 465, y: 735 },  // Waypoint 1 (GameManager.js, line 372)
-{ x: 225, y: 555 },  // Waypoint 2 (GameManager.js, line 372)
-{ x: 165, y: 435 },  // Waypoint 3 (GameManager.js, line 372)
-{ x: 195, y: 315 },  // Waypoint 4 (GameManager.js, line 372)
-{ x: 255, y: 255 },  // Waypoint 5 (GameManager.js, line 372)
-{ x: 345, y: 195 },  // Waypoint 6 (GameManager.js, line 372)
-{ x: 495, y: 195 },  // Waypoint 7 (GameManager.js, line 372)
-{ x: 615, y: 225 },  // Waypoint 8 (GameManager.js, line 372)
-{ x: 735, y: 315 },  // Waypoint 9 (GameManager.js, line 372)
-{ x: 855, y: 375 },  // Waypoint 10 (GameManager.js, line 372)
-{ x: 975, y: 405 },  // Waypoint 11 (GameManager.js, line 372)
-{ x: 1635, y: 405 },  // Exit (GameManager.js, line 372)
+{ x: 555, y: 765 },  // Entry
+{ x: 315, y: 645 },  // Waypoint 1
+{ x: 225, y: 555 },  // Waypoint 2
+{ x: 165, y: 465 },  // Waypoint 3
+{ x: 165, y: 375 },  // Waypoint 4
+{ x: 195, y: 315 },  // Waypoint 5
+{ x: 255, y: 255 },  // Waypoint 6
+{ x: 315, y: 225 },  // Waypoint 7
+{ x: 405, y: 195 },  // Waypoint 8
+{ x: 495, y: 195 },  // Waypoint 9
+{ x: 585, y: 225 },  // Waypoint 10
+{ x: 645, y: 255 },  // Waypoint 11
+{ x: 705, y: 285 },  // Waypoint 12
+{ x: 765, y: 345 },  // Waypoint 13
+{ x: 825, y: 375 },  // Waypoint 14
+{ x: 915, y: 405 },  // Waypoint 15
+{ x: 1095, y: 405 },  // Waypoint 16
+{ x: 1275, y: 405 },  // Waypoint 17
+{ x: 1665, y: 405 },  // Waypoint 18
+{ x: 1725, y: 405 },  // Exit
 ];
 } 
 
 
 function getLevel3Waypoints() {
   return [
-    { x: 30, y: 450 },     // Entry
-    { x: 210, y: 450 },    // Right
-    { x: 210, y: 390 },    // Up
-    { x: 330, y: 270 },    // Diagonal up
-    { x: 450, y: 270 },    // Right
-    { x: 510, y: 330 },    // Down
-    { x: 510, y: 690 },    // Down
-    { x: 570, y: 750 },    // Diagonal down
-    { x: 810, y: 750 },    // Right
-    { x: 810, y: 510 },    // Up
-    { x: 750, y: 450 },    // Left
-    { x: 750, y: 270 },    // Up
-    { x: 1050, y: 270 },   // Right
-    { x: 1050, y: 690 },   // Down
-    { x: 1110, y: 750 },   // Diagonal down
-    { x: 1290, y: 750 },   // Right
-    { x: 1350, y: 690 },   // Up
-    { x: 1350, y: 570 },   // Up
-    { x: 1650, y: 270 }    // Exit
+    { x: 15, y: 435 },  // Entry
+    { x: 225, y: 435 },  // Waypoint 1
+    { x: 255, y: 315 },  // Waypoint 2
+    { x: 285, y: 285 },  // Waypoint 3
+    { x: 375, y: 255 },  // Waypoint 4
+    { x: 495, y: 285 },  // Waypoint 5
+    { x: 525, y: 375 },  // Waypoint 6
+    { x: 525, y: 645 },  // Waypoint 7
+    { x: 825, y: 645 },  // Waypoint 8
+    { x: 825, y: 495 },  // Waypoint 9
+    { x: 735, y: 435 },  // Waypoint 10
+    { x: 735, y: 255 },  // Waypoint 11
+    { x: 1065, y: 255 },  // Waypoint 12
+    { x: 1065, y: 645 },  // Waypoint 13
+    { x: 1305, y: 645 },  // Waypoint 14
+    { x: 1335, y: 555 },  // Waypoint 15
+    { x: 1395, y: 495 },  // Waypoint 16
+    { x: 1485, y: 405 },  // Waypoint 17
+    { x: 1575, y: 315 },  // Exit
   ];
 }
