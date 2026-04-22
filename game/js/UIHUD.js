@@ -2154,10 +2154,10 @@ this._drawEndScreenButton(
     let [r, g, b] = cfg.color;
 
     // 4. 将鼠标位置映射到网格坐标
-    let col = pixelToCol(mx);
-    let row = pixelToRow(my);
-    let gridX = colToCenterX(col);
-    let gridY = rowToCenterY(row);
+let col = pixelToCol(mx);
+let row = pixelToRow(my);
+let gridX = this.game.getTowerCenterXFromAnchor(col);
+let gridY = this.game.getTowerCenterYFromAnchor(row);
 
     // 5. 核心：计算背景图被压缩后的视觉格子高度
     // 逻辑：背景图占用的总像素高度除以总行数
@@ -2212,8 +2212,8 @@ this._drawEndScreenButton(
         tint(255, 180); // 设置透明度
         imageMode(CENTER);
         // 防御塔图片可以稍微根据视觉高度也做一点压缩，或者保持比例
-        let imgW = CURRENT_GRID_SIZE - 2;
-        let imgH = visualGridHeight - 2; 
+        let imgW = CURRENT_GRID_SIZE * 2;
+        let imgH = visualGridHeight *2; 
         image(previewImg, gridX, gridY, imgW, imgH);
         noTint();
       } else {

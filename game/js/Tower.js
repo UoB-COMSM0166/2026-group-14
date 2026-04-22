@@ -15,6 +15,8 @@ class Tower {
     this.color = stats.color;
     this.bulletColor = stats.bulletColor;
     this.size = stats.size || 18;
+    this.footprintW = 2;
+    this.footprintH = 2;
     this.slowEffect = stats.slowEffect || 1;
     this.slowDuration = stats.slowDuration || 0;
     this.splashRadius = stats.splashRadius || this.range;
@@ -337,7 +339,7 @@ class Tower {
   }
 
   drawTowerBody() {
-    const SPRITE_SIZE = (typeof CURRENT_GRID_SIZE !== 'undefined' ? CURRENT_GRID_SIZE : GRID_SIZE) - 2;
+    const SPRITE_SIZE = (typeof CURRENT_GRID_SIZE !== 'undefined' ? CURRENT_GRID_SIZE : GRID_SIZE) * 2;
     let imgs = (typeof gameImages !== 'undefined') ? gameImages : {};
     let img = null;
     let isAttacking = this.isFiring || (this.type === 'area' && this.areaPulseTimer > 0) || (this.type === 'slow' && this.target);

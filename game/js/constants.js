@@ -1,11 +1,11 @@
 // Global constants
 
 // Grid configuration — default cell size and logical map dimensions
-const GRID_SIZE = 60;
-const COLS = 32;
-const ROWS = 15;
-const DESIGN_WIDTH = COLS * GRID_SIZE;   // 32 × 60 = 1920
-const DESIGN_HEIGHT = ROWS * GRID_SIZE;  // 15 × 60 = 900
+const GRID_SIZE = 30;
+const COLS = 64
+const ROWS = 30;
+const DESIGN_WIDTH = COLS * GRID_SIZE;   // 64 × 60 = 3840
+const DESIGN_HEIGHT = ROWS * GRID_SIZE;  // 30 × 60 = 1800
 
 // Active grid settings (can be modified during debug; reset from LEVEL_GRID_CONFIG on load)
 let GRID_OFFSET_X = 0;
@@ -14,9 +14,9 @@ let CURRENT_GRID_SIZE = GRID_SIZE;
 
 // Per-level grid alignment (offset + cell size per map)
 const LEVEL_GRID_CONFIG = {
-  1: { offsetX: -2, offsetY:-16, gridSize: 60 },
-  2: { offsetX: 0, offsetY: 0, gridSize: 58 },  
-  3: { offsetX: -5, offsetY: -15, gridSize: 60 }
+  1: { offsetX: 0, offsetY:-15, gridSize: 30 },
+  2: { offsetX: 0, offsetY: 0, gridSize: 30 },  
+  3: { offsetX: 0, offsetY: 0, gridSize: 30 }
 };
 
 function applyLevelGridConfig(level) {

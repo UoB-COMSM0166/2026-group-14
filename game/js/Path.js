@@ -73,50 +73,24 @@ function getLevel1Waypoints() {
 }
 
 
-function getLevel2Waypoints() {
-  return [
-    { x: 450, y: 870 },  
+function getLevel2Waypoints() { 
+return [
+{ x: 795, y: 885 },  // Entry (GameManager.js, line 372)
+{ x: 465, y: 735 },  // Waypoint 1 (GameManager.js, line 372)
+{ x: 225, y: 555 },  // Waypoint 2 (GameManager.js, line 372)
+{ x: 165, y: 435 },  // Waypoint 3 (GameManager.js, line 372)
+{ x: 195, y: 315 },  // Waypoint 4 (GameManager.js, line 372)
+{ x: 255, y: 255 },  // Waypoint 5 (GameManager.js, line 372)
+{ x: 345, y: 195 },  // Waypoint 6 (GameManager.js, line 372)
+{ x: 495, y: 195 },  // Waypoint 7 (GameManager.js, line 372)
+{ x: 615, y: 225 },  // Waypoint 8 (GameManager.js, line 372)
+{ x: 735, y: 315 },  // Waypoint 9 (GameManager.js, line 372)
+{ x: 855, y: 375 },  // Waypoint 10 (GameManager.js, line 372)
+{ x: 975, y: 405 },  // Waypoint 11 (GameManager.js, line 372)
+{ x: 1635, y: 405 },  // Exit (GameManager.js, line 372)
+];
+} 
 
-
-    { x: 390, y: 810 },
-    { x: 330, y: 750 },
-    { x: 270, y: 690 },
-    { x: 240, y: 630 },
-    { x: 210, y: 570 },
-    { x: 180, y: 510 },
-    { x: 180, y: 450 },
-
-
-    { x: 180, y: 390 },
-    { x: 210, y: 330 },
-    { x: 270, y: 270 },
-    { x: 330, y: 210 },
-    { x: 420, y: 180 },
-    { x: 510, y: 180 },
-
-
-    { x: 600, y: 210 },
-    { x: 690, y: 270 },
-    { x: 780, y: 330 },
-    { x: 900, y: 360 },
-
- 
-    { x: 1020, y: 375 },
-    { x: 1140, y: 375 },
-    { x: 1260, y: 375 },
-    { x: 1380, y: 375 },
-    { x: 1500, y: 375 },
-    { x: 1620, y: 375 },
-    { x: 1710, y: 390 },
-    { x: 1770, y: 405 },
-
-
-    { x: 1830, y: 420 },
-    { x: 1890, y: 420 }
-  ];
-}
-
-//Level 3 - Tower of London Siege
 
 function getLevel3Waypoints() {
   return [

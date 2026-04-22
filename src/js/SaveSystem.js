@@ -48,7 +48,7 @@ class SaveSystem {
       nickname: SaveSystem.normaliseNickname(nickname),
       createdAt: Date.now(),
       updatedAt: Date.now(),
-      unlockedUpTo: 1,
+      unlockedUpTo: 3,
       lastCompletedLevel: 0,
       totalWins: 0
     };
