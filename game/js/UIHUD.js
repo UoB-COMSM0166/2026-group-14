@@ -1303,7 +1303,23 @@ this._drawEndScreenButton(
     const totalW = BTN_W * count + BTN_GAP * (count - 1);
     
    
-    const startX = Math.floor((CANVAS_WIDTH - totalW) / 2);
+    let startX = Math.floor((CANVAS_WIDTH - totalW) / 2);
+
+    // Level 2: keep tower cards to the right of gold display.
+    if (this.game && this.game.currentLevel === 2) {
+      const btnStartX = 25;
+      const sideBtnW = 95;
+      const sideBtnGap = 12;
+      const dismantleBtnX = btnStartX + (sideBtnW + sideBtnGap) * 3;
+      const coinStartX = dismantleBtnX + sideBtnW + sideBtnGap + 40;
+      const coinCX = coinStartX + 50;
+
+      // Leave room for coin icon + gold value and a visual buffer.
+      const minStartX = coinCX + 170;
+      const maxStartX = CANVAS_WIDTH - totalW - 20;
+      startX = Math.min(Math.max(startX, minStartX), maxStartX);
+    }
+
     const tabY = TOWER_PANEL_TOP + Math.floor((TOWER_PANEL_HEIGHT - BTN_H) / 2);
 
     return availableTowers.map((type, i) => ({
