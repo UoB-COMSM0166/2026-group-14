@@ -34,7 +34,7 @@ let bgMusic;
 let musicTracks = {};
 
 function preload() {
-  _bgImage = loadImage('assets/magic_background.png');
+  _bgImage = loadImage('assets/settings_bg_new.png');
   _settingsBgImg = loadImage('assets/PNG/panelInset_brown.png');
 
   musicTracks['Epic Battle Music'] = loadSound('soundtrack/epic.mp3');

@@ -79,20 +79,7 @@ class UIHUD {
     return -1; // 没点到按钮
   }
 
-  // 辅助函数：定义主菜单按钮的精确位置（必须和绘制时的坐标一致）
-  getMenuButtonRects() {
-    const BW = 225;
-    const BH = 63;
-    const GAP = 19;
-    const startY = CANVAS_HEIGHT / 2 - 50;
-    const cx = CANVAS_WIDTH / 2;
-    
-    return [
-      { x: cx - BW / 2, y: startY, w: BW, h: BH },                   // Index 0: Start
-      { x: cx - BW / 2, y: startY + BH + GAP, w: BW, h: BH },        // Index 1: Settings
-      { x: cx - BW / 2, y: startY + (BH + GAP) * 2, w: BW, h: BH }   // Index 2: Exit
-    ];
-  }
+
   setupUI() {
     this.createMenuButtons();
     this.createSettingsUI();
@@ -1045,32 +1032,34 @@ class UIHUD {
     noStroke();
 
     fill(235);
-    textAlign(LEFT, TOP);
-    textSize(22);
-    textLeading(26);
-    let lineX = panelX + 28;
-    let lineY = panelY + 28;
-    let lineStep = 40;
-    text(`Landmark HP: ${stats.landmarkHp}/${stats.landmarkMaxHp}`, lineX, lineY);
-    text(`Enemies Defeated: ${stats.totalKills}`, lineX, lineY + lineStep);
-    text(`Gold Remaining: ${stats.goldRemaining}`, lineX, lineY + lineStep * 2);
-    text(`Waves Survived: ${stats.waveSurvived}/${stats.totalWaves}`, lineX, lineY + lineStep * 3);
+fill(235);
+textAlign(LEFT, TOP);
+textSize(22);
+textLeading(26);
+let lineX = panelX + 28;
+let lineY = panelY + 28;
+let lineStep = 40;
+text(`Landmark HP: ${stats.landmarkHp}/${stats.landmarkMaxHp}`, lineX, lineY);
+text(`Enemies Defeated: ${stats.totalKills}`, lineX, lineY + lineStep);
+text(`Gold Remaining: ${stats.goldRemaining}`, lineX, lineY + lineStep * 2);
+text(`Waves Survived: ${stats.waveSurvived}/${stats.totalWaves}`, lineX, lineY + lineStep * 3);
 
-    let buttonY = panelY + panelH + 32;
-    let btnH = 48;
-    let btnWPlay = 158;
-    let btnWLevel = 178;
-    let btnGap = 22;
-    let btnRowW = btnWPlay + btnGap + btnWLevel;
-    let btnStartX = CANVAS_WIDTH / 2 - btnRowW / 2;
-    this._drawEndScreenButton(
-      { label: "Play Again", x: btnStartX, y: buttonY, w: btnWPlay, h: btnH, action: "restart" },
-      { r: 40, g: 130, b: 70 }
-    );
-    this._drawEndScreenButton(
-      { label: "Level Select", x: btnStartX + btnWPlay + btnGap, y: buttonY, w: btnWLevel, h: btnH, action: "menu" },
-      { r: 95, g: 80, b: 50 }
-    );
+let buttonY = panelY + panelH + 35;
+
+this._drawEndScreenButton(
+  { label: "Try Again", x: CANVAS_WIDTH / 2 - 240, y: buttonY, w: 140, h: 46, action: "restart" },
+  { r: 40, g: 130, b: 70 }
+);
+
+this._drawEndScreenButton(
+  { label: "Next Level", x: CANVAS_WIDTH / 2 - 70, y: buttonY, w: 140, h: 46, action: "next_level" },
+  { r: 70, g: 110, b: 170 }
+);
+
+this._drawEndScreenButton(
+  { label: "Level Select", x: CANVAS_WIDTH / 2 + 100, y: buttonY, w: 160, h: 46, action: "level_select" },
+  { r: 95, g: 80, b: 50 }
+);
   }
 
   //Lose screen - called when GameState.LOSE
@@ -2235,18 +2224,40 @@ class UIHUD {
     }
   }
 
-  handleEndScreenClick(mx, my) {
-    for (let button of this.endScreenButtons) {
-      if (mx >= button.x && mx <= button.x + button.w &&
-        my >= button.y && my <= button.y + button.h) {
-        this.game.sound.play("click2");
-        if (button.action === 'restart') this.game.restart();
-        if (button.action === 'menu') this.game.returnToMenu();
-        return true;
+handleEndScreenClick(mx, my) {
+  for (let button of this.endScreenButtons) {
+    if (
+      mx >= button.x && mx <= button.x + button.w &&
+      my >= button.y && my <= button.y + button.h
+    ) {
+      this.game.sound.play("click2");
+
+      if (button.action === 'restart') {
+        this.game.restart();
       }
+
+      if (button.action === 'menu') {
+        this.game.returnToMenu();
+      }
+
+      if (button.action === 'next_level') {
+        let nextLevel = this.game.currentLevel + 1;
+        if (nextLevel <= TOTAL_LEVELS) {
+          this.game.startLevel(nextLevel);
+        } else {
+          this.game.setState(GameState.LEVEL_SELECT);
+        }
+      }
+
+      if (button.action === 'level_select') {
+        this.game.setState(GameState.LEVEL_SELECT);
+      }
+
+      return true;
     }
-    return false;
   }
+  return false;
+}
 
   _getEndStats() {
     let finalStats = this.game.finalStats || {};
@@ -2391,46 +2402,84 @@ class UIHUD {
 
     pop();
   }
-
+  
   drawTutorialDarkOverlay(highlightType) {
-    fill(0, 0, 0, 180);
+  if (highlightType === 'path' && this.game && this.game.path && this.game.path.waypoints) {
+    push();
+
+    let wps = this.game.path.waypoints;
+    let revealWidth = CURRENT_GRID_SIZE * 0.92;
+    let borderWidth = 8;
+
+    fill(35, 28, 20, 150);
     noStroke();
     rectMode(CORNER);
+    rect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-    let highlightArea = this.getTutorialHighlightArea(highlightType);
+    drawingContext.save();
+    drawingContext.globalCompositeOperation = 'destination-out';
 
-    if (highlightArea && highlightType !== 'none') {
-      let hx = highlightArea.x;
-      let hy = highlightArea.y;
-      let hw = highlightArea.w;
-      let hh = highlightArea.h;
-      let pad = 10;
-
-      // Top
-      rect(0, 0, CANVAS_WIDTH, hy - pad);
-      // Bottom
-      rect(0, hy + hh + pad, CANVAS_WIDTH, CANVAS_HEIGHT - (hy + hh + pad));
-      // Left
-      rect(0, hy - pad, hx - pad, hh + pad * 2);
-      // Right
-      rect(hx + hw + pad, hy - pad, CANVAS_WIDTH - (hx + hw + pad), hh + pad * 2);
-
-      // Highlight border
-      stroke(255, 220, 100);
-      strokeWeight(4);
-      noFill();
-      rect(hx - pad, hy - pad, hw + pad * 2, hh + pad * 2, 8);
-
-      // Pulsing glow
-      let pulse = (sin(frameCount * 0.1) + 1) * 0.5;
-      stroke(255, 220, 100, 100 + pulse * 100);
-      strokeWeight(8);
-      rect(hx - pad - 4, hy - pad - 4, hw + pad * 2 + 8, hh + pad * 2 + 8, 12);
-      noStroke();
-    } else {
-      rect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    noFill();
+    stroke(255);
+    strokeWeight(revealWidth);
+    strokeJoin(ROUND);
+    strokeCap(ROUND);
+    beginShape();
+    for (let wp of wps) {
+      vertex(wp.x, wp.y);
     }
+    endShape();
+
+    noStroke();
+    fill(255);
+    for (let wp of wps) {
+      ellipse(wp.x, wp.y, revealWidth, revealWidth);
+    }
+
+    drawingContext.restore();
+
+    noFill();
+    stroke(255, 220, 100, 235);
+    strokeWeight(borderWidth);
+    strokeJoin(ROUND);
+    strokeCap(ROUND);
+    beginShape();
+    for (let wp of wps) {
+      vertex(wp.x, wp.y);
+    }
+    endShape();
+
+    pop();
+    return;
   }
+
+  fill(35, 28, 20, 150);
+  noStroke();
+  rectMode(CORNER);
+
+  let highlightArea = this.getTutorialHighlightArea(highlightType);
+
+  if (highlightArea && highlightType !== 'none') {
+    let hx = highlightArea.x;
+    let hy = highlightArea.y;
+    let hw = highlightArea.w;
+    let hh = highlightArea.h;
+    let pad = 10;
+
+    rect(0, 0, CANVAS_WIDTH, hy - pad);
+    rect(0, hy + hh + pad, CANVAS_WIDTH, CANVAS_HEIGHT - (hy + hh + pad));
+    rect(0, hy - pad, hx - pad, hh + pad * 2);
+    rect(hx + hw + pad, hy - pad, CANVAS_WIDTH - (hx + hw + pad), hh + pad * 2);
+
+    stroke(255, 220, 100);
+    strokeWeight(4);
+    noFill();
+    rect(hx - pad, hy - pad, hw + pad * 2, hh + pad * 2, 8);
+    noStroke();
+  } else {
+    rect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+  }
+}
 
   getTutorialHighlightArea(highlightType) {
     // Use custom highlightArea from step config if defined and non-zero

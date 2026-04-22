@@ -1353,7 +1353,7 @@ ${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
 
       // Game Instructions button — starts Level 1 with tutorial
       let instrBtnX = 636;
-      let instrBtnY = 827;
+      let instrBtnY = 750;
       let instrBtnW = 328;
       let instrBtnH = 55;
 
