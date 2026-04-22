@@ -2383,9 +2383,9 @@ handleEndScreenClick(mx, my) {
     rect(x, y, w, h, 6);
     noStroke();
 
-    // Left section: Enemy image
-    let imgSize = 50;
-    let imgCenterX = x + 40;
+    // Left section: Enemy image (responsive sizing)
+    let imgSize = Math.min(50, h - 26);
+    let imgCenterX = x + Math.max(36, Math.min(44, Math.round(w * 0.18)));
     let imgCenterY = y + h / 2;
 
     // Image background circle
@@ -2401,37 +2401,43 @@ handleEndScreenClick(mx, my) {
     }
 
     // Right section: All text content
-    let textLeftX = x + 80;  // Start text after image area
-    let textRightX = x + w - 10;
+    let textLeftX = x + Math.max(76, Math.round(w * 0.33));
+    let textRightX = x + w - 12;
     let textWidth = textRightX - textLeftX;
+    let titleSize = w >= 220 ? 16 : 15;
+    let statSize = w >= 220 ? 13 : 12;
+    let abilitySize = w >= 220 ? 12 : 11;
 
     // Row 1: Enemy name
     fill(255, 220, 150);
     textAlign(LEFT, TOP);
-    textSize(16);
+    textSize(titleSize);
     textStyle(BOLD);
     text(info.name, textLeftX, y + 12);
     textStyle(NORMAL);
 
     // Row 2: Stats (HP, SPD, Reward) - all on same line
     let statsY = y + 34;
-    textSize(13);
+    textSize(statSize);
+    let hpX = textLeftX;
+    let spdX = textLeftX + Math.max(54, Math.floor(textWidth * 0.34));
 
     fill(255, 110, 110);
     textAlign(LEFT, TOP);
-    text("HP:" + stats.hp, textLeftX, statsY);
+    text("HP:" + stats.hp, hpX, statsY);
 
     fill(110, 200, 255);
-    text("SPD:" + stats.speed, textLeftX + 60, statsY);
+    text("SPD:" + stats.speed, spdX, statsY);
 
     fill(255, 215, 0);
-    text("$" + stats.reward, textLeftX + 125, statsY);
+    textAlign(RIGHT, TOP);
+    text("$" + stats.reward, textRightX, statsY);
 
     // Row 3: Ability text (below stats, within right section only)
     if (info.ability && info.ability !== 'None') {
       let abilityY = y + 56;
       fill(255, 190, 100);
-      textSize(12);
+      textSize(abilitySize);
       textAlign(LEFT, TOP);
       textLeading(14);
       // Constrain text to right section only
@@ -2872,24 +2878,29 @@ handleEndScreenClick(mx, my) {
     let enemies = LEVEL_ENEMIES[currentLevel] || LEVEL_ENEMIES[1];
     let enemyCount = enemies.length;
 
-    // Calculate panel size based on enemy count
-    let cardsPerRow = 3;
-    let cardW = 240;
-    let cardH = 100;  // Reduced height since ability text is more compact now
-    let cardGapX = 15;
-    let cardGapY = 15;
-    let padding = 30;
+    // Responsive layout based on enemy count and canvas size
+    let cardsPerRow = enemyCount >= 9 ? 4 : 3;
+    let cardGapX = 14;
+    let cardGapY = 12;
+    let paddingX = 24;
+    let paddingY = 18;
+    let headerH = 74;
+    let footerH = 70;
+
+    let maxPanelW = Math.floor(CANVAS_WIDTH * 0.9);
+    let maxPanelH = Math.floor(CANVAS_HEIGHT * 0.88);
+    let cardW = Math.floor((maxPanelW - paddingX * 2 - (cardsPerRow - 1) * cardGapX) / cardsPerRow);
+    cardW = constrain(cardW, 190, 230);
+    let cardH = cardW >= 220 ? 102 : 96;
 
     let rows = Math.ceil(enemyCount / cardsPerRow);
     let contentW = cardsPerRow * cardW + (cardsPerRow - 1) * cardGapX;
     let contentH = rows * cardH + (rows - 1) * cardGapY;
 
-    let panelW = contentW + padding * 2;
-    let panelH = contentH + 150;
-
-    // Minimum panel size
-    panelW = Math.max(panelW, 780);
-    panelH = Math.max(panelH, 400);
+    let panelW = contentW + paddingX * 2;
+    let panelH = contentH + headerH + footerH + paddingY * 2;
+    panelW = constrain(panelW, 700, maxPanelW);
+    panelH = constrain(panelH, 280, maxPanelH);
 
     // Center panel
     let panelX = (CANVAS_WIDTH - panelW) / 2;
@@ -2911,21 +2922,19 @@ handleEndScreenClick(mx, my) {
     // Title
     fill(255, 220, 150);
     textAlign(CENTER, CENTER);
-    textSize(28);
+    textSize(panelW >= 820 ? 38 : 32);
     textStyle(BOLD);
-    text("ENEMY GUIDE - LEVEL " + currentLevel, CANVAS_WIDTH / 2, panelY + 40);
+    text("ENEMY GUIDE - LEVEL " + currentLevel, CANVAS_WIDTH / 2, panelY + 36);
     textStyle(NORMAL);
 
     // Divider line
     stroke(120, 100, 70);
     strokeWeight(2);
-    line(panelX + 25, panelY + 65, panelX + panelW - 25, panelY + 65);
+    line(panelX + 24, panelY + 62, panelX + panelW - 24, panelY + 62);
     noStroke();
 
     // Calculate starting position for cards (centered)
-    let actualContentW = Math.min(enemyCount, cardsPerRow) * cardW + (Math.min(enemyCount, cardsPerRow) - 1) * cardGapX;
-    let startX = panelX + (panelW - actualContentW) / 2;
-    let startY = panelY + 80;
+    let startY = panelY + headerH + paddingY;
 
     // Draw enemy cards
     for (let i = 0; i < enemyCount; i++) {
@@ -2944,10 +2953,10 @@ handleEndScreenClick(mx, my) {
     }
 
     // Close button - positioned below all cards
-    let closeBtnW = 140;
-    let closeBtnH = 42;
+    let closeBtnW = 150;
+    let closeBtnH = 46;
     let closeBtnX = CANVAS_WIDTH / 2 - closeBtnW / 2;
-    let closeBtnY = panelY + panelH - 55;
+    let closeBtnY = panelY + panelH - closeBtnH - 16;
 
     let mx = getGameMouseX();
     let my = getGameMouseY();
