@@ -34,9 +34,14 @@ class GameManager {
     this.currentMapImage = null;
 
     this.mapEditMode = false;
+    /** 2=可建 0=不可建；本关内持久，供 M 编辑 / D 预览 / E 导出 */
+    this.debugBuildGrid = null;
     this.editGrid = null;
     this.isDragging = false;
     this.dragValue = 0;
+    this.editSelectionStart = null;
+    this.editSelectionCurrent = null;
+    this.editSelectionMoved = false;
 
     this.pathEditMode = false;
     this.pathPoints = [];
@@ -157,7 +162,7 @@ class GameManager {
   canPlayLevel(levelId) {
     if (!Number.isFinite(levelId)) return false;
     if (levelId < 1 || levelId > TOTAL_LEVELS) return false;
-    return levelId <= this.getUnlockedUpTo();
+    return true;
   }
 
   // --- State ---
@@ -176,17 +181,12 @@ class GameManager {
 
   tryStartLevel(levelId) {
     if (typeof ensureAudioStarted === 'function') ensureAudioStarted();
-    if (!this.isLoggedIn()) {
-      console.log('[Save] No player logged in. Redirecting to login.');
-      this.setState(GameState.LOGIN);
-      return false;
-    }
     if (!this.canPlayLevel(levelId)) {
-      console.log(`[Game] Level ${levelId} is locked for ${this.playerNickname}.`);
+      console.log(`[Game] Level ${levelId} does not exist.`);
       return false;
     }
     this.startLevel(levelId);
-    this._saveRunNow('start_level');
+    if (this.isLoggedIn()) this._saveRunNow('start_level');
     return true;
   }
 
@@ -252,6 +252,7 @@ class GameManager {
 
     this.mapEditMode = false;
     this.editGrid = null;
+    this.debugBuildGrid = null;
     this.pathEditMode = false;
     this.pathPoints = [];
     this.editModePaused = false;
@@ -268,68 +269,62 @@ class GameManager {
     if (this.mapEditMode) {
       this.editModePaused = true;
       if (this.pathEditMode) this.togglePathEditMode();
-      this.editGrid = Array.from({ length: ROWS }, () => new Array(COLS).fill(2));
+      if (!this.debugBuildGrid) {
+        this.debugBuildGrid = Array.from({ length: ROWS }, () => new Array(COLS).fill(2));
+        console.log('[Editor] New draft grid: all green (first M this level)');
+      } else {
+        console.log('[Editor] Resuming saved draft grid (multi-step edit)');
+      }
+      this.editGrid = this.debugBuildGrid;
       this.exportButton = null;
       console.log('[Editor] Map edit mode enabled (game paused)');
-      console.log('[Editor] Edit grid created, size:', COLS, 'x', ROWS);
-      console.log('[Editor] Press E to export code, or click Export button');
-      console.log('[Editor] Press M to exit edit mode');
+      console.log('[Editor] Left/drag=RED  Right/drag=GREEN  M=exit  D=preview draft  E=export latest');
     } else {
       this.editModePaused = this.pathEditMode;
       this.editGrid = null;
       this.exportButton = null;
       this.isDragging = false;
+      this.editSelectionStart = null;
+      this.editSelectionCurrent = null;
+      this.editSelectionMoved = false;
       console.log('[Editor] Map edit mode disabled (game resumed)');
     }
   }
 
   exportGridCode() {
-    if (!this.editGrid) {
-      console.log('[Editor] No edit data to export');
+    let grid = this.debugBuildGrid || this.editGrid;
+    if (!grid) {
+      console.log('[Editor] No draft grid — press M once to create a draft, then paint and export');
       return;
     }
 
+    let obstacleCoords = [];
     let buildableCoords = [];
     for (let row = 0; row < ROWS; row++) {
       for (let col = 0; col < COLS; col++) {
-        if (this.editGrid[row][col] === 2) {
+        if (grid[row][col] === 2) {
           buildableCoords.push([col, row]);
+        } else {
+          obstacleCoords.push([col, row]);
         }
       }
     }
 
     let levelNum = this.currentLevel || 1;
-    console.log('========== EXPORTED CODE ==========');
+    console.log('='.repeat(60));
+    console.log(`Level ${levelNum} — 编辑结果导出`);
+    console.log(`  可建造格子: ${buildableCoords.length} 个`);
+    console.log(`  不可建造格子: ${obstacleCoords.length} 个`);
     console.log('');
-    console.log(`// Level ${levelNum} buildable grid whitelist`);
-    console.log(`// ${buildableCoords.length} buildable cells`);
-    console.log(`const LEVEL_${levelNum}_GRID_WHITELIST = [`);
 
-    let currentCol = -1;
-    for (let [col, row] of buildableCoords) {
-      if (col !== currentCol) {
-        console.log(`  // col ${col}`);
-        currentCol = col;
-      }
-      console.log(`  [${col},${row}],`);
-    }
-
-    console.log('];');
+    console.log('--- 不可建造格子坐标 [col, row]（复制下面这一行给 Agent）---');
+    console.log(JSON.stringify(obstacleCoords));
     console.log('');
-    console.log('Copy the code above to MapData.js');
 
-    let fullCode = `const LEVEL_${levelNum}_GRID = (() => {
-  const g = Array.from({ length: 15 }, () => new Array(32).fill(0));
-  const whitelist = [
-${buildableCoords.map(([c, r]) => `    [${c},${r}]`).join(',\n')}
-  ];
-  for (const [col, row] of whitelist) {
-    if (row >= 0 && row < 15 && col >= 0 && col < 32) g[row][col] = 2;
-  }
-  return g;
-})();`;
-    console.log(`\n========== FULL LEVEL_${levelNum}_GRID REPLACEMENT CODE ==========`);
-    console.log(fullCode);
+    console.log('--- 可建造格子坐标 whitelist（用于 MapData.js）---');
+    console.log(JSON.stringify(buildableCoords));
+    console.log('='.repeat(60));
+    console.log('提示: 在浏览器控制台右键以上 JSON 可直接复制全文');
   }
 
   togglePathEditMode() {
@@ -915,6 +910,7 @@ tower.anchorRow = (typeof t.anchorRow === 'number')
 
   drawEditGrid() {
     push();
+    rectMode(CORNER);
 
     for (let row = 0; row < ROWS; row++) {
       for (let col = 0; col < COLS; col++) {
@@ -922,23 +918,17 @@ tower.anchorRow = (typeof t.anchorRow === 'number')
         let y = rowToTopY(row);
 
         if (this.editGrid[row][col] === 2) {
-          fill(0, 255, 0, 100);
+          fill(0, 255, 0, 40);
         } else {
-          fill(255, 0, 0, 100);
+          fill(255, 0, 0, 20);
         }
         noStroke();
         rect(x, y, CURRENT_GRID_SIZE, CURRENT_GRID_SIZE);
 
-        stroke(255, 255, 255, 150);
+        stroke(255, 255, 255, 60);
         strokeWeight(1);
         noFill();
         rect(x, y, CURRENT_GRID_SIZE, CURRENT_GRID_SIZE);
-
-        fill(255, 255, 255, 200);
-        noStroke();
-        textSize(18);
-        textAlign(CENTER, CENTER);
-        text(`${col},${row}`, x + CURRENT_GRID_SIZE / 2, y + CURRENT_GRID_SIZE / 2);
       }
     }
 
@@ -952,40 +942,70 @@ tower.anchorRow = (typeof t.anchorRow === 'number')
       strokeWeight(3);
       noFill();
       rect(colToLeftX(hoverCol), rowToTopY(hoverRow), CURRENT_GRID_SIZE, CURRENT_GRID_SIZE);
+
+      let tileVal = this.editGrid[hoverRow][hoverCol];
+      fill(0, 0, 0, 180);
+      noStroke();
+      rect(8, 54, 380, 22, 4);
+      fill(tileVal === 2 ? color(80, 255, 120) : color(255, 110, 80));
+      textSize(26);
+      textAlign(LEFT, CENTER);
+      text(`col=${hoverCol}, row=${hoverRow}  →  ${tileVal === 2 ? 'Buildable ✓' : 'Non-buildable ✗'}`, 16, 65);
     }
 
-    fill(0, 0, 0, 220);
+    if (this.mapEditMode && this.isDragging && this.editSelectionStart && this.editSelectionCurrent) {
+      const minCol = Math.min(this.editSelectionStart.col, this.editSelectionCurrent.col);
+      const maxCol = Math.max(this.editSelectionStart.col, this.editSelectionCurrent.col);
+      const minRow = Math.min(this.editSelectionStart.row, this.editSelectionCurrent.row);
+      const maxRow = Math.max(this.editSelectionStart.row, this.editSelectionCurrent.row);
+      const selX = colToLeftX(minCol);
+      const selY = rowToTopY(minRow);
+      const selW = (maxCol - minCol + 1) * CURRENT_GRID_SIZE;
+      const selH = (maxRow - minRow + 1) * CURRENT_GRID_SIZE;
+
+      if (this.dragValue === 2) {
+        fill(0, 255, 0, 50);
+      } else {
+        fill(255, 0, 0, 50);
+      }
+      noStroke();
+      rect(selX, selY, selW, selH);
+      stroke(255, 255, 0, 220);
+      strokeWeight(3);
+      noFill();
+      rect(selX, selY, selW, selH);
+    }
+
+    fill(0, 0, 0, 210);
     noStroke();
-    rect(10, 10, 400, 80, 8);
+    rect(10, 10, 620, 64, 8);
 
     fill(255, 255, 0);
-    textSize(32);
-    textAlign(LEFT, TOP);
-    text('Map Edit Mode', 20, 18);
+    textSize(26);
+    textAlign(LEFT, CENTER);
+    text('Map Edit Mode  [M: exit]', 18, 26);
 
-    fill(255, 255, 255);
-    textSize(24);
-    text('Click cells: toggle Buildable (green) / Non-buildable (red)', 20, 42);
-    text('Press E: export code  |  Press M: exit edit mode', 20, 60);
-    text(`Current: col=${hoverCol}, row=${hoverRow}`, 20, 78);
+    fill(220, 220, 220);
+    textSize(20);
+    text('左键/拖拽=红(不可建)  右键/拖拽=绿  退出M后草稿保留', 18, 48);
+    text('D=预览草稿  E=导出最新（可在游戏内直接按 E）', 18, 64);
 
-    let btnX = DESIGN_WIDTH - 150;
-    let btnY = 30;
-    let btnW = 130;
-    let btnH = 40;
+    let btnX = DESIGN_WIDTH - 210;
+    let btnY = 12;
+    let btnW = 195;
+    let btnH = 38;
 
     let hovered = mx >= btnX && mx <= btnX + btnW && my >= btnY && my <= btnY + btnH;
-    fill(hovered ? 70 : 50, hovered ? 180 : 150, 50);
-    stroke(255);
+    fill(hovered ? 70 : 40, hovered ? 180 : 140, 50);
+    stroke(180, 255, 180);
     strokeWeight(2);
-    rectMode(CORNER);
-    rect(btnX, btnY, btnW, btnH, 8);
+    rect(btnX, btnY, btnW, btnH, 6);
 
     fill(255);
     noStroke();
-    textSize(32);
+    textSize(26);
     textAlign(CENTER, CENTER);
-    text('Export Code (E)', btnX + btnW / 2, btnY + btnH / 2);
+    text('导出坐标 (E)', btnX + btnW / 2, btnY + btnH / 2);
 
     this.exportButton = { x: btnX, y: btnY, width: btnW, height: btnH };
 
@@ -1184,13 +1204,9 @@ canBuildAt(col, row) {
 }
 
   /**
-   * Visualise the tile grid for map editing.
-   * Enabled/disabled with the 'D' key (debugMode flag).
-   * Does NOT affect any game logic.
-   *
-   * Colour key:
-   *   Green = canBuildAt() → true
-   *   Red   = canBuildAt() → false
+   * Debug overlay (D key). Does not affect gameplay.
+   * If debugBuildGrid exists (after first M this level), colours follow the M-draft;
+   * otherwise they follow mapGrid (GRASS vs other).
    */
   drawDebugGrid() {
     if (!this.debugMode) return;
@@ -1198,13 +1214,16 @@ canBuildAt(col, row) {
     push();
     rectMode(CORNER);
 
+    const draft = this.debugBuildGrid;
     for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
         let x = GRID_OFFSET_X + c * CURRENT_GRID_SIZE;
         let y = GRID_OFFSET_Y + r * CURRENT_GRID_SIZE;
 
-        let tile = this.mapGrid && this.mapGrid[r] ? this.mapGrid[r][c] : null;
-        if (tile === TILE_TYPES.GRASS) {
+        let isBuildableCell = draft
+          ? (draft[r][c] === 2)
+          : (this.mapGrid && this.mapGrid[r] && this.mapGrid[r][c] === TILE_TYPES.GRASS);
+        if (isBuildableCell) {
           fill(0, 255, 0, 40);
         } else {
           fill(255, 0, 0, 20);
@@ -1253,26 +1272,39 @@ canBuildAt(col, row) {
       [TILE_TYPES.OBSTACLE]: 0, [TILE_TYPES.OCCUPIED]: 'occ'
     };
     let mapVal = (rawTile in DECODE) ? DECODE[rawTile] : rawTile;
-    let hoverLine = `Grid: col=${mCol}, row=${mRow} | canBuild: ${canBuild} | mapValue: ${mapVal}`;
+    let draftCellOk = draft && mRow >= 0 && mRow < ROWS && mCol >= 0 && mCol < COLS
+      ? (draft[mRow][mCol] === 2)
+      : null;
+    let draftLabel = draftCellOk === true ? 'green' : draftCellOk === false ? 'red' : '—';
+    let hoverLine = draft
+      ? `col=${mCol}, row=${mRow} | draft: ${draftLabel} | game map: ${mapVal}`
+      : `Grid: col=${mCol}, row=${mRow} | canBuild: ${canBuild} | mapValue: ${mapVal}`;
 
     noStroke();
     textSize(26);
     textAlign(LEFT, CENTER);
     fill(0, 0, 0, 180);
-    rect(8, 54, 440, 22, 4);
-    fill(canBuild ? color(80, 255, 120) : color(255, 110, 80));
+    rect(8, 54, 520, 22, 4);
+    fill(draftCellOk === false ? color(255, 110, 80) : (draftCellOk === true ? color(80, 255, 120) : (canBuild ? color(80, 255, 120) : color(255, 110, 80))));
     text(hoverLine, 16, 65);
 
     fill(0, 0, 0, 200);
     noStroke();
     rectMode(CORNER);
-    rect(5, 80, 280, 180, 5);
+    rect(5, 80, 320, draft ? 200 : 180, 5);
 
     fill(255, 255, 0);
     textSize(26);
     textAlign(LEFT, TOP);
     let y = 88;
     text('Level: ' + this.currentLevel, 12, y); y += 20;
+    if (draft) {
+      fill(180, 255, 180);
+      textSize(22);
+      text('D = M-draft overlay (not gameplay)', 12, y); y += 18;
+      fill(255, 255, 0);
+      textSize(26);
+    }
     text('GRID_OFFSET_X: ' + GRID_OFFSET_X, 12, y); y += 20;
     text('GRID_OFFSET_Y: ' + GRID_OFFSET_Y, 12, y); y += 20;
     text('GRID_SIZE: ' + CURRENT_GRID_SIZE, 12, y); y += 25;
@@ -1283,6 +1315,10 @@ canBuildAt(col, row) {
     text('Arrow Keys = Adjust offset', 12, y); y += 15;
     text('- / = = Adjust grid size', 12, y); y += 15;
     text('P = Print config to console', 12, y);
+    if (draft) {
+      y += 15;
+      text('M = edit draft  E = export draft', 12, y);
+    }
 
     pop();
   }
@@ -1331,7 +1367,7 @@ canBuildAt(col, row) {
 
   // --- Player actions ---
 
-  handleClick(mx, my) {
+  handleClick(mx, my, btn) {
     // Guard against click-through: if state just changed this same event
     // (e.g. an HTML button callback already fired startLevel/setState),
     // drop this canvas-level click entirely.
@@ -1367,17 +1403,14 @@ canBuildAt(col, row) {
       let row = pixelToRow(my);
 
       if (col >= 0 && col < COLS && row >= 0 && row < ROWS) {
-        if (this.editGrid[row][col] === 2) {
-          this.editGrid[row][col] = 0;
-          this.isDragging = true;
-          this.dragValue = 0;
-          console.log(`[Editor] [${col},${row}] -> Non-buildable`);
-        } else {
-          this.editGrid[row][col] = 2;
-          this.isDragging = true;
-          this.dragValue = 2;
-          console.log(`[Editor] [${col},${row}] -> Buildable`);
-        }
+        let val = (btn === RIGHT) ? 2 : 0;
+        this.editGrid[row][col] = val;
+        this.isDragging = true;
+        this.dragValue = val;
+        this.editSelectionStart = { col, row };
+        this.editSelectionCurrent = { col, row };
+        this.editSelectionMoved = false;
+        console.log(`[Editor] [${col},${row}] -> ${val === 2 ? 'Buildable ✓' : 'Non-buildable ✗'}`);
       }
       return;
     }
@@ -1403,7 +1436,7 @@ canBuildAt(col, row) {
       let btnIdx = this.ui.getClickedMenuButton(mx, my); 
       
       if (btnIdx === 0) {
-        this.setState(GameState.LOGIN); // 进入登录流程
+        this.setState(GameState.LEVEL_SELECT); // 直接进入关卡选择
       } else if (btnIdx === 1) {
         this.setState(GameState.SETTINGS); // 进入设置
       } else if (btnIdx === 2) {
@@ -1423,6 +1456,28 @@ canBuildAt(col, row) {
       if (this.ui.levelSelectDebug) {
         console.log('[Debug] Clicked at: x=' + mx + ', y=' + my);
         console.log('[Debug] Button code: { x: ' + mx + ', y: ' + my + ', w: 150, h: 50 }');
+
+        let clickData = { x: Math.round(mx), y: Math.round(my) };
+        this.ui.levelSelectDebugClicks.push(clickData);
+        console.log('[Debug][LevelSelect] Click #' + this.ui.levelSelectDebugClicks.length + ':',
+          'x=' + clickData.x + ', y=' + clickData.y);
+
+        if (this.ui.levelSelectDebugClicks.length === 2) {
+          let c1 = this.ui.levelSelectDebugClicks[0];
+          let c2 = this.ui.levelSelectDebugClicks[1];
+          let x = Math.min(c1.x, c2.x);
+          let y = Math.min(c1.y, c2.y);
+          let w = Math.abs(c2.x - c1.x);
+          let h = Math.abs(c2.y - c1.y);
+
+          console.log('='.repeat(56));
+          console.log('[Debug][LevelSelect] BOX SELECTION');
+          console.log(`rect: { x: ${x}, y: ${y}, w: ${w}, h: ${h} }`);
+          console.log(`highlightArea: { x: ${x}, y: ${y}, w: ${w}, h: ${h} }`);
+          console.log('='.repeat(56));
+          this.ui.levelSelectDebugClicks = [];
+        }
+        return;
       }
 
       // Game Instructions button — starts Level 1 with tutorial
@@ -1447,10 +1502,10 @@ canBuildAt(col, row) {
       //   this.setState(GameState.MENU);
       //   return;
       // }
-      let menuBtnX = 1004; 
-      let menuBtnY = 827;
-      let menuBtnW = 328;
-      let menuBtnH = 55;
+      let menuBtnX = 995;
+      let menuBtnY = 760;
+      let menuBtnW = 417;
+      let menuBtnH = 63;
 
       if (mx >= menuBtnX && mx <= menuBtnX + menuBtnW && my >= menuBtnY && my <= menuBtnY + menuBtnH) {
       this.sound.play("click1");
@@ -1557,6 +1612,15 @@ if (this.state === GameState.PLAYING) {
     return;
   }
 
+  if (this.ui.inGameBackBtn) {
+    let btn = this.ui.inGameBackBtn;
+    if (mx >= btn.x && mx <= btn.x + btn.w && my >= btn.y && my <= btn.y + btn.h) {
+      this.sound.play("click1");
+      this.confirmExit = true;
+      return;
+    }
+  }
+
   if (this.ui.pauseBtn) {
     let btn = this.ui.pauseBtn;
     if (mx >= btn.x && mx <= btn.x + btn.w && my >= btn.y && my <= btn.y + btn.h) {
@@ -1658,13 +1722,40 @@ this.tryPlaceTower(this.selectedTowerType, col, row, gridX, gridY);
       let row = pixelToRow(my);
 
       if (col >= 0 && col < COLS && row >= 0 && row < ROWS) {
-        this.editGrid[row][col] = this.dragValue;
+        this.editSelectionCurrent = { col, row };
+        if (
+          this.editSelectionStart &&
+          (col !== this.editSelectionStart.col || row !== this.editSelectionStart.row)
+        ) {
+          this.editSelectionMoved = true;
+        }
       }
     }
   }
 
   handleMouseUp() {
+    if (this.mapEditMode && this.editGrid && this.isDragging && this.editSelectionStart && this.editSelectionCurrent) {
+      const minCol = Math.min(this.editSelectionStart.col, this.editSelectionCurrent.col);
+      const maxCol = Math.max(this.editSelectionStart.col, this.editSelectionCurrent.col);
+      const minRow = Math.min(this.editSelectionStart.row, this.editSelectionCurrent.row);
+      const maxRow = Math.max(this.editSelectionStart.row, this.editSelectionCurrent.row);
+
+      for (let row = minRow; row <= maxRow; row++) {
+        for (let col = minCol; col <= maxCol; col++) {
+          this.editGrid[row][col] = this.dragValue;
+        }
+      }
+
+      if (this.editSelectionMoved) {
+        let label = this.dragValue === 2 ? 'Buildable ✓' : 'Non-buildable ✗';
+        console.log(`[Editor] Box ${label}: col ${minCol}-${maxCol}, row ${minRow}-${maxRow}`);
+      }
+    }
+
     this.isDragging = false;
+    this.editSelectionStart = null;
+    this.editSelectionCurrent = null;
+    this.editSelectionMoved = false;
   }
 tryPlaceTower(towerType, anchorCol, anchorRow, x, y) {
   let config = TOWER_TYPES[towerType];

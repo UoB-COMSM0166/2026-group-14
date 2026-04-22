@@ -204,7 +204,7 @@ function mousePressed() {
   if (canvas && canvas.elt) canvas.elt.focus();
   let mx = getGameMouseX();
   let my = getGameMouseY();
-  game.handleClick(mx, my);
+  game.handleClick(mx, my, mouseButton);
 }
 
 function mouseDragged() {
@@ -295,8 +295,9 @@ function keyPressed() {
     }
   }
 
-  if (game && (key === 'e' || key === 'E') && game.mapEditMode) {
-    console.log('[Editor] Exporting...');
+  if (game && (key === 'e' || key === 'E') && game.getState() === GameState.PLAYING && !game.pathEditMode &&
+      (game.mapEditMode || game.debugBuildGrid)) {
+    console.log('[Editor] Exporting draft grid...');
     game.exportGridCode();
     return false;
   }
