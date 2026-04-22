@@ -324,9 +324,14 @@ function keyPressed() {
   }
   if (state === GameState.LEVEL_SELECT) {
     // Toggle level select debug grid
-    if (key === 'g' || key === 'G') {
+    if (key === 'm' || key === 'M' || key === 'g' || key === 'G') {
       game.ui.levelSelectDebug = !game.ui.levelSelectDebug;
-      console.log('[Debug] Level select grid:', game.ui.levelSelectDebug ? 'ON' : 'OFF');
+      if (!game.ui.levelSelectDebug) {
+        game.ui.levelSelectDebugDragging = false;
+        game.ui.levelSelectDebugDragStart = null;
+        game.ui.levelSelectDebugDragCurrent = null;
+      }
+      console.log('[Debug] Level select grid (M):', game.ui.levelSelectDebug ? 'ON' : 'OFF');
       return false;
     }
     if (key === 'c' || key === 'C') {

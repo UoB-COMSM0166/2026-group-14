@@ -39,6 +39,10 @@ class UIHUD {
     this._panelLogged = false;  // print tab rects once to console
 
     this.levelSelectDebug = false;
+    this.levelSelectDebugDragging = false;
+    this.levelSelectDebugDragStart = null;
+    this.levelSelectDebugDragCurrent = null;
+    this.levelSelectDebugLastRect = null;
 
     // Tutorial debug mode
     this.tutorialDebugMode = false;
@@ -65,6 +69,7 @@ class UIHUD {
 
     // Switch player button (p5 DOM)
     this.switchPlayerBtn = null;
+    this.enableSwitchPlayer = false;
   }
 
    getClickedMenuButton(mx, my) {
@@ -84,7 +89,7 @@ class UIHUD {
     this.createMenuButtons();
     this.createSettingsUI();
     this.createLoginUI();
-    this.createSwitchPlayerUI();
+    if (this.enableSwitchPlayer) this.createSwitchPlayerUI();
     this.hideAll();
   }
 
@@ -252,6 +257,7 @@ class UIHUD {
   }
 
   createSwitchPlayerUI() {
+    if (!this.enableSwitchPlayer) return;
     let uiStyle = `
         background: #5D4037;
         color: #FFECB3;
@@ -273,7 +279,7 @@ class UIHUD {
   }
 
   showSwitchPlayerUI() {
-    if (this.switchPlayerBtn) {
+    if (this.enableSwitchPlayer && this.switchPlayerBtn) {
       this.switchPlayerBtn.show();
       this.switchPlayerBtn.style('z-index', '1000');
     }
@@ -335,7 +341,11 @@ class UIHUD {
 
    // UIHUD.js -> drawMainMenu() 内部逻辑
 
-  if (this.game && typeof this.game.isLoggedIn === 'function' && this.game.isLoggedIn()) {
+  if (this.enableSwitchPlayer &&
+      this.switchPlayerBtn &&
+      this.game &&
+      typeof this.game.isLoggedIn === 'function' &&
+      this.game.isLoggedIn()) {
     this.showSwitchPlayerUI();
   
  
@@ -462,14 +472,16 @@ class UIHUD {
 
     // 4. 定义关卡按钮及其状态
     this.levelButtons = [
-      { level: 1, x: 409, y: 457, width: 160, height: 150, unlocked: true, name: "THE OUTER DEFENSES" },
-      { level: 2, x: 1067, y: 526, width: 162, height: 156, unlocked: true, name: "RIVER THAMES PATROL" },
-      { level: 3, x: 1566, y: 282, width: 300, height: 189, unlocked: true, name: "TOWER OF LONDON SIEGE" }
+      // highlightArea: { x: 208, y: 317, w: 230, h: 234 }
+      { level: 1, x: 323, y: 434, width: 230, height: 234, unlocked: true, name: "THE OUTER DEFENSES" },
+      // highlightArea: { x: 958, y: 392, w: 229, h: 225 }
+      { level: 2, x: 1072.5, y: 504.5, width: 229, height: 225, unlocked: true, name: "RIVER THAMES PATROL" },
+      // highlightArea: { x: 1447, y: 156, w: 325, h: 222 }
+      { level: 3, x: 1609.5, y: 267, width: 325, height: 222, unlocked: true, name: "TOWER OF LONDON SIEGE" }
     ];
 
-    let unlockedUpTo = (this.game && this.game.getUnlockedUpTo) ? this.game.getUnlockedUpTo() : 1;
     for (let btn of this.levelButtons) {
-      btn.unlocked = btn.level <= unlockedUpTo;
+      btn.unlocked = true;
 
       let left = btn.x - btn.width / 2;
       let right = btn.x + btn.width / 2;
@@ -606,15 +618,39 @@ class UIHUD {
     text("Mouse X: " + Math.round(mx), infoX + 10, infoY + 32);
     text("Mouse Y: " + Math.round(my), infoX + 10, infoY + 48);
 
+    // Draw drag-selection rectangle (live preview)
+    if (this.levelSelectDebugDragging && this.levelSelectDebugDragStart && this.levelSelectDebugDragCurrent) {
+      const s = this.levelSelectDebugDragStart;
+      const c = this.levelSelectDebugDragCurrent;
+      const rx = Math.min(s.x, c.x);
+      const ry = Math.min(s.y, c.y);
+      const rw = Math.abs(c.x - s.x);
+      const rh = Math.abs(c.y - s.y);
+
+      fill(255, 255, 0, 35);
+      stroke(255, 255, 0, 220);
+      strokeWeight(2);
+      rectMode(CORNER);
+      rect(rx, ry, rw, rh);
+    } else if (this.levelSelectDebugLastRect) {
+      // Keep showing the last exported box so it's easy to verify
+      const r = this.levelSelectDebugLastRect;
+      fill(0, 255, 255, 26);
+      stroke(0, 255, 255, 220);
+      strokeWeight(2);
+      rectMode(CORNER);
+      rect(r.x, r.y, r.w, r.h);
+    }
+
     fill(150, 150, 150);
     textSize(20);
-    text("Press G to toggle grid", infoX + 10, infoY + 65);
+    text("Press M to toggle grid", infoX + 10, infoY + 65);
 
     // Show click position helper
     fill(255, 100, 255);
     textAlign(LEFT, BOTTOM);
     textSize(11);
-    text("Click position: (" + Math.round(mx) + ", " + Math.round(my) + ")", mx + 15, my - 5);
+    text("Drag to export box: (" + Math.round(mx) + ", " + Math.round(my) + ")", mx + 15, my - 5);
 
     pop();
   }
@@ -2071,7 +2107,7 @@ this._drawEndScreenButton(
     rect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
     let dialogW = 580;
-    let dialogH = 268;
+    let dialogH = 292;
     let dialogX = (CANVAS_WIDTH - dialogW) / 2;
     let dialogY = (CANVAS_HEIGHT - dialogH) / 2;
     let innerPad = 36;
@@ -2084,21 +2120,21 @@ this._drawEndScreenButton(
     noStroke();
     fill(255, 220, 180);
     textAlign(CENTER, TOP);
-    textSize(28);
-    textLeading(32);
-    text("Return to level select?", dialogX + dialogW / 2, dialogY + innerPad, dialogW - innerPad * 2, 44);
+    textSize(32);
+    textLeading(36);
+    text("Exit game?", dialogX + innerPad, dialogY + innerPad, dialogW - innerPad * 2, 52);
 
     fill(210, 190, 160);
-    textSize(18);
-    textLeading(24);
-    let bodyTop = dialogY + innerPad + 50;
+    textSize(22);
+    textLeading(30);
+    let bodyTop = dialogY + innerPad + 62;
     let bodyW = dialogW - innerPad * 2;
     text(
-      "Your run will end (progress is still saved on your profile). Continue?",
-      dialogX + dialogW / 2,
+      "Are you sure you want to exit the game? ",
+      dialogX + innerPad,
       bodyTop,
       bodyW,
-      130
+      142
     );
 
     let btnH = 48;
@@ -2120,8 +2156,8 @@ this._drawEndScreenButton(
     noStroke();
     fill(255);
     textAlign(CENTER, CENTER);
-    textSize(18);
-    text("Level Select", levelBtnX + btnWLevel / 2, btnY + btnH / 2);
+    textSize(20);
+    text("Exit Game", levelBtnX + btnWLevel / 2, btnY + btnH / 2);
 
     let noHover = gmx >= cancelX && gmx <= cancelX + btnWCancel && gmy >= btnY && gmy <= btnY + btnH;
     fill(noHover ? color(160, 90, 90) : color(130, 80, 80));
@@ -2130,7 +2166,7 @@ this._drawEndScreenButton(
     rect(cancelX, btnY, btnWCancel, btnH, 8);
     noStroke();
     fill(255);
-    text("Cancel", cancelX + btnWCancel / 2, btnY + btnH / 2);
+    text("Stay", cancelX + btnWCancel / 2, btnY + btnH / 2);
 
     this.exitConfirmYesBtn = { x: levelBtnX, y: btnY, w: btnWLevel, h: btnH };
     this.exitConfirmNoBtn = { x: cancelX, y: btnY, w: btnWCancel, h: btnH };

@@ -1452,31 +1452,14 @@ canBuildAt(col, row) {
     }
 
     if (this.state === GameState.LEVEL_SELECT) {
-      // Debug: log click position
+      // Level select debug mode: click + drag to export a rectangle
       if (this.ui.levelSelectDebug) {
-        console.log('[Debug] Clicked at: x=' + mx + ', y=' + my);
-        console.log('[Debug] Button code: { x: ' + mx + ', y: ' + my + ', w: 150, h: 50 }');
-
-        let clickData = { x: Math.round(mx), y: Math.round(my) };
-        this.ui.levelSelectDebugClicks.push(clickData);
-        console.log('[Debug][LevelSelect] Click #' + this.ui.levelSelectDebugClicks.length + ':',
-          'x=' + clickData.x + ', y=' + clickData.y);
-
-        if (this.ui.levelSelectDebugClicks.length === 2) {
-          let c1 = this.ui.levelSelectDebugClicks[0];
-          let c2 = this.ui.levelSelectDebugClicks[1];
-          let x = Math.min(c1.x, c2.x);
-          let y = Math.min(c1.y, c2.y);
-          let w = Math.abs(c2.x - c1.x);
-          let h = Math.abs(c2.y - c1.y);
-
-          console.log('='.repeat(56));
-          console.log('[Debug][LevelSelect] BOX SELECTION');
-          console.log(`rect: { x: ${x}, y: ${y}, w: ${w}, h: ${h} }`);
-          console.log(`highlightArea: { x: ${x}, y: ${y}, w: ${w}, h: ${h} }`);
-          console.log('='.repeat(56));
-          this.ui.levelSelectDebugClicks = [];
-        }
+        const startX = Math.round(mx);
+        const startY = Math.round(my);
+        this.ui.levelSelectDebugDragging = true;
+        this.ui.levelSelectDebugDragStart = { x: startX, y: startY };
+        this.ui.levelSelectDebugDragCurrent = { x: startX, y: startY };
+        console.log('[Debug][LevelSelect] Drag start: x=' + startX + ', y=' + startY);
         return;
       }
 
@@ -1717,6 +1700,14 @@ this.tryPlaceTower(this.selectedTowerType, col, row, gridX, gridY);
   }
 
   handleMouseDrag(mx, my) {
+    if (this.state === GameState.LEVEL_SELECT &&
+      this.ui.levelSelectDebug &&
+      this.ui.levelSelectDebugDragging &&
+      this.ui.levelSelectDebugDragStart) {
+      this.ui.levelSelectDebugDragCurrent = { x: Math.round(mx), y: Math.round(my) };
+      return;
+    }
+
     if (this.mapEditMode && this.isDragging && this.editGrid) {
       let col = pixelToCol(mx);
       let row = pixelToRow(my);
@@ -1734,6 +1725,31 @@ this.tryPlaceTower(this.selectedTowerType, col, row, gridX, gridY);
   }
 
   handleMouseUp() {
+    if (this.state === GameState.LEVEL_SELECT &&
+      this.ui.levelSelectDebug &&
+      this.ui.levelSelectDebugDragging &&
+      this.ui.levelSelectDebugDragStart &&
+      this.ui.levelSelectDebugDragCurrent) {
+      const start = this.ui.levelSelectDebugDragStart;
+      const current = this.ui.levelSelectDebugDragCurrent;
+      const x = Math.min(start.x, current.x);
+      const y = Math.min(start.y, current.y);
+      const w = Math.abs(current.x - start.x);
+      const h = Math.abs(current.y - start.y);
+
+      this.ui.levelSelectDebugLastRect = { x, y, w, h };
+      console.log('='.repeat(56));
+      console.log('[Debug][LevelSelect] BOX SELECTION');
+      console.log(`rect: { x: ${x}, y: ${y}, w: ${w}, h: ${h} }`);
+      console.log(`highlightArea: { x: ${x}, y: ${y}, w: ${w}, h: ${h} }`);
+      console.log('='.repeat(56));
+
+      this.ui.levelSelectDebugDragging = false;
+      this.ui.levelSelectDebugDragStart = null;
+      this.ui.levelSelectDebugDragCurrent = null;
+      return;
+    }
+
     if (this.mapEditMode && this.editGrid && this.isDragging && this.editSelectionStart && this.editSelectionCurrent) {
       const minCol = Math.min(this.editSelectionStart.col, this.editSelectionCurrent.col);
       const maxCol = Math.max(this.editSelectionStart.col, this.editSelectionCurrent.col);
