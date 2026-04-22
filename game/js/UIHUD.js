@@ -1295,38 +1295,50 @@ this._drawEndScreenButton(
 
  getTowerPanelTabs() {
     const availableTowers = (this.game && this.game.availableTowers) || LEVEL_AVAILABLE_TOWERS[1];
-   
-    const BTN_W = 180; 
+
+    // Keep tower cards clear of left utility controls + gold display.
+    const BASE_BTN_W = 180;
+    const BASE_BTN_GAP = 20;
     const BTN_H = 90;
-    const BTN_GAP = 20; 
     const count = availableTowers.length;
-    const totalW = BTN_W * count + BTN_GAP * (count - 1);
-    
-   
-    let startX = Math.floor((CANVAS_WIDTH - totalW) / 2);
+    let btnW = BASE_BTN_W;
+    let btnGap = BASE_BTN_GAP;
 
-    // Level 2: keep tower cards to the right of gold display.
-    if (this.game && this.game.currentLevel === 2) {
-      const btnStartX = 25;
-      const sideBtnW = 95;
-      const sideBtnGap = 12;
-      const dismantleBtnX = btnStartX + (sideBtnW + sideBtnGap) * 3;
-      const coinStartX = dismantleBtnX + sideBtnW + sideBtnGap + 40;
-      const coinCX = coinStartX + 50;
+    const btnStartX = 25;
+    const sideBtnW = 95;
+    const sideBtnGap = 12;
+    const dismantleBtnX = btnStartX + (sideBtnW + sideBtnGap) * 3;
+    const coinStartX = dismantleBtnX + sideBtnW + sideBtnGap + 40;
+    const coinCX = coinStartX + 50;
 
-      // Leave room for coin icon + gold value and a visual buffer.
-      const minStartX = coinCX + 170;
-      const maxStartX = CANVAS_WIDTH - totalW - 20;
-      startX = Math.min(Math.max(startX, minStartX), maxStartX);
+    // Reserve horizontal area for coin icon + gold number.
+    const minStartX = coinCX + 185;
+    const rightPadding = 20;
+    const availableW = CANVAS_WIDTH - minStartX - rightPadding;
+    const baseTotalW = btnW * count + btnGap * (count - 1);
+
+    // If default cards can't fit after gold section, shrink cards proportionally.
+    if (baseTotalW > availableW && count > 0 && availableW > 0) {
+      const scale = availableW / baseTotalW;
+      btnW = Math.max(120, Math.floor(btnW * scale));
+      btnGap = Math.max(8, Math.floor(btnGap * scale));
     }
+
+    const totalW = btnW * count + btnGap * (count - 1);
+    let startX = Math.floor((CANVAS_WIDTH - totalW) / 2);
+    startX = Math.max(startX + 24, minStartX); // slight right shift
+    if (startX + totalW > CANVAS_WIDTH - rightPadding) {
+      startX = CANVAS_WIDTH - rightPadding - totalW;
+    }
+    startX = Math.max(startX, minStartX);
 
     const tabY = TOWER_PANEL_TOP + Math.floor((TOWER_PANEL_HEIGHT - BTN_H) / 2);
 
     return availableTowers.map((type, i) => ({
       type,
-      x: startX + i * (BTN_W + BTN_GAP),
+      x: startX + i * (btnW + btnGap),
       y: tabY,
-      w: BTN_W,
+      w: btnW,
       h: BTN_H
     }));
   }
@@ -1599,7 +1611,7 @@ this._drawEndScreenButton(
       steam: imgs.towerSteam || imgs.towerSteamFire,
       alchemist: imgs.towerAlchemist || imgs.towerAlchemistFire
     };
-    const THUMB = 60; // 图标尺寸从40放大到60
+    const THUMB = Math.min(60, Math.max(44, Math.floor((tabs[0] ? tabs[0].w : 180) * 0.34)));
     const THUMB_CX_OFF = 12 + THUMB / 2;
 
     for (let i = 0; i < tabs.length; i++) {

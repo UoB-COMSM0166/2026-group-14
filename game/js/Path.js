@@ -58,18 +58,19 @@ class Path {
 //Level 1 — Big Ben
 // Path.js
 function getLevel1Waypoints() {
-// Based on CURRENT_GRID_SIZE cell centres (export uses live offset/size) (GameManager.js, line 361)
+// Based on CURRENT_GRID_SIZE cell centres (export uses live offset/size)
 return [
-{ x: 15, y: 420 },  // Entry (GameManager.js, line 372)
-{ x: 255, y: 420 },  // Waypoint 1 (GameManager.js, line 372)
-{ x: 255, y: 180 },  // Waypoint 2 (GameManager.js, line 372)
-{ x: 555, y: 180 },  // Waypoint 3 (GameManager.js, line 372)
-{ x: 555, y: 660 },  // Waypoint 4 (GameManager.js, line 372)
-{ x: 855, y: 660 },  // Waypoint 5 (GameManager.js, line 372)
-{ x: 855, y: 450 },  // Waypoint 6 (GameManager.js, line 372)
-{ x: 1755, y: 450 },  // Exit (GameManager.js, line 372)
-]; 
-} 
+    { x: 15, y: 420 },  // Entry
+    { x: 255, y: 420 },  // Waypoint 1
+    { x: 255, y: 180 },  // Waypoint 2
+    { x: 555, y: 180 },  // Waypoint 3
+    { x: 555, y: 660 },  // Waypoint 4
+    { x: 855, y: 660 },  // Waypoint 5
+    { x: 855, y: 450 },  // Waypoint 6
+    { x: 855, y: 420 },  // Waypoint 7
+    { x: 1785, y: 420 },  // Exit
+  ];
+}
 
 function getLevel2Waypoints() { 
 return [

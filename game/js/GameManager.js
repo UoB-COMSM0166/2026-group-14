@@ -42,6 +42,8 @@ class GameManager {
 
     this.pathEditMode = false;
     this.pathPoints = [];
+    // Debug path editor cache: levelId -> [{col,row}, ...]
+    this.debugPathPointsByLevel = {};
 
     this.editModePaused = false;
     this.manualPaused = false;
@@ -154,6 +156,16 @@ class GameManager {
 
   // --- Level management ---
 
+  getDefaultPathWaypoints(levelId) {
+    const waypointFns = {
+      1: getLevel1Waypoints,
+      2: getLevel2Waypoints,
+      3: getLevel3Waypoints
+    };
+    let waypointFn = waypointFns[levelId] || getLevel1Waypoints;
+    return waypointFn();
+  }
+
   tryStartLevel(levelId) {
     if (typeof ensureAudioStarted === 'function') ensureAudioStarted();
     if (!this.canPlayLevel(levelId)) {
@@ -189,13 +201,12 @@ class GameManager {
     this.enemies = [];
 
     // Build the path for this level (defined in Path.js)
-    const waypointFns = {
-      1: getLevel1Waypoints,
-      2: getLevel2Waypoints,
-      3: getLevel3Waypoints
-    };
-    let waypointFn = waypointFns[levelId] || getLevel1Waypoints;
-    this.path = new Path(waypointFn());
+    this.path = new Path(this.getDefaultPathWaypoints(levelId));
+    let savedPathPoints = this.debugPathPointsByLevel[levelId];
+    if (savedPathPoints && savedPathPoints.length >= 2) {
+      this.pathPoints = savedPathPoints.map(pt => ({ col: pt.col, row: pt.row }));
+      this.applyPathPointsToLivePath(false);
+    }
 
     // Build the tile grid for build-validity checks (defined in MapData.js)
     const mapDataFns = {
@@ -307,15 +318,68 @@ class GameManager {
 
     if (this.pathEditMode) {
       this.editModePaused = true;
-      this.pathPoints = [];
+      let saved = this.debugPathPointsByLevel[this.currentLevel];
+      if (saved && saved.length > 0) {
+        this.pathPoints = saved.map(pt => ({ col: pt.col, row: pt.row }));
+      } else {
+        this.pathPoints = [];
+      }
       if (this.mapEditMode) this.toggleMapEditMode();
       console.log('[Editor] Path edit mode enabled (game paused)');
       console.log('[Editor] Click cells to add waypoints in order');
-      console.log('[Editor] Press Z: undo last point; E: export path; N: exit');
+      console.log('[Editor] Press Z: undo last point; C: clear; E: export path; N: apply+exit');
     } else {
+      this.applyPathPointsToLivePath();
       this.editModePaused = this.mapEditMode;
       console.log('[Editor] Path edit mode disabled (game resumed)');
     }
+  }
+
+  applyPathPointsToLivePath(saveToLevel = true) {
+    if (!this.pathPoints || this.pathPoints.length < 2) return false;
+
+    const waypoints = this.pathPoints.map(pt => ({
+      x: colToCenterX(pt.col),
+      y: rowToCenterY(pt.row)
+    }));
+    this.path = new Path(waypoints);
+
+    if (saveToLevel) {
+      this.debugPathPointsByLevel[this.currentLevel] = this.pathPoints.map(pt => ({
+        col: pt.col,
+        row: pt.row
+      }));
+    }
+    return true;
+  }
+
+  addPathPoint(col, row) {
+    if (col < 0 || col >= COLS || row < 0 || row >= ROWS) return false;
+    const last = this.pathPoints[this.pathPoints.length - 1];
+    if (last && last.col === col && last.row === row) return false;
+
+    this.pathPoints.push({ col, row });
+    this.applyPathPointsToLivePath();
+
+    let pixelX = colToCenterX(col);
+    let pixelY = rowToCenterY(row);
+    console.log(`[Editor] Add waypoint #${this.pathPoints.length}: col=${col}, row=${row} -> (${pixelX}, ${pixelY})`);
+    return true;
+  }
+
+  undoPathPoint() {
+    if (!this.pathPoints || this.pathPoints.length === 0) return false;
+    let removed = this.pathPoints.pop();
+    console.log(`[Editor] Undo waypoint: col=${removed.col}, row=${removed.row}`);
+    this.applyPathPointsToLivePath();
+    return true;
+  }
+
+  clearPathPoints() {
+    this.pathPoints = [];
+    delete this.debugPathPointsByLevel[this.currentLevel];
+    this.path = new Path(this.getDefaultPathWaypoints(this.currentLevel));
+    console.log(`[Editor] Cleared path points for Level ${this.currentLevel}`);
   }
 
   exportPathCode() {
@@ -326,6 +390,9 @@ class GameManager {
 
     let levelNum = this.currentLevel || 1;
     console.log('========== EXPORTED PATH CODE ==========');
+    console.log('');
+    console.log(`--- 路径格子坐标 [col, row]（Level ${levelNum}）---`);
+    console.log(JSON.stringify(this.pathPoints.map(pt => [pt.col, pt.row])));
     console.log('');
     console.log(`function getLevel${levelNum}Waypoints() {`);
     console.log('  // Based on CURRENT_GRID_SIZE cell centres (export uses live offset/size)');
@@ -1068,8 +1135,8 @@ tower.anchorRow = (typeof t.anchorRow === 'number')
 
     fill(255, 255, 255);
     textSize(26);
-    text('Click red cells (path) to add waypoints in order', 20, 65);
-    text('Press Z: undo  |  E: export  |  N: exit', 20, 85);
+    text('Click grid cells to add waypoints in order', 20, 65);
+    text('Z: undo  |  C: clear  |  E: export  |  N: apply+exit', 20, 85);
     let coordText = (hoverCol >= 0 && hoverCol < COLS && hoverRow >= 0 && hoverRow < ROWS)
       ? `col=${hoverCol}, row=${hoverRow}` : '-';
     text(`Current: ${coordText}  |  Points: ${this.pathPoints.length}`, 20, 105);
@@ -1338,14 +1405,7 @@ canBuildAt(col, row) {
       let col = pixelToCol(mx);
       let row = pixelToRow(my);
 
-      if (col >= 0 && col < COLS && row >= 0 && row < ROWS) {
-        this.pathPoints.push({ col: col, row: row });
-
-        let pixelX = colToCenterX(col);
-        let pixelY = rowToCenterY(row);
-
-        console.log(`[Editor] Add waypoint #${this.pathPoints.length}: col=${col}, row=${row} -> (${pixelX}, ${pixelY})`);
-      }
+      this.addPathPoint(col, row);
       return;
     }
 
@@ -1606,24 +1666,7 @@ if (this.state === GameState.PLAYING) {
       }
       return;
     }
-let col = pixelToCol(mx);
-let row = pixelToRow(my);
 
-let gridX = this.getTowerCenterXFromAnchor(col);
-let gridY = this.getTowerCenterYFromAnchor(row);
-
-if (!this.canBuildAt(col, row)) {
-  let tileType = this.mapGrid && this.mapGrid[row] ? this.mapGrid[row][col] : null;
-  let reason =
-    tileType === TILE_TYPES.PATH ? "Can't build on the path!" :
-    tileType === TILE_TYPES.OCCUPIED ? "Already occupied!" :
-    "Can't build here!";
-  console.log(`[Game] ${reason} (col=${col}, row=${row}, tile=${tileType})`);
-  this.ui.showPlacementError(reason);
-  return;
-}
-
-this.tryPlaceTower(this.selectedTowerType, col, row, gridX, gridY);
     if (this.state === GameState.WIN || this.state === GameState.LOSE) {
       this.ui.handleEndScreenClick(mx, my);
       return;

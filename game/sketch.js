@@ -279,10 +279,11 @@ function keyPressed() {
 
   if (game && game.getState() === GameState.PLAYING && game.pathEditMode) {
     if (key === 'z' || key === 'Z') {
-      if (game.pathPoints.length > 0) {
-        let removed = game.pathPoints.pop();
-        console.log(`[Editor] Undo waypoint: col=${removed.col}, row=${removed.row}`);
-      }
+      game.undoPathPoint();
+      return false;
+    }
+    if (key === 'c' || key === 'C') {
+      game.clearPathPoints();
       return false;
     }
     if (key === 'e' || key === 'E') {
