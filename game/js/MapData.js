@@ -57,7 +57,9 @@ const LEVEL_1_GRID = (() => {
 const LEVEL_2_GRID = (() => {
 const g = Array.from({ length: ROWS }, () => new Array(COLS).fill(0));
 
-  const whitelist = [
+  const whitelist = (typeof LEVEL_2_BUILDABLE_WHITELIST !== 'undefined')
+    ? LEVEL_2_BUILDABLE_WHITELIST
+    : [
  [0,0],
     [1,0],
     [2,0],
@@ -1449,7 +1451,7 @@ const g = Array.from({ length: ROWS }, () => new Array(COLS).fill(0));
   ];
 
   for (const [col, row] of whitelist) {
-    if (row >= 0 && row < 15 && col >= 0 && col < 32) {
+    if (row >= 0 && row < ROWS && col >= 0 && col < COLS) {
       g[row][col] = 2;
     }
   }
