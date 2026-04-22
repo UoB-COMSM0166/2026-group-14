@@ -2785,7 +2785,7 @@ const g = Array.from({ length: ROWS }, () => new Array(COLS).fill(0));
   ];
 
   for (const [col, row] of whitelist) {
-    if (row >= 0 && row < 15 && col >= 0 && col < 32) {
+    if (row >= 0 && row < ROWS && col >= 0 && col < COLS) {
       g[row][col] = 2;
     }
   }

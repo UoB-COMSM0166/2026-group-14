@@ -98,7 +98,7 @@ const TUTORIAL_STEPS = [
   {
     id: 'tower_panel',
     highlight: 'tower_panel',
-    highlightArea: { x: 8, y: 811, w: 1904, h: 92 },
+    highlightArea: { x: 0, y: 790, w: 3000, h: 92 },
     title: 'Tower Selection',
     message: 'Select a tower type here. Each tower has different abilities and costs.',
     position: 'top'
@@ -106,7 +106,7 @@ const TUTORIAL_STEPS = [
   {
     id: 'buildable',
     highlight: 'buildable',
-    highlightArea: { x: 0, y: 42, w: 1911, h: 762 },
+    highlightArea: { x: 0, y: 70, w: 2100, h: 750 },
     title: 'Build Towers',
     message: 'Click on the green highlighted areas to place your selected tower.',
     position: 'center'
@@ -114,7 +114,7 @@ const TUTORIAL_STEPS = [
   {
     id: 'gold',
     highlight: 'gold',
-    highlightArea: { x: 395, y: 825, w: 110, h: 35 },
+    highlightArea: { x: 500, y: 820, w: 110, h: 35 },
     title: 'Gold',
     message: 'Building towers costs gold. Kill enemies to earn more gold!',
     position: 'top'
@@ -122,7 +122,7 @@ const TUTORIAL_STEPS = [
   {
     id: 'lives',
     highlight: 'lives',
-    highlightArea: { x: 746, y: 5, w: 448, h: 37 },
+    highlightArea: { x: 750, y: 20, w: 400, h: 37 },
     title: 'Lives',
     message: 'You lose a life when an enemy reaches the Landmark. Game over when lives reach 0!',
     position: 'left'
