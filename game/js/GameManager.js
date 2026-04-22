@@ -1621,8 +1621,11 @@ if (this.state === GameState.PLAYING) {
 
   if (this.dismantleMode) {
     console.log(`[Game] Attempting to dismantle at (${mx}, ${my})`);
-    this.removeTower(mx, my);
-    this.dismantleMode = false;
+    let removed = this.removeTower(mx, my);
+    if (removed) {
+      this.dismantleMode = false;
+      cursor(ARROW);
+    }
     return;
   }
 
@@ -1817,41 +1820,52 @@ tryPlaceTower(towerType, anchorCol, anchorRow, x, y) {
 }
 
 removeTower(x, y) {
-  let col = pixelToCol(x);
-  let row = pixelToRow(y);
-  let gridX = this.getTowerCenterXFromAnchor(col);
-  let gridY = this.getTowerCenterYFromAnchor(row);
+  console.log(`[Game] Checking for tower near click (${x}, ${y})`);
 
-  console.log(`[Game] Checking for tower at col=${col}, row=${row}, gridX=${gridX}, gridY=${gridY}`);
-
+  let bestIdx = -1;
+  let bestDist = Infinity;
   for (let i = this.towers.length - 1; i >= 0; i--) {
     let tower = this.towers[i];
-    let dist = Math.sqrt((tower.x - gridX) ** 2 + (tower.y - gridY) ** 2);
-
-    if (dist < CURRENT_GRID_SIZE) {
-      let config = TOWER_TYPES[tower.type];
-      let refund = Math.floor(config.cost * 0.7);
-      this.economy.addGold(refund);
-      this.towers.splice(i, 1);
-
-      if (this.mapGrid) {
-        this.setFootprintOccupiedByColRow(tower.anchorCol, tower.anchorRow, false);
+    let fw = (tower.footprintW || 2) * CURRENT_GRID_SIZE;
+    let fh = (tower.footprintH || 2) * CURRENT_GRID_SIZE;
+    let halfW = fw / 2;
+    let halfH = fh / 2;
+    if (x >= tower.x - halfW && x <= tower.x + halfW &&
+        y >= tower.y - halfH && y <= tower.y + halfH) {
+      let dx = tower.x - x;
+      let dy = tower.y - y;
+      let d = dx * dx + dy * dy;
+      if (d < bestDist) {
+        bestDist = d;
+        bestIdx = i;
       }
-
-      console.log(`[Game] Removed ${tower.type} tower at (${tower.x}, ${tower.y}), refunded ${refund} gold`);
-      this.sound.play("bonus", 0.65);
-
-      if (this.ui && typeof this.ui.showDismantleRefund === 'function') {
-        this.ui.showDismantleRefund(refund, x, y);
-      }
-
-      this._saveRunNow('remove_tower');
-      return true;
     }
   }
 
-  console.log(`[Game] No tower found near (${gridX}, ${gridY})`);
-  return false;
+  if (bestIdx === -1) {
+    console.log(`[Game] No tower found at click (${x}, ${y})`);
+    return false;
+  }
+
+  let tower = this.towers[bestIdx];
+  let config = TOWER_TYPES[tower.type];
+  let refund = Math.floor(config.cost * 0.7);
+  this.economy.addGold(refund);
+  this.towers.splice(bestIdx, 1);
+
+  if (this.mapGrid) {
+    this.setFootprintOccupiedByColRow(tower.anchorCol, tower.anchorRow, false);
+  }
+
+  console.log(`[Game] Removed ${tower.type} tower at (${tower.x}, ${tower.y}), refunded ${refund} gold`);
+  this.sound.play("bonus", 0.65);
+
+  if (this.ui && typeof this.ui.showDismantleRefund === 'function') {
+    this.ui.showDismantleRefund(refund, x, y);
+  }
+
+  this._saveRunNow('remove_tower');
+  return true;
 }
 
   setSelectedTowerType(towerType) {

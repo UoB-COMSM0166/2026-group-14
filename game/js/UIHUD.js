@@ -1564,11 +1564,24 @@ this._drawEndScreenButton(
     strokeWeight(2);
     rect(dismantleBtnX, btnY, btnW, btnH, 8);
 
+    let dismantleIcon = (imgs && imgs.dismantleAxe) ? imgs.dismantleAxe : null;
+    if (dismantleIcon && dismantleIcon.width > 0) {
+      let iconSize = 44;
+      imageMode(CENTER);
+      tint(255, (isDismantleHover || isDismantleSelected) ? 255 : 220);
+      image(dismantleIcon, dismantleBtnX + btnW / 2, btnY + btnH / 2 - 9, iconSize, iconSize);
+      noTint();
+    } else {
+      fill((isDismantleHover || isDismantleSelected) ? color(255, 230, 180) : color(180, 160, 120));
+      noStroke();
+      textAlign(CENTER, CENTER);
+      textSize(30);
+      text('\u{1FA9A}', dismantleBtnX + btnW / 2, btnY + btnH / 2 - 8);
+    }
+
     fill((isDismantleHover || isDismantleSelected) ? color(255, 230, 180) : color(180, 160, 120));
     noStroke();
     textAlign(CENTER, CENTER);
-    textSize(30); // 图标放大
-    text('\u{1FA9A}', dismantleBtnX + btnW / 2, btnY + btnH / 2 - 8);
     textSize(16); // 文字标签
     text("Dismantle", dismantleBtnX + btnW / 2, btnY + btnH / 2 + 20);
     this.dismantleBtn = { x: dismantleBtnX, y: btnY, w: btnW, h: btnH };
@@ -2290,16 +2303,11 @@ handleEndScreenClick(mx, my) {
       }
 
       if (button.action === 'next_level') {
-        let nextLevel = this.game.currentLevel + 1;
-        if (nextLevel <= TOTAL_LEVELS) {
-          this.game.startLevel(nextLevel);
-        } else {
-          this.game.setState(GameState.LEVEL_SELECT);
-        }
+        this.game.nextLevel();
       }
 
       if (button.action === 'level_select') {
-        this.game.setState(GameState.LEVEL_SELECT);
+        this.game.returnToMenu();
       }
 
       return true;

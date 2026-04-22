@@ -135,6 +135,10 @@ function preload() {
     () => console.log('[Error] gentleman_bug.png failed to load')
   );
   gameImages.panelBottom = loadImage('assets/ui_panel_bottom.png');
+  gameImages.dismantleAxe = loadImage('assets/ax.png',
+    () => console.log('[Load] ax.png loaded'),
+    () => console.log('[Error] ax.png failed to load')
+  );
 }
 
 function setup() {
@@ -153,7 +157,9 @@ function setup() {
   canvas.elt.style.outline = 'none';
   frameRate(FPS);
 
-  dismantleCursorImg = createDismantleAxeCursor();
+  dismantleCursorImg = (gameImages.dismantleAxe && gameImages.dismantleAxe.width > 0)
+    ? gameImages.dismantleAxe
+    : createDismantleAxeCursor();
 
   console.log(`[Debug] Screen: ${windowWidth}x${windowHeight}`);
   console.log(`[Debug] Canvas: ${canvasWidth}x${canvasHeight}`);
