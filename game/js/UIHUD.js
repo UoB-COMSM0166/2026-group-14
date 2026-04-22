@@ -48,6 +48,10 @@ class UIHUD {
     this.tutorialDebugMode = false;
     this.tutorialDebugStep = 0;
     this.tutorialDebugClicks = [];
+    this.tutorialDebugDragging = false;
+    this.tutorialDebugDragStart = null;
+    this.tutorialDebugDragCurrent = null;
+    this.tutorialDebugLastRect = null;
 
     this.settings = {
       musicVolume: 0.08,
@@ -337,7 +341,6 @@ class UIHUD {
     this.hideSwitchPlayerUI();
 
     this.drawMenuButtons();
-    this.drawPlayerBadge();
 
    // UIHUD.js -> drawMainMenu() 内部逻辑
 
@@ -508,26 +511,8 @@ class UIHUD {
       }
     }
 
-    // 5. 渲染 Continue 按钮（它依赖上面的 mx 和 my）
-    let canContinue = this.game && typeof this.game.hasRunSave === 'function' ? this.game.hasRunSave() : false;
-    let contW = 220;
-    let contH = 48;
-    let contX = CANVAS_WIDTH - contW - 28;
-    let contY = CANVAS_HEIGHT - contH - 28;
-    this.continueButton = { x: contX, y: contY, w: contW, h: contH, enabled: canContinue };
-
-    let contHover = mx >= contX && mx <= contX + contW && my >= contY && my <= contY + contH;
-    fill(contHover ? color(80, 60, 40, 230) : color(50, 40, 30, 204));
-    stroke(contHover ? '#FFD700' : '#C8A84E');
-    strokeWeight(2);
-    rectMode(CORNER);
-    rect(contX, contY, contW, contH, 10);
-    noStroke();
-
-    fill(canContinue ? color(255, 220, 150) : color(170, 170, 170));
-    textAlign(CENTER, CENTER);
-    textSize(27);
-    text("Continue", contX + contW / 2, contY + contH / 2);
+    // Save-system continue entry removed
+    this.continueButton = null;
   
     pop();
     this.drawLevelSelectDebugGrid();
@@ -2130,7 +2115,7 @@ this._drawEndScreenButton(
     let bodyTop = dialogY + innerPad + 62;
     let bodyW = dialogW - innerPad * 2;
     text(
-      "Are you sure you want to exit the game? ",
+      "Are you sure you want to exit the game?",
       dialogX + innerPad,
       bodyTop,
       bodyW,
@@ -2565,8 +2550,8 @@ handleEndScreenClick(mx, my) {
     let mx = getGameMouseX();
     let my = getGameMouseY();
 
-    let dialogW = 450;
-    let dialogH = 220;
+    let dialogW = 560;
+    let dialogH = 280;
     let dialogX, dialogY;
 
     switch (step.position) {
@@ -2592,6 +2577,74 @@ handleEndScreenClick(mx, my) {
         dialogY = CANVAS_HEIGHT / 2 - dialogH / 2;
     }
 
+    // Optional per-step override for placing dialog near highlight regions.
+    if (step.dialogPosition &&
+      Number.isFinite(step.dialogPosition.x) &&
+      Number.isFinite(step.dialogPosition.y)) {
+      dialogX = step.dialogPosition.x;
+      dialogY = step.dialogPosition.y;
+    }
+
+    // Clamp to keep full dialog inside the canvas.
+    const minDialogX = 10;
+    const maxDialogX = CANVAS_WIDTH - dialogW - 10;
+    const minDialogY = 10;
+    const maxDialogY = CANVAS_HEIGHT - dialogH - 45;
+    dialogX = constrain(dialogX, minDialogX, maxDialogX);
+    dialogY = constrain(dialogY, minDialogY, maxDialogY);
+
+    // Keep dialog close to highlight but never overlapping it.
+    const highlightArea = this.getTutorialHighlightArea(step.highlight);
+    if (highlightArea && step.highlight !== 'none') {
+      const safePad = 14; // matches dim-mask highlight padding and adds a small gap
+      const hx = highlightArea.x - safePad;
+      const hy = highlightArea.y - safePad;
+      const hw = highlightArea.w + safePad * 2;
+      const hh = highlightArea.h + safePad * 2;
+      const dialogGap = 24;
+
+      const overlaps = (ax, ay, aw, ah, bx, by, bw, bh) => {
+        return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
+      };
+      const overlapArea = (ax, ay, aw, ah, bx, by, bw, bh) => {
+        const iw = Math.max(0, Math.min(ax + aw, bx + bw) - Math.max(ax, bx));
+        const ih = Math.max(0, Math.min(ay + ah, by + bh) - Math.max(ay, by));
+        return iw * ih;
+      };
+      const clampDialog = (x, y) => ({
+        x: constrain(x, minDialogX, maxDialogX),
+        y: constrain(y, minDialogY, maxDialogY)
+      });
+
+      if (overlaps(dialogX, dialogY, dialogW, dialogH, hx, hy, hw, hh)) {
+        const cx = hx + hw / 2;
+        const cy = hy + hh / 2;
+        const candidates = [
+          clampDialog(cx - dialogW / 2, hy - dialogH - dialogGap), // top
+          clampDialog(cx - dialogW / 2, hy + hh + dialogGap), // bottom
+          clampDialog(hx - dialogW - dialogGap, cy - dialogH / 2), // left
+          clampDialog(hx + hw + dialogGap, cy - dialogH / 2) // right
+        ];
+
+        let best = null;
+        for (const candidate of candidates) {
+          const ov = overlapArea(candidate.x, candidate.y, dialogW, dialogH, hx, hy, hw, hh);
+          const ccx = candidate.x + dialogW / 2;
+          const ccy = candidate.y + dialogH / 2;
+          const distToHighlight = (ccx - cx) * (ccx - cx) + (ccy - cy) * (ccy - cy);
+          const score = ov * 1e9 + distToHighlight;
+          if (!best || score < best.score) {
+            best = { ...candidate, score };
+          }
+        }
+
+        if (best) {
+          dialogX = best.x;
+          dialogY = best.y;
+        }
+      }
+    }
+
     fill(35, 30, 25, 245);
     stroke(200, 170, 120);
     strokeWeight(4);
@@ -2606,28 +2659,28 @@ handleEndScreenClick(mx, my) {
     // Step indicator
     fill(150, 150, 150);
     textAlign(RIGHT, TOP);
-    textSize(15);
+    textSize(20);
     text((game.tutorialStep + 1) + "/" + TUTORIAL_STEPS.length, dialogX + dialogW - 20, dialogY + 15);
 
     // Title
     fill(255, 220, 150);
     textAlign(LEFT, TOP);
-    textSize(26);
+    textSize(36);
     textStyle(BOLD);
     text(step.title, dialogX + 25, dialogY + 20);
     textStyle(NORMAL);
 
     // Message
     fill(220, 220, 220);
-    textSize(18);
-    textLeading(28);
-    text(step.message, dialogX + 25, dialogY + 55, dialogW - 50, 120);
+    textSize(25);
+    textLeading(36);
+    text(step.message, dialogX + 25, dialogY + 70, dialogW - 50, 160);
 
     // Breathing prompt
     let promptAlpha = 127 + 128 * sin(frameCount * 0.05);
     fill(255, 255, 255, promptAlpha);
     textAlign(CENTER, CENTER);
-    textSize(19);
+    textSize(26);
     text("Click anywhere to continue", dialogX + dialogW / 2, dialogY + dialogH + 30);
     textAlign(LEFT, TOP); // Reset alignment
   }
@@ -2693,34 +2746,27 @@ handleEndScreenClick(mx, my) {
     line(mx - 30, my, mx + 30, my);
     line(mx, my - 30, mx, my + 30);
 
-    // Recorded clicks
-    for (let i = 0; i < this.tutorialDebugClicks.length; i++) {
-      let c = this.tutorialDebugClicks[i];
-      fill(0, 255, 0);
-      stroke(255);
-      strokeWeight(2);
-      ellipse(c.x, c.y, 15, 15);
-
-      fill(255);
-      noStroke();
-      textSize(12);
-      textAlign(CENTER, CENTER);
-      text(i + 1, c.x, c.y);
-    }
-
-    // Preview rectangle when one click is recorded
-    if (this.tutorialDebugClicks.length === 1) {
-      let c1 = this.tutorialDebugClicks[0];
-      let rx = Math.min(c1.x, mx);
-      let ry = Math.min(c1.y, my);
-      let rw = Math.abs(mx - c1.x);
-      let rh = Math.abs(my - c1.y);
+    // Drag-selection rectangle (same flow as level-select debug)
+    if (this.tutorialDebugDragging && this.tutorialDebugDragStart && this.tutorialDebugDragCurrent) {
+      const s = this.tutorialDebugDragStart;
+      const c = this.tutorialDebugDragCurrent;
+      const rx = Math.min(s.x, c.x);
+      const ry = Math.min(s.y, c.y);
+      const rw = Math.abs(c.x - s.x);
+      const rh = Math.abs(c.y - s.y);
 
       fill(255, 255, 0, 30);
       stroke(255, 255, 0);
       strokeWeight(2);
       rectMode(CORNER);
       rect(rx, ry, rw, rh);
+    } else if (this.tutorialDebugLastRect) {
+      const r = this.tutorialDebugLastRect;
+      fill(0, 255, 255, 26);
+      stroke(0, 255, 255, 220);
+      strokeWeight(2);
+      rectMode(CORNER);
+      rect(r.x, r.y, r.w, r.h);
     }
 
     // Debug info panel
@@ -2744,16 +2790,16 @@ handleEndScreenClick(mx, my) {
     text("Current Step: " + (game.tutorialStep + 1) + "/" + TUTORIAL_STEPS.length, 20, infoY); infoY += 18;
     text("Step ID: " + TUTORIAL_STEPS[game.tutorialStep].id, 20, infoY); infoY += 18;
     text("Mouse: (" + Math.round(mx) + ", " + Math.round(my) + ")", 20, infoY); infoY += 18;
-    text("Clicks recorded: " + this.tutorialDebugClicks.length + "/2", 20, infoY); infoY += 25;
+    text("Drag status: " + (this.tutorialDebugDragging ? "dragging" : "idle"), 20, infoY); infoY += 25;
 
     fill(200, 200, 200);
     textSize(11);
     text("Controls:", 20, infoY); infoY += 15;
-    text("T - Toggle debug mode", 20, infoY); infoY += 14;
+    text("M - Toggle debug mode", 20, infoY); infoY += 14;
     text("1-8 - Jump to step", 20, infoY); infoY += 14;
-    text("Click twice - Record highlight area", 20, infoY); infoY += 14;
+    text("Click + drag - Export highlight area", 20, infoY); infoY += 14;
     text("P - Print all configs", 20, infoY); infoY += 14;
-    text("C - Clear clicks", 20, infoY);
+    text("C - Clear last selection", 20, infoY);
 
     pop();
   }

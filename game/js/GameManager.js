@@ -5,12 +5,9 @@ class GameManager {
     this.state = GameState.MENU;
     this.currentLevel = 1;
 
-    // --- Player profile (nickname-based) ---
+    // Save/profile system removed
     this.playerProfile = null;
     this.playerNickname = '';
-    this._loadActivePlayer();
-    this._lastAutoSaveFrame = 0;
-    this._autoSaveIntervalFrames = 120; // ~2s @ 60fps
 
     this.economy = null;
     this.landmark = null;
@@ -102,61 +99,39 @@ class GameManager {
   }
 
   _loadActivePlayer() {
-    if (typeof SaveSystem === 'undefined') return;
-    let nick = SaveSystem.getActiveNickname();
-    if (!nick) return;
-    let profile = SaveSystem.loadProfile(nick);
-    if (!profile) return;
-    this.playerNickname = nick;
-    this.playerProfile = profile;
+    this.playerNickname = '';
+    this.playerProfile = null;
   }
 
   isLoggedIn() {
-    return !!(this.playerProfile && this.playerNickname);
+    return false;
   }
 
   login(nickname) {
-    if (typeof SaveSystem === 'undefined') return false;
-    let prof = SaveSystem.login(nickname);
-    if (!prof) return false;
-    this.playerNickname = prof.nickname;
-    this.playerProfile = prof;
-    console.log('[Save] Logged in as:', this.playerNickname);
+    this.playerNickname = '';
+    this.playerProfile = null;
     return true;
   }
 
   hasRunSave() {
-    if (!this.playerNickname || typeof SaveSystem === 'undefined') return false;
-    return !!SaveSystem.loadRun(this.playerNickname);
+    return false;
   }
 
   continueRun() {
-    if (typeof ensureAudioStarted === 'function') ensureAudioStarted();
-    if (!this.playerNickname || typeof SaveSystem === 'undefined') return false;
-    let run = SaveSystem.loadRun(this.playerNickname);
-    if (!run) return false;
-    return this._restoreFromRunSave(run);
+    return false;
   }
 
   clearRunSave() {
-    if (!this.playerNickname || typeof SaveSystem === 'undefined') return false;
-    return SaveSystem.clearRun(this.playerNickname);
+    return false;
   }
 
   logout() {
-    if (typeof SaveSystem === 'undefined') return;
-    SaveSystem.logout();
     this.playerNickname = '';
     this.playerProfile = null;
-    console.log('[Save] Logged out');
   }
 
   getUnlockedUpTo() {
-    if (!this.playerProfile) return 1;
-    let u = this.playerProfile.unlockedUpTo || 1;
-    if (u < 1) u = 1;
-    if (u > TOTAL_LEVELS) u = TOTAL_LEVELS;
-    return u;
+    return TOTAL_LEVELS;
   }
 
   canPlayLevel(levelId) {
@@ -482,20 +457,11 @@ class GameManager {
   }
 
   _autoSaveTick() {
-    if (!this.isLoggedIn()) return;
-    if (this.manualPaused) return;
-    if (this.editModePaused) return;
-    if (frameCount - this._lastAutoSaveFrame < this._autoSaveIntervalFrames) return;
-    this._lastAutoSaveFrame = frameCount;
-    this._saveRunNow('autosave');
+    return;
   }
 
   _saveRunNow(reason = 'manual') {
-    if (!this.isLoggedIn() || typeof SaveSystem === 'undefined') return false;
-    // Only persist meaningful in-run states
-    if (![GameState.PLAYING, GameState.PAUSED, GameState.IN_GAME_SETTINGS].includes(this.state)) return false;
-    let data = this._buildRunSave(reason);
-    return SaveSystem.saveRun(this.playerNickname, data);
+    return false;
   }
 
   _buildRunSave(reason) {
@@ -733,17 +699,12 @@ tower.anchorRow = (typeof t.anchorRow === 'number')
         this._onVictory();
         this.setState(GameState.WIN);
         this.sound.play("win");
-        if (typeof SaveSystem !== 'undefined' && this.playerNickname) {
-          SaveSystem.clearRun(this.playerNickname);
-        }
       }
     }
   }
 
   _onVictory() {
-    if (!this.playerProfile || typeof SaveSystem === 'undefined') return;
-    // Auto-save progression: completion unlocks the next level.
-    SaveSystem.unlockNextLevel(this.playerProfile, this.currentLevel);
+    return;
   }
 
   recordFinalStats(resultState) {
@@ -1495,19 +1456,6 @@ canBuildAt(col, row) {
       this.setState(GameState.MENU); // 执行返回主菜单功能
       return;
   }        
-      let contBtn = this.ui.continueButton;
-      if (contBtn &&
-        mx >= contBtn.x && mx <= contBtn.x + contBtn.w &&
-        my >= contBtn.y && my <= contBtn.y + contBtn.h) {
-        if (contBtn.enabled) {
-          this.sound.play("click1");
-          this.continueRun();
-        } else {
-          console.log('[Save] No run save to continue');
-        }
-        return;
-      }
-
       let levelBtns = this.ui.levelButtons;
       if (levelBtns) {
         for (let btn of levelBtns) {
@@ -1533,29 +1481,12 @@ canBuildAt(col, row) {
     }
 
     if (this.state === GameState.PLAYING && this.tutorialMode && this.ui.tutorialDebugMode) {
-      let clickData = { x: Math.round(mx), y: Math.round(my) };
-      this.ui.tutorialDebugClicks.push(clickData);
-
-      console.log('[Tutorial Debug] Click #' + this.ui.tutorialDebugClicks.length + ':',
-        'x=' + clickData.x + ', y=' + clickData.y);
-
-      if (this.ui.tutorialDebugClicks.length === 2) {
-        let c1 = this.ui.tutorialDebugClicks[0];
-        let c2 = this.ui.tutorialDebugClicks[1];
-
-        let x = Math.min(c1.x, c2.x);
-        let y = Math.min(c1.y, c2.y);
-        let w = Math.abs(c2.x - c1.x);
-        let h = Math.abs(c2.y - c1.y);
-
-        console.log('='.repeat(50));
-        console.log('[Tutorial Debug] HIGHLIGHT AREA for step "' +
-          TUTORIAL_STEPS[this.tutorialStep].id + '":');
-        console.log('{ x: ' + x + ', y: ' + y + ', w: ' + w + ', h: ' + h + ' }');
-        console.log('='.repeat(50));
-
-        this.ui.tutorialDebugClicks = [];
-      }
+      const startX = Math.round(mx);
+      const startY = Math.round(my);
+      this.ui.tutorialDebugDragging = true;
+      this.ui.tutorialDebugDragStart = { x: startX, y: startY };
+      this.ui.tutorialDebugDragCurrent = { x: startX, y: startY };
+      console.log('[Tutorial Debug] Drag start: x=' + startX + ', y=' + startY);
       return;
     }
 
@@ -1700,6 +1631,15 @@ this.tryPlaceTower(this.selectedTowerType, col, row, gridX, gridY);
   }
 
   handleMouseDrag(mx, my) {
+    if (this.state === GameState.PLAYING &&
+      this.tutorialMode &&
+      this.ui.tutorialDebugMode &&
+      this.ui.tutorialDebugDragging &&
+      this.ui.tutorialDebugDragStart) {
+      this.ui.tutorialDebugDragCurrent = { x: Math.round(mx), y: Math.round(my) };
+      return;
+    }
+
     if (this.state === GameState.LEVEL_SELECT &&
       this.ui.levelSelectDebug &&
       this.ui.levelSelectDebugDragging &&
@@ -1725,6 +1665,33 @@ this.tryPlaceTower(this.selectedTowerType, col, row, gridX, gridY);
   }
 
   handleMouseUp() {
+    if (this.state === GameState.PLAYING &&
+      this.tutorialMode &&
+      this.ui.tutorialDebugMode &&
+      this.ui.tutorialDebugDragging &&
+      this.ui.tutorialDebugDragStart &&
+      this.ui.tutorialDebugDragCurrent) {
+      const start = this.ui.tutorialDebugDragStart;
+      const current = this.ui.tutorialDebugDragCurrent;
+      const x = Math.min(start.x, current.x);
+      const y = Math.min(start.y, current.y);
+      const w = Math.abs(current.x - start.x);
+      const h = Math.abs(current.y - start.y);
+
+      console.log('='.repeat(50));
+      console.log('[Tutorial Debug] HIGHLIGHT AREA for step "' +
+        TUTORIAL_STEPS[this.tutorialStep].id + '":');
+      console.log('{ x: ' + x + ', y: ' + y + ', w: ' + w + ', h: ' + h + ' }');
+      console.log('='.repeat(50));
+
+      this.ui.tutorialDebugLastRect = { x, y, w, h };
+      this.ui.tutorialDebugDragging = false;
+      this.ui.tutorialDebugDragStart = null;
+      this.ui.tutorialDebugDragCurrent = null;
+      this.ui.tutorialDebugClicks = [];
+      return;
+    }
+
     if (this.state === GameState.LEVEL_SELECT &&
       this.ui.levelSelectDebug &&
       this.ui.levelSelectDebugDragging &&

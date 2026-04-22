@@ -85,6 +85,7 @@ const TUTORIAL_STEPS = [
     highlightArea: { x: 1602, y: 100, w: 314, h: 402 },
     title: 'Your Goal',
     message: 'Protect the Landmark! Keep its health above 0 until all enemy waves are defeated.',
+    dialogPosition: { x: 1120, y: 170 },
     position: 'left'
   },
   {
@@ -98,33 +99,37 @@ const TUTORIAL_STEPS = [
   {
     id: 'tower_panel',
     highlight: 'tower_panel',
-    highlightArea: { x: 8, y: 811, w: 1904, h: 92 },
+    highlightArea: { x: 2, y: 783, w: 1916, h: 113 },
     title: 'Tower Selection',
     message: 'Select a tower type here. Each tower has different abilities and costs.',
+    dialogPosition: { x: 735, y: 543 },
     position: 'top'
   },
   {
     id: 'buildable',
     highlight: 'buildable',
-    highlightArea: { x: 0, y: 42, w: 1911, h: 762 },
+    highlightArea: { x: 0, y: 74, w: 1918, h: 705 },
     title: 'Build Towers',
     message: 'Click on the green highlighted areas to place your selected tower.',
+    dialogPosition: { x: 40, y: 270 },
     position: 'center'
   },
   {
     id: 'gold',
     highlight: 'gold',
-    highlightArea: { x: 395, y: 825, w: 110, h: 35 },
+    highlightArea: { x: 478, y: 800, w: 157, h: 89 },
     title: 'Gold',
     message: 'Building towers costs gold. Kill enemies to earn more gold!',
+    dialogPosition: { x: 360, y: 560 },
     position: 'top'
   },
   {
     id: 'lives',
     highlight: 'lives',
-    highlightArea: { x: 746, y: 5, w: 448, h: 37 },
+    highlightArea: { x: 805, y: 4, w: 307, h: 65 },
     title: 'Lives',
     message: 'You lose a life when an enemy reaches the Landmark. Game over when lives reach 0!',
+    dialogPosition: { x: 734, y: 90 },
     position: 'left'
   },
   {

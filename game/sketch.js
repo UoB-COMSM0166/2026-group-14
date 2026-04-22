@@ -302,7 +302,7 @@ function keyPressed() {
     return false;
   }
 
-  if (game && (key === 'm' || key === 'M') && game.getState() === GameState.PLAYING) {
+  if (game && (key === 'm' || key === 'M') && game.getState() === GameState.PLAYING && !game.tutorialMode) {
     game.toggleMapEditMode();
     return false;
   }
@@ -334,10 +334,6 @@ function keyPressed() {
       console.log('[Debug] Level select grid (M):', game.ui.levelSelectDebug ? 'ON' : 'OFF');
       return false;
     }
-    if (key === 'c' || key === 'C') {
-      if (game && typeof game.continueRun === 'function') game.continueRun();
-      return;
-    }
     if (key === '1') game.tryStartLevel(1);
     if (key === '2') game.tryStartLevel(2);
     if (key === '3') game.tryStartLevel(3);
@@ -347,10 +343,15 @@ function keyPressed() {
     return;
   }
   if (state === GameState.PLAYING && game.tutorialMode) {
-    // Toggle tutorial debug mode
-    if (key === 't' || key === 'T') {
+    // Toggle tutorial debug grid (same key as level-select)
+    if (key === 'm' || key === 'M' || key === 't' || key === 'T') {
       game.ui.tutorialDebugMode = !game.ui.tutorialDebugMode;
       game.ui.tutorialDebugClicks = [];
+      if (!game.ui.tutorialDebugMode) {
+        game.ui.tutorialDebugDragging = false;
+        game.ui.tutorialDebugDragStart = null;
+        game.ui.tutorialDebugDragCurrent = null;
+      }
       console.log('[Tutorial Debug] Mode:', game.ui.tutorialDebugMode ? 'ON' : 'OFF');
       console.log('[Tutorial Debug] Current step:', TUTORIAL_STEPS[game.tutorialStep].id);
       return false;
@@ -370,7 +371,11 @@ function keyPressed() {
       }
       if (key === 'c' || key === 'C') {
         game.ui.tutorialDebugClicks = [];
-        console.log('[Tutorial Debug] Clicks cleared');
+        game.ui.tutorialDebugLastRect = null;
+        game.ui.tutorialDebugDragging = false;
+        game.ui.tutorialDebugDragStart = null;
+        game.ui.tutorialDebugDragCurrent = null;
+        console.log('[Tutorial Debug] Selection cleared');
         return false;
       }
     }
