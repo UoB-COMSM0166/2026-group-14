@@ -14,8 +14,8 @@ let CURRENT_GRID_SIZE = GRID_SIZE;
 
 // Per-level grid alignment (offset + cell size per map)
 const LEVEL_GRID_CONFIG = {
-  1: { offsetX: 0, offsetY:-15, gridSize: 30 },
-  2: { offsetX: 0, offsetY: 0, gridSize: 30 },  
+  1: { offsetX: 0, offsetY: -15, gridSize: 30 },
+  2: { offsetX: 0, offsetY: 0, gridSize: 30 },
   3: { offsetX: 0, offsetY: 0, gridSize: 30 }
 };
 
@@ -250,7 +250,7 @@ const TOWER_TYPES = {
     name: "Area Tower",
     cost: 130,
     range: 200,
-    damage: 18,
+    damage: 13,
     fireRate: 85,
     bulletSpeed: 10,
     color: [220, 80, 60],
@@ -336,10 +336,10 @@ const ENEMY_REACH_DAMAGE = 20;
 const TOTAL_LEVELS = 3;
 
 const ENEMY_STATS = {
-  basic:  { hp: 100, speed: 2,   reward: 15 },
-  fast:   { hp:  60, speed: 3,   reward: 20 },
-  tank:   { hp: 300, speed: 1,   reward: 25 },
-  boss:   { hp: 500, speed: 0.8, reward: 45 },
+  basic: { hp: 100, speed: 2, reward: 15 },
+  fast: { hp: 60, speed: 3, reward: 20 },
+  tank: { hp: 300, speed: 1, reward: 25 },
+  boss: { hp: 500, speed: 0.8, reward: 45 },
   knight: {
     hp: 180,
     speed: 1.6,

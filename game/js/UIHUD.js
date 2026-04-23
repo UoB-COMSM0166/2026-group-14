@@ -76,7 +76,7 @@ class UIHUD {
     this.enableSwitchPlayer = false;
   }
 
-   getClickedMenuButton(mx, my) {
+  getClickedMenuButton(mx, my) {
     const rects = this.getMenuButtonRects();
     for (let i = 0; i < rects.length; i++) {
       const r = rects[i];
@@ -293,7 +293,7 @@ class UIHUD {
     if (this.switchPlayerBtn) this.switchPlayerBtn.hide();
   }
 
- getDomX(designX) {
+  getDomX(designX) {
     let cnv = document.querySelector('canvas');
     if (!cnv) return designX;
     let cnvRect = cnv.getBoundingClientRect(); // 使用 cnvRect 变量名
@@ -342,32 +342,32 @@ class UIHUD {
 
     this.drawMenuButtons();
 
-   // UIHUD.js -> drawMainMenu() 内部逻辑
+    // UIHUD.js -> drawMainMenu() 内部逻辑
 
-  if (this.enableSwitchPlayer &&
+    if (this.enableSwitchPlayer &&
       this.switchPlayerBtn &&
       this.game &&
       typeof this.game.isLoggedIn === 'function' &&
       this.game.isLoggedIn()) {
-    this.showSwitchPlayerUI();
-  
- 
-    let cnv = document.querySelector('canvas');
-    let rect = cnv ? cnv.getBoundingClientRect() : { width: DESIGN_WIDTH };
-    let scale = rect.width / DESIGN_WIDTH;
+      this.showSwitchPlayerUI();
 
- 
-    this.switchPlayerBtn.position(this.getDomX(453), this.getDomY(25)); 
-  
-  
-    this.switchPlayerBtn.size(220 * scale, 55 * scale);
-  
 
-    this.switchPlayerBtn.style('font-size', (24 * scale) + 'px');
-    this.switchPlayerBtn.style('font-weight', 'bold');
-  
-    this.switchPlayerBtn.style('padding', (5 * scale) + 'px');
-  }
+      let cnv = document.querySelector('canvas');
+      let rect = cnv ? cnv.getBoundingClientRect() : { width: DESIGN_WIDTH };
+      let scale = rect.width / DESIGN_WIDTH;
+
+
+      this.switchPlayerBtn.position(this.getDomX(453), this.getDomY(25));
+
+
+      this.switchPlayerBtn.size(220 * scale, 55 * scale);
+
+
+      this.switchPlayerBtn.style('font-size', (24 * scale) + 'px');
+      this.switchPlayerBtn.style('font-weight', 'bold');
+
+      this.switchPlayerBtn.style('padding', (5 * scale) + 'px');
+    }
   }
 
   drawPlayerBadge() {
@@ -418,7 +418,7 @@ class UIHUD {
       const cy = centerYs[i];
       const bRect = rectData[i]; // 将变量名 rect 改为 bRect
       const hovered = getGameMouseX() >= bRect.x && getGameMouseX() <= bRect.x + bRect.w &&
-                      getGameMouseY() >= bRect.y && getGameMouseY() <= bRect.y + bRect.h;
+        getGameMouseY() >= bRect.y && getGameMouseY() <= bRect.y + bRect.h;
 
       let scaleFactor = hovered ? 1.08 : 1.0;
       if (hovered && mouseIsPressed) scaleFactor = 0.95;
@@ -513,7 +513,7 @@ class UIHUD {
 
     // Save-system continue entry removed
     this.continueButton = null;
-  
+
     pop();
     this.drawLevelSelectDebugGrid();
   }
@@ -677,12 +677,12 @@ class UIHUD {
     }
 
     let panelW = 640;
-    let panelH = 440; 
+    let panelH = 440;
     let panelX = CANVAS_WIDTH / 2 - panelW / 2;
     let panelY = CANVAS_HEIGHT / 2 - panelH / 2;
 
-    
-    fill(60, 45, 30, 250); 
+
+    fill(60, 45, 30, 250);
     stroke(200, 168, 78);
     strokeWeight(5);
     rect(panelX, panelY, panelW, panelH, 15);
@@ -711,7 +711,7 @@ class UIHUD {
     }
 
     // 4. NICKNAME 标签（同样使用 #FFECB3）
-    fill(255, 236, 179); 
+    fill(255, 236, 179);
     textSize(24);
     text('NICKNAME:', CANVAS_WIDTH / 2, panelY + 195);
 
@@ -719,7 +719,7 @@ class UIHUD {
     let inputH = 48;
     let btnW = 140;
     let btnH = 55;
-    let btnGap = 60; 
+    let btnGap = 60;
 
     this.showLoginUI();
 
@@ -741,7 +741,7 @@ class UIHUD {
       this.nicknameLoginBtn.size(btnW * scale, btnH * scale);
       this.nicknameLoginBtn.position(this.getDomX(btnStartX), this.getDomY(btnY));
       this.nicknameLoginBtn.style('font-size', (20 * scale) + 'px');
-      this.nicknameLoginBtn.style('font-weight', 'normal'); 
+      this.nicknameLoginBtn.style('font-weight', 'normal');
       this.nicknameLoginBtn.style('font-family', "'Georgia', serif");
     }
 
@@ -752,7 +752,7 @@ class UIHUD {
       this.nicknameBackBtn.style('font-weight', 'normal');
       this.nicknameBackBtn.style('font-family', "'Georgia', serif");
     }
-    
+
     pop();
   }
 
@@ -821,7 +821,7 @@ class UIHUD {
     let barW = 200; // 稍微加宽血条
     let barH = 16;  // 稍微加高血条
     let barX = centerX - barW / 2;
-    
+
     // --- 垂直排版优化 ---
     let nameY = 22; // 标题位置
     let barY = 46; // 血条位置，与标题拉开间距
@@ -840,7 +840,7 @@ class UIHUD {
     if (hpPercent > 0.6) fill(76, 175, 80);
     else if (hpPercent > 0.3) fill(255, 193, 7);
     else fill(244, 67, 54);
-    
+
     rect(barX, barY, barW * hpPercent, barH, 8);
 
     // 血条数值居中
@@ -854,8 +854,8 @@ class UIHUD {
     let rightEdge = CANVAS_WIDTH - 25;
     let currWave = 1, totalWaves = 1;
     if (this.game.waveManager) {
-        currWave = Math.min(this.game.waveManager.currentWaveIndex + 1, this.game.waveManager.waves.length);
-        totalWaves = this.game.waveManager.waves.length;
+      currWave = Math.min(this.game.waveManager.currentWaveIndex + 1, this.game.waveManager.waves.length);
+      totalWaves = this.game.waveManager.waves.length;
     }
 
     fill(255, 255, 255, 200);
@@ -882,24 +882,24 @@ class UIHUD {
     this.drawTopHUDBar(false);
     let inGameBackX = 150;
     let inGameBackW = 180;
-    let inGameBackH = 40; 
-    let inGameBackY = (HUD_HEIGHT - inGameBackH) / 2; 
-    
+    let inGameBackH = 40;
+    let inGameBackY = (HUD_HEIGHT - inGameBackH) / 2;
+
     let mx = getGameMouseX();
     let my = getGameMouseY();
     let isInGameBackHover = mx >= inGameBackX && mx <= inGameBackX + inGameBackW && my >= inGameBackY && my <= inGameBackY + inGameBackH;
 
-    fill(100, 80, 60); 
-    stroke(220, 180, 100); 
-    strokeWeight(3); 
+    fill(100, 80, 60);
+    stroke(220, 180, 100);
+    strokeWeight(3);
     rectMode(CORNER);
     rect(inGameBackX, inGameBackY, inGameBackW, inGameBackH, 8);
 
-    
+
     noStroke();
-    fill(255, 230, 180); 
+    fill(255, 230, 180);
     textAlign(CENTER, CENTER);
-    textSize(20); 
+    textSize(20);
     textStyle(BOLD);
     text('Level Select', inGameBackX + inGameBackW / 2, inGameBackY + inGameBackH / 2);
     textStyle(NORMAL);
@@ -964,7 +964,7 @@ class UIHUD {
       text(this.placementMessage, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
     }
 
-       this.drawTowerPanel();
+    this.drawTowerPanel();
     this.drawTowerHoverInfo();
 
     if (this.dismantleRefundTimer > 0) {
@@ -1053,34 +1053,34 @@ class UIHUD {
     noStroke();
 
     fill(235);
-fill(235);
-textAlign(LEFT, TOP);
-textSize(22);
-textLeading(26);
-let lineX = panelX + 28;
-let lineY = panelY + 28;
-let lineStep = 40;
-text(`Landmark HP: ${stats.landmarkHp}/${stats.landmarkMaxHp}`, lineX, lineY);
-text(`Enemies Defeated: ${stats.totalKills}`, lineX, lineY + lineStep);
-text(`Gold Remaining: ${stats.goldRemaining}`, lineX, lineY + lineStep * 2);
-text(`Waves Survived: ${stats.waveSurvived}/${stats.totalWaves}`, lineX, lineY + lineStep * 3);
+    fill(235);
+    textAlign(LEFT, TOP);
+    textSize(22);
+    textLeading(26);
+    let lineX = panelX + 28;
+    let lineY = panelY + 28;
+    let lineStep = 40;
+    text(`Landmark HP: ${stats.landmarkHp}/${stats.landmarkMaxHp}`, lineX, lineY);
+    text(`Enemies Defeated: ${stats.totalKills}`, lineX, lineY + lineStep);
+    text(`Gold Remaining: ${stats.goldRemaining}`, lineX, lineY + lineStep * 2);
+    text(`Waves Survived: ${stats.waveSurvived}/${stats.totalWaves}`, lineX, lineY + lineStep * 3);
 
-let buttonY = panelY + panelH + 35;
+    let buttonY = panelY + panelH + 35;
 
-this._drawEndScreenButton(
-  { label: "Try Again", x: CANVAS_WIDTH / 2 - 240, y: buttonY, w: 140, h: 46, action: "restart" },
-  { r: 40, g: 130, b: 70 }
-);
+    this._drawEndScreenButton(
+      { label: "Try Again", x: CANVAS_WIDTH / 2 - 240, y: buttonY, w: 140, h: 46, action: "restart" },
+      { r: 40, g: 130, b: 70 }
+    );
 
-this._drawEndScreenButton(
-  { label: "Next Level", x: CANVAS_WIDTH / 2 - 70, y: buttonY, w: 140, h: 46, action: "next_level" },
-  { r: 70, g: 110, b: 170 }
-);
+    this._drawEndScreenButton(
+      { label: "Next Level", x: CANVAS_WIDTH / 2 - 70, y: buttonY, w: 140, h: 46, action: "next_level" },
+      { r: 70, g: 110, b: 170 }
+    );
 
-this._drawEndScreenButton(
-  { label: "Level Select", x: CANVAS_WIDTH / 2 + 100, y: buttonY, w: 160, h: 46, action: "level_select" },
-  { r: 95, g: 80, b: 50 }
-);
+    this._drawEndScreenButton(
+      { label: "Level Select", x: CANVAS_WIDTH / 2 + 100, y: buttonY, w: 160, h: 46, action: "level_select" },
+      { r: 95, g: 80, b: 50 }
+    );
   }
 
   //Lose screen - called when GameState.LOSE
@@ -1293,7 +1293,7 @@ this._drawEndScreenButton(
   //Dynamic layout based on available towers per level.
   //Returned objects: { type, x, y, w, h }
 
- getTowerPanelTabs() {
+  getTowerPanelTabs() {
     const availableTowers = (this.game && this.game.availableTowers) || LEVEL_AVAILABLE_TOWERS[1];
 
     // Keep tower cards clear of left utility controls + gold display.
@@ -1421,6 +1421,7 @@ this._drawEndScreenButton(
     text("$" + config.cost, valueX, attrY);
     attrY += lineH;
 
+
     fill(200, 200, 200);
     textAlign(LEFT, TOP);
     text("Damage:", labelX, attrY);
@@ -1516,23 +1517,23 @@ this._drawEndScreenButton(
     stroke(isPauseHover ? color(220, 180, 100) : color(120, 100, 70));
     strokeWeight(2);
     rect(pauseBtnX, btnY, btnW, btnH, 8);
-  // --- Pause/Resume 按钮内部 ---
+    // --- Pause/Resume 按钮内部 ---
     fill(isPauseHover ? color(255, 230, 180) : color(180, 160, 120));
     noStroke();
     textAlign(CENTER, CENTER);
 
     if (isPaused) {
-    textSize(60); // 播放按钮 ">" 可以稍微大一点
-    text(">", pauseBtnX + btnW / 2, btnY + btnH / 2 - 8);
+      textSize(60); // 播放按钮 ">" 可以稍微大一点
+      text(">", pauseBtnX + btnW / 2, btnY + btnH / 2 - 8);
     } else {
-    // 关键改动：减小字号并加粗，消除“长条感”
-    textStyle(BOLD); 
-    textSize(32); // 从 50 降到 32，让它变短
-    text("| |", pauseBtnX + btnW / 2, btnY + btnH / 2 - 10);
-    textStyle(NORMAL); // 恢复普通样式给下面的文字用
+      // 关键改动：减小字号并加粗，消除“长条感”
+      textStyle(BOLD);
+      textSize(32); // 从 50 降到 32，让它变短
+      text("| |", pauseBtnX + btnW / 2, btnY + btnH / 2 - 10);
+      textStyle(NORMAL); // 恢复普通样式给下面的文字用
     }
 
-    textSize(20); 
+    textSize(20);
     text(isPaused ? "Resume" : "Pause", pauseBtnX + btnW / 2, btnY + btnH / 2 + 25);
     this.pauseBtn = { x: pauseBtnX, y: btnY, w: btnW, h: btnH };
 
@@ -2202,7 +2203,7 @@ this._drawEndScreenButton(
     // 1. 基础状态检查
     if (this.game.state !== GameState.PLAYING) return;
     if (!this.game.selectedTowerType) return;
-    
+
     // 2. 检查鼠标是否在可放置的垂直区域内（顶栏和底栏之间）
     let mx = getGameMouseX();
     let my = getGameMouseY();
@@ -2216,15 +2217,15 @@ this._drawEndScreenButton(
     let [r, g, b] = cfg.color;
 
     // 4. 将鼠标位置映射到网格坐标
-let col = pixelToCol(mx);
-let row = pixelToRow(my);
-let gridX = this.game.getTowerCenterXFromAnchor(col);
-let gridY = this.game.getTowerCenterYFromAnchor(row);
+    let col = pixelToCol(mx);
+    let row = pixelToRow(my);
+    let gridX = this.game.getTowerCenterXFromAnchor(col);
+    let gridY = this.game.getTowerCenterYFromAnchor(row);
 
     // 5. 核心：计算背景图被压缩后的视觉格子高度
     // 逻辑：背景图占用的总像素高度除以总行数
-    const safeHeight = TOWER_PANEL_TOP - HUD_HEIGHT; 
-    const visualGridHeight = safeHeight / ROWS; 
+    const safeHeight = TOWER_PANEL_TOP - HUD_HEIGHT;
+    const visualGridHeight = safeHeight / ROWS;
 
     // 6. 检查是否可建造
     let tileOk = this.game.canBuildAt(col, row);
@@ -2240,7 +2241,7 @@ let gridY = this.game.getTowerCenterYFromAnchor(row);
     } else {
       fill(220, 50, 50, 70);    // 红色 - 被阻挡
     }
-    
+
     // 关键修正：宽度使用原始尺寸，高度使用计算出的视觉高度，以对齐地图格子
     rect(gridX, gridY, CURRENT_GRID_SIZE, visualGridHeight, 4);
 
@@ -2250,7 +2251,7 @@ let gridY = this.game.getTowerCenterYFromAnchor(row);
       strokeWeight(2.5);
       // 叉号也根据视觉高度比例缩放
       let sW = CURRENT_GRID_SIZE * 0.22;
-      let sH = visualGridHeight * 0.22; 
+      let sH = visualGridHeight * 0.22;
       line(gridX - sW, gridY - sH, gridX + sW, gridY + sH);
       line(gridX + sW, gridY - sH, gridX - sW, gridY + sH);
     }
@@ -2275,7 +2276,7 @@ let gridY = this.game.getTowerCenterYFromAnchor(row);
         imageMode(CENTER);
         // 防御塔图片可以稍微根据视觉高度也做一点压缩，或者保持比例
         let imgW = CURRENT_GRID_SIZE * 2;
-        let imgH = visualGridHeight *2; 
+        let imgH = visualGridHeight * 2;
         image(previewImg, gridX, gridY, imgW, imgH);
         noTint();
       } else {
@@ -2286,35 +2287,35 @@ let gridY = this.game.getTowerCenterYFromAnchor(row);
     }
   }
 
-handleEndScreenClick(mx, my) {
-  for (let button of this.endScreenButtons) {
-    if (
-      mx >= button.x && mx <= button.x + button.w &&
-      my >= button.y && my <= button.y + button.h
-    ) {
-      this.game.sound.play("click2");
+  handleEndScreenClick(mx, my) {
+    for (let button of this.endScreenButtons) {
+      if (
+        mx >= button.x && mx <= button.x + button.w &&
+        my >= button.y && my <= button.y + button.h
+      ) {
+        this.game.sound.play("click2");
 
-      if (button.action === 'restart') {
-        this.game.restart();
+        if (button.action === 'restart') {
+          this.game.restart();
+        }
+
+        if (button.action === 'menu') {
+          this.game.returnToMenu();
+        }
+
+        if (button.action === 'next_level') {
+          this.game.nextLevel();
+        }
+
+        if (button.action === 'level_select') {
+          this.game.returnToMenu();
+        }
+
+        return true;
       }
-
-      if (button.action === 'menu') {
-        this.game.returnToMenu();
-      }
-
-      if (button.action === 'next_level') {
-        this.game.nextLevel();
-      }
-
-      if (button.action === 'level_select') {
-        this.game.returnToMenu();
-      }
-
-      return true;
     }
+    return false;
   }
-  return false;
-}
 
   _getEndStats() {
     let finalStats = this.game.finalStats || {};
@@ -2465,84 +2466,84 @@ handleEndScreenClick(mx, my) {
 
     pop();
   }
-  
-  drawTutorialDarkOverlay(highlightType) {
-  if (highlightType === 'path' && this.game && this.game.path && this.game.path.waypoints) {
-    push();
 
-    let wps = this.game.path.waypoints;
-    let revealWidth = CURRENT_GRID_SIZE * 0.92;
-    let borderWidth = 8;
+  drawTutorialDarkOverlay(highlightType) {
+    if (highlightType === 'path' && this.game && this.game.path && this.game.path.waypoints) {
+      push();
+
+      let wps = this.game.path.waypoints;
+      let revealWidth = CURRENT_GRID_SIZE * 0.92;
+      let borderWidth = 8;
+
+      fill(35, 28, 20, 150);
+      noStroke();
+      rectMode(CORNER);
+      rect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+      drawingContext.save();
+      drawingContext.globalCompositeOperation = 'destination-out';
+
+      noFill();
+      stroke(255);
+      strokeWeight(revealWidth);
+      strokeJoin(ROUND);
+      strokeCap(ROUND);
+      beginShape();
+      for (let wp of wps) {
+        vertex(wp.x, wp.y);
+      }
+      endShape();
+
+      noStroke();
+      fill(255);
+      for (let wp of wps) {
+        ellipse(wp.x, wp.y, revealWidth, revealWidth);
+      }
+
+      drawingContext.restore();
+
+      noFill();
+      stroke(255, 220, 100, 235);
+      strokeWeight(borderWidth);
+      strokeJoin(ROUND);
+      strokeCap(ROUND);
+      beginShape();
+      for (let wp of wps) {
+        vertex(wp.x, wp.y);
+      }
+      endShape();
+
+      pop();
+      return;
+    }
 
     fill(35, 28, 20, 150);
     noStroke();
     rectMode(CORNER);
-    rect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-    drawingContext.save();
-    drawingContext.globalCompositeOperation = 'destination-out';
+    let highlightArea = this.getTutorialHighlightArea(highlightType);
 
-    noFill();
-    stroke(255);
-    strokeWeight(revealWidth);
-    strokeJoin(ROUND);
-    strokeCap(ROUND);
-    beginShape();
-    for (let wp of wps) {
-      vertex(wp.x, wp.y);
+    if (highlightArea && highlightType !== 'none') {
+      let hx = highlightArea.x;
+      let hy = highlightArea.y;
+      let hw = highlightArea.w;
+      let hh = highlightArea.h;
+      let pad = 10;
+
+      rect(0, 0, CANVAS_WIDTH, hy - pad);
+      rect(0, hy + hh + pad, CANVAS_WIDTH, CANVAS_HEIGHT - (hy + hh + pad));
+      rect(0, hy - pad, hx - pad, hh + pad * 2);
+      rect(hx + hw + pad, hy - pad, CANVAS_WIDTH - (hx + hw + pad), hh + pad * 2);
+
+      stroke(255, 220, 100);
+      strokeWeight(4);
+      noFill();
+      rect(hx - pad, hy - pad, hw + pad * 2, hh + pad * 2, 8);
+      noStroke();
+    } else {
+      rect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
     }
-    endShape();
-
-    noStroke();
-    fill(255);
-    for (let wp of wps) {
-      ellipse(wp.x, wp.y, revealWidth, revealWidth);
-    }
-
-    drawingContext.restore();
-
-    noFill();
-    stroke(255, 220, 100, 235);
-    strokeWeight(borderWidth);
-    strokeJoin(ROUND);
-    strokeCap(ROUND);
-    beginShape();
-    for (let wp of wps) {
-      vertex(wp.x, wp.y);
-    }
-    endShape();
-
-    pop();
-    return;
   }
-
-  fill(35, 28, 20, 150);
-  noStroke();
-  rectMode(CORNER);
-
-  let highlightArea = this.getTutorialHighlightArea(highlightType);
-
-  if (highlightArea && highlightType !== 'none') {
-    let hx = highlightArea.x;
-    let hy = highlightArea.y;
-    let hw = highlightArea.w;
-    let hh = highlightArea.h;
-    let pad = 10;
-
-    rect(0, 0, CANVAS_WIDTH, hy - pad);
-    rect(0, hy + hh + pad, CANVAS_WIDTH, CANVAS_HEIGHT - (hy + hh + pad));
-    rect(0, hy - pad, hx - pad, hh + pad * 2);
-    rect(hx + hw + pad, hy - pad, CANVAS_WIDTH - (hx + hw + pad), hh + pad * 2);
-
-    stroke(255, 220, 100);
-    strokeWeight(4);
-    noFill();
-    rect(hx - pad, hy - pad, hw + pad * 2, hh + pad * 2, 8);
-    noStroke();
-  } else {
-    rect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-  }
-}
 
   getTutorialHighlightArea(highlightType) {
     // Use custom highlightArea from step config if defined and non-zero

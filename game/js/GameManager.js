@@ -73,7 +73,7 @@ class GameManager {
         landmarkHp: LANDMARK_MAX_HP + 10,
         landmarkX: CANVAS_WIDTH - 100,
         landmarkY: CANVAS_HEIGHT / 2,
-        initialGold: INITIAL_GOLD + 50,
+        initialGold: INITIAL_GOLD + 200,
         totalWaves: 6
       },
       3: {
@@ -82,7 +82,7 @@ class GameManager {
         landmarkHp: LANDMARK_MAX_HP + 20,
         landmarkX: CANVAS_WIDTH - 100,
         landmarkY: CANVAS_HEIGHT / 2,
-        initialGold: INITIAL_GOLD + 100,
+        initialGold: INITIAL_GOLD + 300,
         totalWaves: 6
       }
     };
@@ -439,8 +439,8 @@ class GameManager {
       if (this.waveManager.consumeWaveClearEvent()) {
         this.sound.play("bonus");
         this.waveSurvived++;
-        this.economy.addGold(WAVE_CLEAR_BONUS_GOLD);
-        this.ui.showWaveBonus(`+${WAVE_CLEAR_BONUS_GOLD} Wave Bonus!`);
+        this.economy.addGold(WAVE_CLEAR_BONUS_GOLD * 1.5);
+        this.ui.showWaveBonus(`+${WAVE_CLEAR_BONUS_GOLD * 1.5} Wave Bonus!`);
       }
     }
 
@@ -532,18 +532,18 @@ class GameManager {
   }
 
   _buildRunSave(reason) {
-let towers = (this.towers || []).map(t => ({
-  type: t.type,
-  x: t.x,
-  y: t.y,
-  anchorCol: t.anchorCol,
-  anchorRow: t.anchorRow,
-  disabled: !!t.disabled,
-  disableTimer: t.disableTimer || 0,
-  tauntDebuff: t.tauntDebuff || 0,
-  tauntTimer: t.tauntTimer || 0,
-  chargeStacks: t.chargeStacks || 0
-}));
+    let towers = (this.towers || []).map(t => ({
+      type: t.type,
+      x: t.x,
+      y: t.y,
+      anchorCol: t.anchorCol,
+      anchorRow: t.anchorRow,
+      disabled: !!t.disabled,
+      disableTimer: t.disableTimer || 0,
+      tauntDebuff: t.tauntDebuff || 0,
+      tauntTimer: t.tauntTimer || 0,
+      chargeStacks: t.chargeStacks || 0
+    }));
 
     let enemies = (this.enemies || []).map(e => ({
       type: e.type,
@@ -627,35 +627,35 @@ let towers = (this.towers || []).map(t => ({
       this.waveSurvived = run.waveSurvived || 0;
       this.totalKills = run.totalKills || 0;
 
-this.towers = [];
-if (Array.isArray(run.towers)) {
-  for (let t of run.towers) {
-    if (!t || !t.type) continue;
+      this.towers = [];
+      if (Array.isArray(run.towers)) {
+        for (let t of run.towers) {
+          if (!t || !t.type) continue;
 
-    let tower = new Tower(t.x, t.y, t.type);
+          let tower = new Tower(t.x, t.y, t.type);
 
-tower.anchorCol = (typeof t.anchorCol === 'number')
-  ? t.anchorCol
-  : pixelToCol(t.x) - 1;
+          tower.anchorCol = (typeof t.anchorCol === 'number')
+            ? t.anchorCol
+            : pixelToCol(t.x) - 1;
 
-tower.anchorRow = (typeof t.anchorRow === 'number')
-  ? t.anchorRow
-  : pixelToRow(t.y) - 1;
+          tower.anchorRow = (typeof t.anchorRow === 'number')
+            ? t.anchorRow
+            : pixelToRow(t.y) - 1;
 
-    tower.disabled = !!t.disabled;
-    tower.disableTimer = t.disableTimer || 0;
-    tower.tauntDebuff = t.tauntDebuff || 0;
-    tower.tauntTimer = t.tauntTimer || 0;
-    tower.chargeStacks = t.chargeStacks || 0;
-    tower.lastTarget = null;
+          tower.disabled = !!t.disabled;
+          tower.disableTimer = t.disableTimer || 0;
+          tower.tauntDebuff = t.tauntDebuff || 0;
+          tower.tauntTimer = t.tauntTimer || 0;
+          tower.chargeStacks = t.chargeStacks || 0;
+          tower.lastTarget = null;
 
-    this.towers.push(tower);
+          this.towers.push(tower);
 
-    if (this.mapGrid) {
-      this.setFootprintOccupiedByColRow(tower.anchorCol, tower.anchorRow, true);
-    }
-  }
-}
+          if (this.mapGrid) {
+            this.setFootprintOccupiedByColRow(tower.anchorCol, tower.anchorRow, true);
+          }
+        }
+      }
 
       if (this.waveManager && run.wave) {
         this.waveManager.currentWaveIndex = run.wave.currentWaveIndex || 0;
@@ -875,7 +875,7 @@ tower.anchorRow = (typeof t.anchorRow === 'number')
 
 
 
- drawBackground() {
+  drawBackground() {
     let bg = this.currentMapImage || gameImages.mapLevel1;
     if (!bg || bg.width <= 0) return;
 
@@ -886,7 +886,7 @@ tower.anchorRow = (typeof t.anchorRow === 'number')
     // 2. 强制将整张背景图渲染在这个安全区内
     // 参数说明: image(图片, 目标X, 目标Y, 目标宽, 目标高, 原图X, 原图Y, 原图宽, 原图高)
     image(
-      bg, 
+      bg,
       0, safeY, DESIGN_WIDTH, safeHeight, // 目标：铺满黑框之间的区域
       0, 0, bg.width, bg.height           // 源：使用整张背景图
     );
@@ -1153,83 +1153,83 @@ tower.anchorRow = (typeof t.anchorRow === 'number')
    * @returns {boolean}
    */
 
-getTowerCenterXFromAnchor(col) {
-  return colToCenterX(col) + CURRENT_GRID_SIZE / 2;
-}
-
-getTowerCenterYFromAnchor(row) {
-  return rowToCenterY(row) + CURRENT_GRID_SIZE / 2;
-}
-
-getFootprintCells(col, row, towerType = this.selectedTowerType) {
-  let w = 2;
-  let h = 2;
-  let cells = [];
-
-  for (let dy = 0; dy < h; dy++) {
-    for (let dx = 0; dx < w; dx++) {
-      cells.push({ col: col + dx, row: row + dy });
-    }
+  getTowerCenterXFromAnchor(col) {
+    return colToCenterX(col) + CURRENT_GRID_SIZE / 2;
   }
-  return cells;
-}
 
-getFootprintCells(col, row, towerType = this.selectedTowerType) {
-  let w = 2;
-  let h = 2;
-  let cells = [];
-
-  for (let dy = 0; dy < h; dy++) {
-    for (let dx = 0; dx < w; dx++) {
-      cells.push({ col: col + dx, row: row + dy });
-    }
+  getTowerCenterYFromAnchor(row) {
+    return rowToCenterY(row) + CURRENT_GRID_SIZE / 2;
   }
-  return cells;
-}
 
-setFootprintOccupiedByColRow(col, row, occupied = true) {
-  if (!this.mapGrid) return;
+  getFootprintCells(col, row, towerType = this.selectedTowerType) {
+    let w = 2;
+    let h = 2;
+    let cells = [];
 
-  let cells = this.getFootprintCells(col, row);
-  for (let cell of cells) {
-    let c = cell.col;
-    let r = cell.row;
+    for (let dy = 0; dy < h; dy++) {
+      for (let dx = 0; dx < w; dx++) {
+        cells.push({ col: col + dx, row: row + dy });
+      }
+    }
+    return cells;
+  }
 
-    if (r >= 0 && r < this.mapGrid.length && c >= 0 && c < this.mapGrid[0].length) {
-      if (occupied) {
-        this.mapGrid[r][c] = TILE_TYPES.OCCUPIED;
-      } else {
-        if (this.mapGrid[r][c] === TILE_TYPES.OCCUPIED) {
-          this.mapGrid[r][c] = TILE_TYPES.GRASS;
+  getFootprintCells(col, row, towerType = this.selectedTowerType) {
+    let w = 2;
+    let h = 2;
+    let cells = [];
+
+    for (let dy = 0; dy < h; dy++) {
+      for (let dx = 0; dx < w; dx++) {
+        cells.push({ col: col + dx, row: row + dy });
+      }
+    }
+    return cells;
+  }
+
+  setFootprintOccupiedByColRow(col, row, occupied = true) {
+    if (!this.mapGrid) return;
+
+    let cells = this.getFootprintCells(col, row);
+    for (let cell of cells) {
+      let c = cell.col;
+      let r = cell.row;
+
+      if (r >= 0 && r < this.mapGrid.length && c >= 0 && c < this.mapGrid[0].length) {
+        if (occupied) {
+          this.mapGrid[r][c] = TILE_TYPES.OCCUPIED;
+        } else {
+          if (this.mapGrid[r][c] === TILE_TYPES.OCCUPIED) {
+            this.mapGrid[r][c] = TILE_TYPES.GRASS;
+          }
         }
       }
     }
   }
-}
 
-canBuildAt(col, row) {
-  if (!this.mapGrid) return false;
+  canBuildAt(col, row) {
+    if (!this.mapGrid) return false;
 
-  let cells = this.getFootprintCells(col, row);
+    let cells = this.getFootprintCells(col, row);
 
-  for (let cell of cells) {
-    let c = cell.col;
-    let r = cell.row;
+    for (let cell of cells) {
+      let c = cell.col;
+      let r = cell.row;
 
-    // 越界
-    if (r < 0 || r >= this.mapGrid.length) return false;
-    if (c < 0 || c >= this.mapGrid[0].length) return false;
+      // 越界
+      if (r < 0 || r >= this.mapGrid.length) return false;
+      if (c < 0 || c >= this.mapGrid[0].length) return false;
 
-    // 不能压到 HUD
-    let cellCenterY = rowToCenterY(r);
-    if (cellCenterY < HUD_HEIGHT) return false;
+      // 不能压到 HUD
+      let cellCenterY = rowToCenterY(r);
+      if (cellCenterY < HUD_HEIGHT) return false;
 
-    // 每一格都必须是 grass
-    if (this.mapGrid[r][c] !== TILE_TYPES.GRASS) return false;
+      // 每一格都必须是 grass
+      if (this.mapGrid[r][c] !== TILE_TYPES.GRASS) return false;
+    }
+
+    return true;
   }
-
-  return true;
-}
 
   /**
    * Debug overlay (D key). Does not affect gameplay.
@@ -1454,8 +1454,8 @@ canBuildAt(col, row) {
 
     if (this.state === GameState.MENU) {
       // 调用 UI 层的辅助函数获取点击了第几个按钮 (0: Start, 1: Settings, 2: Exit)
-      let btnIdx = this.ui.getClickedMenuButton(mx, my); 
-      
+      let btnIdx = this.ui.getClickedMenuButton(mx, my);
+
       if (btnIdx === 0) {
         this.setState(GameState.LEVEL_SELECT); // 直接进入关卡选择
       } else if (btnIdx === 1) {
@@ -1512,10 +1512,10 @@ canBuildAt(col, row) {
       let menuBtnH = 63;
 
       if (mx >= menuBtnX && mx <= menuBtnX + menuBtnW && my >= menuBtnY && my <= menuBtnY + menuBtnH) {
-      this.sound.play("click1");
-      this.setState(GameState.MENU); // 执行返回主菜单功能
-      return;
-  }        
+        this.sound.play("click1");
+        this.setState(GameState.MENU); // 执行返回主菜单功能
+        return;
+      }
       let levelBtns = this.ui.levelButtons;
       if (levelBtns) {
         for (let btn of levelBtns) {
@@ -1565,98 +1565,98 @@ canBuildAt(col, row) {
       return;
     }
 
-if (this.state === GameState.PLAYING) {
-  if (this.confirmExit) {
-    if (this.ui.exitConfirmYesBtn &&
-        mx >= this.ui.exitConfirmYesBtn.x && mx <= this.ui.exitConfirmYesBtn.x + this.ui.exitConfirmYesBtn.w &&
-        my >= this.ui.exitConfirmYesBtn.y && my <= this.ui.exitConfirmYesBtn.y + this.ui.exitConfirmYesBtn.h) {
-      this.sound.play("click1");
-      this.confirmExit = false;
-      this.returnToMenu();
+    if (this.state === GameState.PLAYING) {
+      if (this.confirmExit) {
+        if (this.ui.exitConfirmYesBtn &&
+          mx >= this.ui.exitConfirmYesBtn.x && mx <= this.ui.exitConfirmYesBtn.x + this.ui.exitConfirmYesBtn.w &&
+          my >= this.ui.exitConfirmYesBtn.y && my <= this.ui.exitConfirmYesBtn.y + this.ui.exitConfirmYesBtn.h) {
+          this.sound.play("click1");
+          this.confirmExit = false;
+          this.returnToMenu();
+          return;
+        }
+        if (this.ui.exitConfirmNoBtn &&
+          mx >= this.ui.exitConfirmNoBtn.x && mx <= this.ui.exitConfirmNoBtn.x + this.ui.exitConfirmNoBtn.w &&
+          my >= this.ui.exitConfirmNoBtn.y && my <= this.ui.exitConfirmNoBtn.y + this.ui.exitConfirmNoBtn.h) {
+          this.sound.play("click1");
+          this.confirmExit = false;
+          return;
+        }
+        this.confirmExit = false;
+        return;
+      }
+
+      if (this.ui.inGameBackBtn) {
+        let btn = this.ui.inGameBackBtn;
+        if (mx >= btn.x && mx <= btn.x + btn.w && my >= btn.y && my <= btn.y + btn.h) {
+          this.sound.play("click1");
+          this.confirmExit = true;
+          return;
+        }
+      }
+
+      if (this.ui.pauseBtn) {
+        let btn = this.ui.pauseBtn;
+        if (mx >= btn.x && mx <= btn.x + btn.w && my >= btn.y && my <= btn.y + btn.h) {
+          this.sound.play("click1");
+          this.manualPaused = !this.manualPaused;
+          console.log(this.manualPaused ? '[Game] Game paused' : '[Game] Game resumed');
+          return;
+        }
+      }
+
+      if (this.ui.monsterInfoBtn) {
+        let btn = this.ui.monsterInfoBtn;
+        if (mx >= btn.x && mx <= btn.x + btn.w && my >= btn.y && my <= btn.y + btn.h) {
+          this.sound.play("click1");
+          this.setState(GameState.MONSTER_INFO);
+          return;
+        }
+      }
+
+      if (this.manualPaused) return;
+
+      if (this.ui.handleTowerPanelClick(mx, my)) return;
+      if (my < HUD_HEIGHT) return;
+
+      if (this.dismantleMode) {
+        console.log(`[Game] Attempting to dismantle at (${mx}, ${my})`);
+        let removed = this.removeTower(mx, my);
+        if (removed) {
+          this.dismantleMode = false;
+          cursor(ARROW);
+        }
+        return;
+      }
+
+      if (!this.selectedTowerType) return;
+
+      let col = pixelToCol(mx);
+      let row = pixelToRow(my);
+      let gridX = this.getTowerCenterXFromAnchor(col);
+      let gridY = this.getTowerCenterYFromAnchor(row);
+
+      if (this.debugMode) {
+        let rawTile = this.mapGrid ? (this.mapGrid[row] ? this.mapGrid[row][col] : 'OOB') : 'no-grid';
+        let canBuild = this.canBuildAt(col, row);
+        console.log(`[Debug] Click at col=${col}, row=${row}, canBuild=${canBuild}, rawTile=${rawTile}`);
+        return;
+      }
+
+      if (!this.canBuildAt(col, row)) {
+        let tileType = this.mapGrid && this.mapGrid[row] ? this.mapGrid[row][col] : null;
+        let reason =
+          tileType === TILE_TYPES.PATH ? "Can't build on the path!" :
+            tileType === TILE_TYPES.OCCUPIED ? "Already occupied!" :
+              "Can't build here!";
+        console.log(`[Game] ${reason} (col=${col}, row=${row}, tile=${tileType})`);
+        this.ui.showPlacementError(reason);
+        return;
+      }
+
+      this.tryPlaceTower(this.selectedTowerType, col, row, gridX, gridY);
       return;
     }
-    if (this.ui.exitConfirmNoBtn &&
-        mx >= this.ui.exitConfirmNoBtn.x && mx <= this.ui.exitConfirmNoBtn.x + this.ui.exitConfirmNoBtn.w &&
-        my >= this.ui.exitConfirmNoBtn.y && my <= this.ui.exitConfirmNoBtn.y + this.ui.exitConfirmNoBtn.h) {
-      this.sound.play("click1");
-      this.confirmExit = false;
-      return;
-    }
-    this.confirmExit = false;
-    return;
-  }
-
-  if (this.ui.inGameBackBtn) {
-    let btn = this.ui.inGameBackBtn;
-    if (mx >= btn.x && mx <= btn.x + btn.w && my >= btn.y && my <= btn.y + btn.h) {
-      this.sound.play("click1");
-      this.confirmExit = true;
-      return;
-    }
-  }
-
-  if (this.ui.pauseBtn) {
-    let btn = this.ui.pauseBtn;
-    if (mx >= btn.x && mx <= btn.x + btn.w && my >= btn.y && my <= btn.y + btn.h) {
-      this.sound.play("click1");
-      this.manualPaused = !this.manualPaused;
-      console.log(this.manualPaused ? '[Game] Game paused' : '[Game] Game resumed');
-      return;
-    }
-  }
-
-  if (this.ui.monsterInfoBtn) {
-    let btn = this.ui.monsterInfoBtn;
-    if (mx >= btn.x && mx <= btn.x + btn.w && my >= btn.y && my <= btn.y + btn.h) {
-      this.sound.play("click1");
-      this.setState(GameState.MONSTER_INFO);
-      return;
-    }
-  }
-
-  if (this.manualPaused) return;
-
-  if (this.ui.handleTowerPanelClick(mx, my)) return;
-  if (my < HUD_HEIGHT) return;
-
-  if (this.dismantleMode) {
-    console.log(`[Game] Attempting to dismantle at (${mx}, ${my})`);
-    let removed = this.removeTower(mx, my);
-    if (removed) {
-      this.dismantleMode = false;
-      cursor(ARROW);
-    }
-    return;
-  }
-
-  if (!this.selectedTowerType) return;
-
-  let col = pixelToCol(mx);
-  let row = pixelToRow(my);
-  let gridX = this.getTowerCenterXFromAnchor(col);
-  let gridY = this.getTowerCenterYFromAnchor(row);
-
-  if (this.debugMode) {
-    let rawTile = this.mapGrid ? (this.mapGrid[row] ? this.mapGrid[row][col] : 'OOB') : 'no-grid';
-    let canBuild = this.canBuildAt(col, row);
-    console.log(`[Debug] Click at col=${col}, row=${row}, canBuild=${canBuild}, rawTile=${rawTile}`);
-    return;
-  }
-
-  if (!this.canBuildAt(col, row)) {
-    let tileType = this.mapGrid && this.mapGrid[row] ? this.mapGrid[row][col] : null;
-    let reason =
-      tileType === TILE_TYPES.PATH ? "Can't build on the path!" :
-      tileType === TILE_TYPES.OCCUPIED ? "Already occupied!" :
-      "Can't build here!";
-    console.log(`[Game] ${reason} (col=${col}, row=${row}, tile=${tileType})`);
-    this.ui.showPlacementError(reason);
-    return;
-  }
-
-  this.tryPlaceTower(this.selectedTowerType, col, row, gridX, gridY);
-  return;
-}
 
     if (this.state === GameState.MONSTER_INFO) {
       if (this.ui.monsterInfoCloseBtn) {
@@ -1786,87 +1786,87 @@ if (this.state === GameState.PLAYING) {
     this.editSelectionCurrent = null;
     this.editSelectionMoved = false;
   }
-tryPlaceTower(towerType, anchorCol, anchorRow, x, y) {
-  let config = TOWER_TYPES[towerType];
-  if (!config) {
-    console.log(`[Game] Unknown tower type: ${towerType}`);
-    return false;
+  tryPlaceTower(towerType, anchorCol, anchorRow, x, y) {
+    let config = TOWER_TYPES[towerType];
+    if (!config) {
+      console.log(`[Game] Unknown tower type: ${towerType}`);
+      return false;
+    }
+
+    let cost = config.cost;
+
+    if (!this.economy.canAfford(cost)) {
+      console.log(`[Game] Not enough gold: need ${cost}, have ${this.economy.getGold()}`);
+      return false;
+    }
+
+    this.economy.spendGold(cost);
+
+    let tower = new Tower(x, y, towerType);
+
+    tower.anchorCol = anchorCol;
+    tower.anchorRow = anchorRow;
+
+    this.towers.push(tower);
+
+    if (this.mapGrid) {
+      this.setFootprintOccupiedByColRow(anchorCol, anchorRow, true);
+    }
+
+    console.log(`[Game] Placed ${towerType} tower at center=(${x}, ${y}), anchor=(${anchorCol}, ${anchorRow})`);
+    this.sound.play("place");
+    this._saveRunNow('place_tower');
+    return true;
   }
 
-  let cost = config.cost;
+  removeTower(x, y) {
+    console.log(`[Game] Checking for tower near click (${x}, ${y})`);
 
-  if (!this.economy.canAfford(cost)) {
-    console.log(`[Game] Not enough gold: need ${cost}, have ${this.economy.getGold()}`);
-    return false;
-  }
-
-  this.economy.spendGold(cost);
-
-  let tower = new Tower(x, y, towerType);
-
-  tower.anchorCol = anchorCol;
-  tower.anchorRow = anchorRow;
-
-  this.towers.push(tower);
-
-  if (this.mapGrid) {
-    this.setFootprintOccupiedByColRow(anchorCol, anchorRow, true);
-  }
-
-  console.log(`[Game] Placed ${towerType} tower at center=(${x}, ${y}), anchor=(${anchorCol}, ${anchorRow})`);
-  this.sound.play("place");
-  this._saveRunNow('place_tower');
-  return true;
-}
-
-removeTower(x, y) {
-  console.log(`[Game] Checking for tower near click (${x}, ${y})`);
-
-  let bestIdx = -1;
-  let bestDist = Infinity;
-  for (let i = this.towers.length - 1; i >= 0; i--) {
-    let tower = this.towers[i];
-    let fw = (tower.footprintW || 2) * CURRENT_GRID_SIZE;
-    let fh = (tower.footprintH || 2) * CURRENT_GRID_SIZE;
-    let halfW = fw / 2;
-    let halfH = fh / 2;
-    if (x >= tower.x - halfW && x <= tower.x + halfW &&
+    let bestIdx = -1;
+    let bestDist = Infinity;
+    for (let i = this.towers.length - 1; i >= 0; i--) {
+      let tower = this.towers[i];
+      let fw = (tower.footprintW || 2) * CURRENT_GRID_SIZE;
+      let fh = (tower.footprintH || 2) * CURRENT_GRID_SIZE;
+      let halfW = fw / 2;
+      let halfH = fh / 2;
+      if (x >= tower.x - halfW && x <= tower.x + halfW &&
         y >= tower.y - halfH && y <= tower.y + halfH) {
-      let dx = tower.x - x;
-      let dy = tower.y - y;
-      let d = dx * dx + dy * dy;
-      if (d < bestDist) {
-        bestDist = d;
-        bestIdx = i;
+        let dx = tower.x - x;
+        let dy = tower.y - y;
+        let d = dx * dx + dy * dy;
+        if (d < bestDist) {
+          bestDist = d;
+          bestIdx = i;
+        }
       }
     }
+
+    if (bestIdx === -1) {
+      console.log(`[Game] No tower found at click (${x}, ${y})`);
+      return false;
+    }
+
+    let tower = this.towers[bestIdx];
+    let config = TOWER_TYPES[tower.type];
+    let refund = Math.floor(config.cost * 0.7);
+    this.economy.addGold(refund);
+    this.towers.splice(bestIdx, 1);
+
+    if (this.mapGrid) {
+      this.setFootprintOccupiedByColRow(tower.anchorCol, tower.anchorRow, false);
+    }
+
+    console.log(`[Game] Removed ${tower.type} tower at (${tower.x}, ${tower.y}), refunded ${refund} gold`);
+    this.sound.play("bonus", 0.65);
+
+    if (this.ui && typeof this.ui.showDismantleRefund === 'function') {
+      this.ui.showDismantleRefund(refund, x, y);
+    }
+
+    this._saveRunNow('remove_tower');
+    return true;
   }
-
-  if (bestIdx === -1) {
-    console.log(`[Game] No tower found at click (${x}, ${y})`);
-    return false;
-  }
-
-  let tower = this.towers[bestIdx];
-  let config = TOWER_TYPES[tower.type];
-  let refund = Math.floor(config.cost * 0.7);
-  this.economy.addGold(refund);
-  this.towers.splice(bestIdx, 1);
-
-  if (this.mapGrid) {
-    this.setFootprintOccupiedByColRow(tower.anchorCol, tower.anchorRow, false);
-  }
-
-  console.log(`[Game] Removed ${tower.type} tower at (${tower.x}, ${tower.y}), refunded ${refund} gold`);
-  this.sound.play("bonus", 0.65);
-
-  if (this.ui && typeof this.ui.showDismantleRefund === 'function') {
-    this.ui.showDismantleRefund(refund, x, y);
-  }
-
-  this._saveRunNow('remove_tower');
-  return true;
-}
 
   setSelectedTowerType(towerType) {
     if (!TOWER_TYPES[towerType]) return;
@@ -1890,7 +1890,7 @@ removeTower(x, y) {
     this.startLevel(this.currentLevel);
   }
 
- 
+
   returnToMenu() {
     console.log("[Game] Returning to Level Selection...");
 

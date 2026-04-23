@@ -194,7 +194,7 @@ class Tower {
 
       let dx = proj.targetEnemy.x - proj.x;
       let dy = proj.targetEnemy.y - proj.y;
-      let d  = Math.sqrt(dx * dx + dy * dy);
+      let d = Math.sqrt(dx * dx + dy * dy);
 
       if (d < proj.speed) {
         // Steam cannon charge: consecutive hits on same target increase damage
@@ -243,9 +243,9 @@ class Tower {
             let decay = 1 - this.pierceDamageDecay;
             let currentDecay = decay;
             let baseDmg = this.damage * this.boostedDamageMultiplier * (1 - this.tauntDebuff);
-          let candidates = enemies.filter(e =>
-            !e.isDead() && !e.reachedEnd() && !hitEnemies.includes(e) && this.isEnemyTargetable(e)
-          );
+            let candidates = enemies.filter(e =>
+              !e.isDead() && !e.reachedEnd() && !hitEnemies.includes(e) && this.isEnemyTargetable(e)
+            );
             candidates.sort((a, b) => {
               let da = (a.x - proj.x) ** 2 + (a.y - proj.y) ** 2;
               let db = (b.x - proj.x) ** 2 + (b.y - proj.y) ** 2;
@@ -563,7 +563,7 @@ class Tower {
   drawHitEffects() {
     for (let fx of this.hitEffects) {
       let progress = 1 - fx.timer / fx.maxTimer;  // 0 at start → 1 at end
-      let alpha    = (fx.timer / fx.maxTimer) * 255;
+      let alpha = (fx.timer / fx.maxTimer) * 255;
 
       if (fx.type === 'basic') {
         let r = 20 * progress;
@@ -592,7 +592,7 @@ class Tower {
         ellipse(fx.x, fx.y, r * 2, r * 2);
       } else if (fx.type === 'area') {
         let maxR = fx.maxRadius || 120;
-        let r    = maxR * progress;
+        let r = maxR * progress;
         // Filled core (semi-transparent)
         noStroke();
         fill(255, 80, 0, alpha * 0.25);

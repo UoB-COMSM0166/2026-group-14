@@ -18,7 +18,7 @@ class Enemy {
     this.hp = this.maxHp;
     this.speed = (config.speed !== undefined) ? config.speed : preset.speed;
     this.baseSpeed = this.speed;
-    this.reward = preset.reward;
+    this.reward = this.reward = Math.max(1, Math.floor(preset.reward * 0.85));
     this.slowTimer = 0;
     this.isSlowed = false;
 
