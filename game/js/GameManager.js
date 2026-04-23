@@ -73,7 +73,7 @@ class GameManager {
         landmarkHp: LANDMARK_MAX_HP + 10,
         landmarkX: CANVAS_WIDTH - 100,
         landmarkY: CANVAS_HEIGHT / 2,
-        initialGold: INITIAL_GOLD + 200,
+        initialGold: INITIAL_GOLD + 250,
         totalWaves: 6
       },
       3: {
