@@ -48,8 +48,8 @@ class Enemy {
     this.diveTimer = 0;
     this.isDiving = false;
     this.diveEffectTimer = 0;
-    // Treat Diving Lizard "dive" as an invis/untargetable window.
-    // During this window it cannot be targeted/selected or damaged.
+    // Treat Diving Lizard "dive" as an invis/untargetable window
+    // During this window it cannot be targeted/selected or damaged
 
     // Treant Mage - heal
     this.healRadius = preset.healRadius || 0;
@@ -166,10 +166,9 @@ class Enemy {
     // Diving Lizard: dive
     if (this.ability === 'dive') {
       if (this.hp / this.maxHp < 0.8) {
-        // 1. 初始化（只在刚进入 80% 血量的一瞬间执行）
         if (!this.diveState) {
-          this.diveState = 'diving'; 
-          this.isDiving = true; // 关键：初始化时就要明确告诉系统已经在潜水了
+          this.diveState = 'diving';
+          this.isDiving = true;
           this.diveTimer = 0;
           console.log('[Combat] Diving Lizard submerged (Initial)');
         }
@@ -177,30 +176,27 @@ class Enemy {
         this.diveTimer++;
 
         if (this.diveState === 'diving') {
-          // 潜水期间，强制保持 isDiving 为 true
-          this.isDiving = true; 
-          
+          this.isDiving = true;
+
           if (this.diveTimer >= this.diveDuration) {
             this.diveState = 'visible';
-            this.isDiving = false; // 结束潜水
+            this.isDiving = false;
             this.diveTimer = 0;
             console.log('[Combat] Diving Lizard emerged');
           }
-        } 
+        }
         else if (this.diveState === 'visible') {
-          // 显形期间，强制保持 isDiving 为 false
           this.isDiving = false;
 
           if (this.diveTimer >= this.diveCooldown) {
             this.diveState = 'diving';
-            this.isDiving = true; // 开始潜水
+            this.isDiving = true;
             this.diveTimer = 0;
             console.log('[Combat] Diving Lizard submerged');
           }
         }
 
       } else {
-        // 还没到 80% 血量，彻底洗掉所有状态
         this.isDiving = false;
         this.diveTimer = 0;
         this.diveState = null;
@@ -335,7 +331,7 @@ class Enemy {
 
     // Dive effect (transparent + ripple)
     if (this.isDiving) {
-      // Invisible/untargetable window: do not render the body or HP bar.
+      // Invisible/untargetable window: do not render the body or HP bar
       noFill();
       stroke(100, 200, 255, 100);
       strokeWeight(2);

@@ -55,7 +55,7 @@ class Path {
 
 // Level waypoint definitions (1920x900 design; alignment uses applyLevelGridConfig + CURRENT_GRID_SIZE)
 
-//Level 1 — Big Ben
+// Level 1 — Big Ben
 // Path.js
 function getLevel1Waypoints() {
 // Based on CURRENT_GRID_SIZE cell centres (export uses live offset/size)
@@ -72,7 +72,7 @@ return [
   ];
 }
 
-function getLevel2Waypoints() { 
+function getLevel2Waypoints() {
 return [
 { x: 555, y: 765 },  // Entry
 { x: 315, y: 645 },  // Waypoint 1
@@ -95,7 +95,7 @@ return [
 { x: 1665, y: 405 },  // Waypoint 18
 { x: 1725, y: 405 },  // Exit
 ];
-} 
+}
 
 
 function getLevel3Waypoints() {

@@ -40,8 +40,8 @@ function freeTile(grid, px, py) {
   }
 }
 
-// Level 1 - Big Ben: default obstacle; only whitelist cells are buildable (grass).
-// Coordinates live in MapDataLevel1Buildable.js as LEVEL_1_BUILDABLE_WHITELIST [col, row].
+// Level 1 - Big Ben: default obstacle; only whitelist cells are buildable (grass)
+// Coordinates live in MapDataLevel1Buildable.js as LEVEL_1_BUILDABLE_WHITELIST [col, row]
 const LEVEL_1_GRID = (() => {
   const g = Array.from({ length: ROWS }, () => new Array(COLS).fill(0));
   for (const [col, row] of LEVEL_1_BUILDABLE_WHITELIST) {
@@ -1472,9 +1472,7 @@ const g = Array.from({ length: ROWS }, () => new Array(COLS).fill(0));
   return g;
 })();
 
-// ========================================
 // Grid decoder
-// ========================================
 
 const _GRID_DECODE = [
   TILE_TYPES.OBSTACLE, // 0
