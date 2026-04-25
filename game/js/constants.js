@@ -323,23 +323,23 @@ const LEVEL_AVAILABLE_TOWERS = {
 };
 const TOWER_COST = {
   basic: 60,
-  slow: 85,
+  slow: 75,
   area: 140,
   crystal: 120,
-  steam: 180,
+  steam: 170,
   alchemist: 150
 };
 
-const LANDMARK_MAX_HP = 80;
+const LANDMARK_MAX_HP = 100;
 const ENEMY_REACH_DAMAGE = 20;
 
 const TOTAL_LEVELS = 3;
 
 const ENEMY_STATS = {
-  basic: { hp: 100, speed: 2, reward: 15 },
-  fast: { hp: 60, speed: 3, reward: 20 },
-  tank: { hp: 300, speed: 1, reward: 25 },
-  boss: { hp: 500, speed: 0.8, reward: 45 },
+  basic: { hp: 100, speed: 2, reward: 10 },
+  fast: { hp: 60, speed: 3, reward: 15 },
+  tank: { hp: 300, speed: 1, reward: 20 },
+  boss: { hp: 500, speed: 0.8, reward: 40 },
   knight: {
     hp: 180,
     speed: 1.6,
@@ -358,7 +358,7 @@ const ENEMY_STATS = {
   },
   giant: {
     hp: 500,
-    speed: 0.7,
+    speed: 0.9,
     reward: 35,
     ability: 'leap',
     leapCooldown: 300,
@@ -373,8 +373,8 @@ const ENEMY_STATS = {
     disableDuration: 180
   },
   divingLizard: {
-    hp: 100,
-    speed: 1.8,
+    hp: 150,
+    speed: 3.3,
     reward: 20,
     ability: 'dive',
     diveCooldown: 480,
@@ -473,21 +473,19 @@ const LEVEL_2_WAVE_CONFIGS = [
     waveNumber: 5,
     spawnInterval: 22,
     enemies: [
-      { type: 'knight', count: 20, hp: 250, speed: 1.9 },
-      { type: 'archer', count: 18, hp: 110, speed: 2.8 },
-      { type: 'giant', count: 8, hp: 550, speed: 0.8 },
-      { type: 'tank', count: 8, hp: 420, speed: 1.2 },
-      { type: 'boss', count: 3, hp: 700, speed: 0.65 }
+      { type: 'knight', count: 20, hp: 300, speed: 1.9 },
+      { type: 'archer', count: 20, hp: 110, speed: 2.8 },
+      { type: 'giant', count: 10, hp: 550, speed: 0.8 },
+      { type: 'tank', count: 10, hp: 520, speed: 1.2 },
     ]
   },
   {
     waveNumber: 6,
     spawnInterval: 18,
     enemies: [
-      { type: 'knight', count: 25, hp: 280, speed: 2.0 },
-      { type: 'archer', count: 20, hp: 120, speed: 3.0 },
-      { type: 'giant', count: 10, hp: 600, speed: 0.85 },
-      { type: 'boss', count: 5, hp: 800, speed: 0.7 }
+      { type: 'knight', count: 30, hp: 350, speed: 2.0 },
+      { type: 'archer', count: 20, hp: 200, speed: 3.0 },
+      { type: 'giant', count: 15, hp: 800, speed: 0.85 },
     ]
   }
 ];
@@ -508,7 +506,7 @@ const LEVEL_3_WAVE_CONFIGS = [
     spawnInterval: 35,
     enemies: [
       { type: 'archer', count: 12, hp: 100, speed: 2.4 },
-      { type: 'divingLizard', count: 10, hp: 100, speed: 1.8 },
+      { type: 'divingLizard', count: 10, hp: 100, speed: 3.3 },
       { type: 'giant', count: 4, hp: 500, speed: 0.7 }
     ]
   },
@@ -517,7 +515,7 @@ const LEVEL_3_WAVE_CONFIGS = [
     spawnInterval: 30,
     enemies: [
       { type: 'knight', count: 12, hp: 220, speed: 1.7 },
-      { type: 'divingLizard', count: 8, hp: 110, speed: 1.9 },
+      { type: 'divingLizard', count: 8, hp: 110, speed: 3.4 },
       { type: 'treantMage', count: 4, hp: 200, speed: 1.2 },
       { type: 'tank', count: 4, hp: 400, speed: 1.0 }
     ]
@@ -537,7 +535,7 @@ const LEVEL_3_WAVE_CONFIGS = [
     spawnInterval: 25,
     enemies: [
       { type: 'knight', count: 18, hp: 250, speed: 1.8 },
-      { type: 'divingLizard', count: 12, hp: 120, speed: 2.0 },
+      { type: 'divingLizard', count: 12, hp: 120, speed: 3.5 },
       { type: 'treantMage', count: 8, hp: 240, speed: 1.3 },
       { type: 'giant', count: 6, hp: 600, speed: 0.8 }
     ]
@@ -548,7 +546,7 @@ const LEVEL_3_WAVE_CONFIGS = [
     enemies: [
       { type: 'knight', count: 20, hp: 280, speed: 1.9 },
       { type: 'goblinBomber', count: 15, hp: 140, speed: 2.4 },
-      { type: 'divingLizard', count: 10, hp: 130, speed: 2.1 },
+      { type: 'divingLizard', count: 10, hp: 130, speed: 3.6 },
       { type: 'treantMage', count: 6, hp: 260, speed: 1.4 },
       { type: 'gentlemanBug', count: 2, hp: 2500, speed: 0.8 }
     ]

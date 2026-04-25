@@ -1,0 +1,29 @@
+[33mcommit aea852544dc7ecf8fcde56c6f2d3b2bdaa868614[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mgamefix[m[33m)[m
+Author: Jiaxi <youjiaxi607@gmail.com>
+Date:   Sat Apr 18 14:52:37 2026 +0100
+
+    Update UIHUD layout and text formatting for end screens and tower info display. Adjust panel sizes, text alignment, and sizes for improved readability and consistency.
+
+[33mcommit 55301ca2edd8d2c12385d73e35a4bcd8eb7ca059[m
+Author: Jiaxi <youjiaxi607@gmail.com>
+Date:   Sat Apr 18 14:44:01 2026 +0100
+
+    Enhance dismantle feature with custom cursor and refund display. Update exit confirmation dialog and sound effects for tower removal.
+
+[33mcommit 9482ed5d4bba0d64d884e8141d58cdb9b07238fc[m
+Author: TANGSHASHA <wj25162@bristol.ac.uk>
+Date:   Sat Apr 18 01:44:35 2026 +0100
+
+    modify font size of enemy panel
+
+[33mcommit e48d0aade83b10cde20faa68863cb7c6ef919bad[m
+Author: TANGSHASHA <wj25162@bristol.ac.uk>
+Date:   Sat Apr 18 01:06:59 2026 +0100
+
+    add an exit confirmation dialog function to the game, which will prompt the user to confirm if they want to exit the game when they try to close the browser tab or window. This will help prevent accidental exits and ensure that players don't lose their progress unintentionally.
+
+[33mcommit 84cd8ea02b8223103ad306c9160467c09d7fe56c[m
+Author: TANGSHASHA <wj25162@bristol.ac.uk>
+Date:   Sat Apr 18 00:28:21 2026 +0100
+
+    implement dismantle feature
