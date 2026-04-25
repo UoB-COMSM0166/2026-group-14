@@ -496,7 +496,7 @@ const LEVEL_3_WAVE_CONFIGS = [
     waveNumber: 1,
     spawnInterval: 40,
     enemies: [
-      { type: 'basic', count: 15, hp: 130, speed: 1.8 },
+      { type: 'basic', count: 12, hp: 130, speed: 1.8 },
       { type: 'knight', count: 8, hp: 200, speed: 1.6 },
       { type: 'goblinBomber', count: 5, hp: 120, speed: 2.2 }
     ]
@@ -506,7 +506,7 @@ const LEVEL_3_WAVE_CONFIGS = [
     spawnInterval: 35,
     enemies: [
       { type: 'archer', count: 12, hp: 100, speed: 2.4 },
-      { type: 'divingLizard', count: 10, hp: 100, speed: 3.3 },
+      { type: 'divingLizard', count: 8, hp: 90, speed: 3.3 },
       { type: 'giant', count: 4, hp: 500, speed: 0.7 }
     ]
   },
@@ -514,8 +514,8 @@ const LEVEL_3_WAVE_CONFIGS = [
     waveNumber: 3,
     spawnInterval: 30,
     enemies: [
-      { type: 'knight', count: 12, hp: 220, speed: 1.7 },
-      { type: 'divingLizard', count: 8, hp: 110, speed: 3.4 },
+      { type: 'knight', count: 10, hp: 220, speed: 1.7 },
+      { type: 'divingLizard', count: 8, hp: 90, speed: 3.4 },
       { type: 'treantMage', count: 4, hp: 200, speed: 1.2 },
       { type: 'tank', count: 4, hp: 400, speed: 1.0 }
     ]
@@ -524,7 +524,7 @@ const LEVEL_3_WAVE_CONFIGS = [
     waveNumber: 4,
     spawnInterval: 28,
     enemies: [
-      { type: 'goblinBomber', count: 15, hp: 130, speed: 2.3 },
+      { type: 'goblinBomber', count: 12, hp: 130, speed: 2.3 },
       { type: 'archer', count: 12, hp: 110, speed: 2.5 },
       { type: 'treantMage', count: 6, hp: 220, speed: 1.3 },
       { type: 'giant', count: 5, hp: 550, speed: 0.75 }
@@ -535,7 +535,7 @@ const LEVEL_3_WAVE_CONFIGS = [
     spawnInterval: 25,
     enemies: [
       { type: 'knight', count: 18, hp: 250, speed: 1.8 },
-      { type: 'divingLizard', count: 12, hp: 120, speed: 3.5 },
+      { type: 'divingLizard', count: 12, hp: 100, speed: 3.5 },
       { type: 'treantMage', count: 8, hp: 240, speed: 1.3 },
       { type: 'giant', count: 6, hp: 600, speed: 0.8 }
     ]
@@ -546,7 +546,7 @@ const LEVEL_3_WAVE_CONFIGS = [
     enemies: [
       { type: 'knight', count: 20, hp: 280, speed: 1.9 },
       { type: 'goblinBomber', count: 15, hp: 140, speed: 2.4 },
-      { type: 'divingLizard', count: 10, hp: 130, speed: 3.6 },
+      { type: 'divingLizard', count: 10, hp: 110, speed: 3.6 },
       { type: 'treantMage', count: 6, hp: 260, speed: 1.4 },
       { type: 'gentlemanBug', count: 2, hp: 2500, speed: 0.8 }
     ]
