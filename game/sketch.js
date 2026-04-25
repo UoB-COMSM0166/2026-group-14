@@ -204,7 +204,7 @@ function ensureAudioStarted() {
 }
 
 function mousePressed() {
-  // Attempt to start audio on the first user interaction, but don't block clicks.
+  // Attempt to start audio on the first user interaction, but don't block clicks
   ensureAudioStarted();
 
   if (canvas && canvas.elt) canvas.elt.focus();

@@ -48,8 +48,8 @@ class Enemy {
     this.diveTimer = 0;
     this.isDiving = false;
     this.diveEffectTimer = 0;
-    // Treat Diving Lizard "dive" as an invis/untargetable window.
-    // During this window it cannot be targeted/selected or damaged.
+    // Treat Diving Lizard "dive" as an invis/untargetable window
+    // During this window it cannot be targeted/selected or damaged
 
     // Treant Mage - heal
     this.healRadius = preset.healRadius || 0;
@@ -186,7 +186,7 @@ class Enemy {
             this.diveTimer = 0;
             console.log('[Combat] Diving Lizard emerged');
           }
-        } 
+        }
         else if (this.diveState === 'visible') {
          
           this.isDiving = false;
@@ -334,7 +334,7 @@ class Enemy {
 
     // Dive effect (transparent + ripple)
     if (this.isDiving) {
-      // Invisible/untargetable window: do not render the body or HP bar.
+      // Invisible/untargetable window: do not render the body or HP bar
       noFill();
       stroke(100, 200, 255, 100);
       strokeWeight(2);

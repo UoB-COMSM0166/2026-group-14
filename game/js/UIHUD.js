@@ -2,7 +2,7 @@
 
 class UIHUD {
 
-  //@param {GameManager} game - Game engine reference
+  // @param {GameManager} game - Game engine reference
 
   constructor(game) {
     this.game = game;
@@ -80,12 +80,11 @@ class UIHUD {
     const rects = this.getMenuButtonRects();
     for (let i = 0; i < rects.length; i++) {
       const r = rects[i];
-      // 检查鼠标是否在按钮矩形范围内
       if (mx >= r.x && mx <= r.x + r.w && my >= r.y && my <= r.y + r.h) {
         return i;
       }
     }
-    return -1; // 没点到按钮
+    return -1;
   }
 
 
@@ -103,7 +102,7 @@ class UIHUD {
     this.exitButton = null;
   }
 
-  //Returns main menu button click regions for handleClick detection
+  // Returns main menu button click regions for handleClick detection
   updateMusicTrack(newTrackName = null) {
     let selectedName = newTrackName || this.musicSelect.value();
     console.log("selectedName =", selectedName);
@@ -122,9 +121,9 @@ class UIHUD {
       let vol = this.settings ? this.settings.musicVolume : this.musicSlider.value();
       track.setVolume(vol);
 
-      console.log("成功播放音轨:", selectedName);
+      console.log("Track playing:", selectedName);
     } else {
-      console.error("未找到音轨:", selectedName);
+      console.error("Track not found:", selectedName);
     }
   }
   getMenuButtonRects() {
@@ -154,7 +153,6 @@ class UIHUD {
     this.musicSlider = createSlider(0, 1, 0.08, 0.01);
     this.musicSlider.input(() => {
       let vol = this.musicSlider.value();
-      // 遍历所有音轨更新音量（或者只更新当前播放的）
       for (let key in this.musicTracks) {
         this.musicTracks[key].setVolume(vol);
       }
@@ -296,7 +294,7 @@ class UIHUD {
   getDomX(designX) {
     let cnv = document.querySelector('canvas');
     if (!cnv) return designX;
-    let cnvRect = cnv.getBoundingClientRect(); // 使用 cnvRect 变量名
+    let cnvRect = cnv.getBoundingClientRect();
     let scale = cnvRect.width / DESIGN_WIDTH;
     return cnvRect.left + (designX * scale);
   }
@@ -320,7 +318,7 @@ class UIHUD {
     if (this.nicknameBackBtn) this.nicknameBackBtn.hide();
   }
 
-  //Main menu - called when GameState.MENU
+  // Main menu - called when GameState.MENU
 
   drawMainMenu() {
     this.endScreenButtons = [];
@@ -342,7 +340,6 @@ class UIHUD {
 
     this.drawMenuButtons();
 
-    // UIHUD.js -> drawMainMenu() 内部逻辑
 
     if (this.enableSwitchPlayer &&
       this.switchPlayerBtn &&
@@ -394,7 +391,7 @@ class UIHUD {
     pop();
   }
 
-  //Draw main menu buttons (image or fallback text)
+  // Draw main menu buttons (image or fallback text)
 
   drawMenuButtons() {
     const BW = 225;
@@ -416,7 +413,7 @@ class UIHUD {
 
     for (let i = 0; i < 3; i++) {
       const cy = centerYs[i];
-      const bRect = rectData[i]; // 将变量名 rect 改为 bRect
+      const bRect = rectData[i];
       const hovered = getGameMouseX() >= bRect.x && getGameMouseX() <= bRect.x + bRect.w &&
         getGameMouseY() >= bRect.y && getGameMouseY() <= bRect.y + bRect.h;
 
@@ -435,7 +432,7 @@ class UIHUD {
       } else {
         noStroke();
         fill(60, 50, 40, 230);
-        rect(bRect.x, bRect.y, bRect.w, bRect.h, 12); // 使用修正后的 bRect 变量
+        rect(bRect.x, bRect.y, bRect.w, bRect.h, 12);
         stroke(180, 160, 120);
         strokeWeight(2);
         noFill();
@@ -453,27 +450,23 @@ class UIHUD {
     }
   }
 
-  //Level select - called when GameState.LEVEL_SELECT
+  // Level select - called when GameState.LEVEL_SELECT
 
   drawLevelSelect() {
     push();
 
-    // 1. 强制隐藏登录 UI 和切换玩家按钮
     this.hideLoginUI();
     this.hideSwitchPlayerUI();
 
-    // 2. 渲染背景图
     if (typeof gameImages !== 'undefined' && gameImages.levelSelectBg && gameImages.levelSelectBg.width > 0) {
       image(gameImages.levelSelectBg, 0, 0, DESIGN_WIDTH, DESIGN_HEIGHT);
     } else {
       background(40, 35, 30);
     }
 
-    // 3. 定义鼠标坐标变量（这是关键！即使删了返回键，后面的 Continue 键也要用）
     let mx = typeof getGameMouseX === 'function' ? getGameMouseX() : mouseX;
     let my = typeof getGameMouseY === 'function' ? getGameMouseY() : mouseY;
 
-    // 4. 定义关卡按钮及其状态
     this.levelButtons = [
       // highlightArea: { x: 208, y: 317, w: 230, h: 234 }
       { level: 1, x: 323, y: 434, width: 230, height: 234, unlocked: true, name: "THE OUTER DEFENSES" },
@@ -687,30 +680,25 @@ class UIHUD {
     strokeWeight(5);
     rect(panelX, panelY, panelW, panelH, 15);
 
-    // --- 核心设置：完全同步按钮文字风格 ---
-    textFont('Georgia'); // 使用与按钮一致的 Georgia 字体
-    textStyle(NORMAL);   // 强制使用常规粗细，不要加粗
-    noStroke();          // 必须取消描边，否则文字会显得粗大模糊
+    textFont('Georgia');
+    textStyle(NORMAL);
+    noStroke();
 
-    // 1. 主标题
     fill(255, 215, 100);
     textAlign(CENTER, CENTER);
     textSize(50);
     text('Nickname Login', CANVAS_WIDTH / 2, panelY + 70);
 
-    // 2. 说明文字（使用按钮的文字颜色 #FFECB3）
-    fill(255, 236, 179); // 对应 HTML 颜色 #FFECB3
+    fill(255, 236, 179);
     textSize(20);
     text('Your progress will be saved to this name.', CANVAS_WIDTH / 2, panelY + 120);
 
-    // 3. 错误信息
     if (this._loginErrorMsg) {
       fill(255, 120, 120);
       textSize(20);
       text("⚠️ " + this._loginErrorMsg, CANVAS_WIDTH / 2, panelY + 155);
     }
 
-    // 4. NICKNAME 标签（同样使用 #FFECB3）
     fill(255, 236, 179);
     textSize(24);
     text('NICKNAME:', CANVAS_WIDTH / 2, panelY + 195);
@@ -729,14 +717,13 @@ class UIHUD {
       this.nicknameInput.style('font-size', (22 * scale) + 'px');
       this.nicknameInput.style('text-align', 'center');
       this.nicknameInput.style('font-family', "'Georgia', serif");
-      this.nicknameInput.style('font-weight', 'normal'); // 确保输入框也不加粗
+      this.nicknameInput.style('font-weight', 'normal');
     }
 
     let totalBtnAreaW = (btnW * 2) + btnGap;
     let btnStartX = CANVAS_WIDTH / 2 - totalBtnAreaW / 2;
     let btnY = panelY + 330;
 
-    // 更新 DOM 按钮样式，确保万无一失
     if (this.nicknameLoginBtn) {
       this.nicknameLoginBtn.size(btnW * scale, btnH * scale);
       this.nicknameLoginBtn.position(this.getDomX(btnStartX), this.getDomY(btnY));
@@ -757,7 +744,7 @@ class UIHUD {
   }
 
   handleLoginClick(mx, my) {
-    // DOM buttons handle the interactions.
+    // DOM buttons handle the interactions
     return false;
   }
 
@@ -769,24 +756,18 @@ class UIHUD {
     this.hideLoginUI();
     this.hideSwitchPlayerUI();
     push();
-    // 渲染背景
     if (this.bgImage) {
       image(this.bgImage, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
     } else {
       background(40, 30, 20);
     }
 
-    // 计算布局坐标 (与 In-Game 保持一致)
     let startY = CANVAS_HEIGHT / 2 - 100;
     let spacing = 85;
 
-    // 这里的文字提示 (Music Volume 等) 也要用 Canvas 画
-    // ... 你的文字代码 ...
 
-    // 调用上面改好的函数
     this.showSettingsUI();
 
-    // 最后渲染亮度罩子 (确保覆盖全屏)
     this.applyBrightness();
     pop();
   }
@@ -797,16 +778,14 @@ class UIHUD {
    */
   // UIHUD.js
   drawTopHUDBar(showPaused = false) {
-    const H = HUD_HEIGHT; // 假设已在 constants.js 中改为 75
+    const H = HUD_HEIGHT;
     const leftX = 15;
 
-    // 绘制背景
     noStroke();
     fill(30, 25, 18, 224);
     rectMode(CORNER);
     rect(0, 0, CANVAS_WIDTH, H);
 
-    // 底部装饰线
     stroke(200, 168, 78);
     strokeWeight(2);
     line(0, H, CANVAS_WIDTH, H);
@@ -818,22 +797,19 @@ class UIHUD {
     let hpPercent = maxHp > 0 ? hp / maxHp : 0;
 
     let centerX = CANVAS_WIDTH / 2;
-    let barW = 200; // 稍微加宽血条
-    let barH = 16;  // 稍微加高血条
+    let barW = 200;
+    let barH = 16;
     let barX = centerX - barW / 2;
 
-    // --- 垂直排版优化 ---
-    let nameY = 22; // 标题位置
-    let barY = 46; // 血条位置，与标题拉开间距
+    let nameY = 22;
+    let barY = 46;
 
-    // 绘制地标名称
     fill(255, 255, 255, 220);
     textAlign(CENTER, CENTER);
     textSize(28);
     textStyle(BOLD);
     text(name, centerX, nameY);
 
-    // 绘制血条
     fill(60, 60, 60, 204);
     rect(barX, barY, barW, barH, 8);
 
@@ -843,14 +819,12 @@ class UIHUD {
 
     rect(barX, barY, barW * hpPercent, barH, 8);
 
-    // 血条数值居中
     let hpText = `${hp} / ${maxHp}`;
     textSize(16);
     fill(255);
     text(hpText, centerX, barY + barH / 2);
     textStyle(NORMAL);
 
-    // --- 右侧波次信息优化 ---
     let rightEdge = CANVAS_WIDTH - 25;
     let currWave = 1, totalWaves = 1;
     if (this.game.waveManager) {
@@ -873,7 +847,7 @@ class UIHUD {
     textStyle(NORMAL);
   }
 
-  //In-game HUD - called when GameState.PLAYING
+  // In-game HUD - called when GameState.PLAYING
 
   drawHUD() {
     this.hideAll();
@@ -1083,7 +1057,7 @@ class UIHUD {
     );
   }
 
-  //Lose screen - called when GameState.LOSE
+  // Lose screen - called when GameState.LOSE
 
   drawLoseScreen() {
     this.hideAll();
@@ -1146,7 +1120,7 @@ class UIHUD {
     );
   }
 
-  //Pause screen - called when GameState.PAUSED
+  // Pause screen - called when GameState.PAUSED
 
   drawPauseScreen() {
     this.hideAll();
@@ -1289,14 +1263,14 @@ class UIHUD {
     this.hideLoginUI();
   }
 
-  //Calculate the clickable rect for each tower-select tab.
-  //Dynamic layout based on available towers per level.
-  //Returned objects: { type, x, y, w, h }
+  // Calculate the clickable rect for each tower-select tab
+  // Dynamic layout based on available towers per level
+  // Returned objects: { type, x, y, w, h }
 
   getTowerPanelTabs() {
     const availableTowers = (this.game && this.game.availableTowers) || LEVEL_AVAILABLE_TOWERS[1];
 
-    // Keep tower cards clear of left utility controls + gold display.
+    // Keep tower cards clear of left utility controls + gold display
     const BASE_BTN_W = 180;
     const BASE_BTN_GAP = 20;
     const BTN_H = 90;
@@ -1311,13 +1285,13 @@ class UIHUD {
     const coinStartX = dismantleBtnX + sideBtnW + sideBtnGap + 40;
     const coinCX = coinStartX + 50;
 
-    // Reserve horizontal area for coin icon + gold number.
+    // Reserve horizontal area for coin icon + gold number
     const minStartX = coinCX + 185;
     const rightPadding = 20;
     const availableW = CANVAS_WIDTH - minStartX - rightPadding;
     const baseTotalW = btnW * count + btnGap * (count - 1);
 
-    // If default cards can't fit after gold section, shrink cards proportionally.
+    // If default cards can't fit after gold section, shrink cards proportionally
     if (baseTotalW > availableW && count > 0 && availableW > 0) {
       const scale = availableW / baseTotalW;
       btnW = Math.max(120, Math.floor(btnW * scale));
@@ -1469,30 +1443,27 @@ class UIHUD {
     const PH = TOWER_PANEL_HEIGHT;
     const panelCY = PY + PH / 2;
 
-    // ── 背景绘制 ──
     noStroke();
     fill(40, 30, 20, 235);
     rectMode(CORNER);
     rect(0, PY, CANVAS_WIDTH, PH);
 
     stroke(200, 168, 78, 220);
-    strokeWeight(3); // 加粗分割线
+    strokeWeight(3);
     line(0, PY, CANVAS_WIDTH, PY);
     noStroke();
 
     let currentGold = this.game.economy ? this.game.economy.getGold() : 0;
 
-    // ── 左侧功能按钮区 (尺寸从65x70放大到95x95) ──
-    let btnStartX = 25; // 起始向右挪一点
+    let btnStartX = 25;
     let btnY = PY + 10;
-    let btnW = 95;      // 宽度增加
-    let btnH = PH - 20; // 高度增加
-    let btnGap = 12;    // 间距微调
+    let btnW = 95;
+    let btnH = PH - 20;
+    let btnGap = 12;
 
     let mx = getGameMouseX();
     let my = getGameMouseY();
 
-    // --- Settings 按钮 ---
     let settingsBtnX = btnStartX;
     let isSettingsHover = mx >= settingsBtnX && mx <= settingsBtnX + btnW && my >= btnY && my <= btnY + btnH;
     fill(isSettingsHover ? color(100, 80, 60) : color(55, 45, 35));
@@ -1503,13 +1474,12 @@ class UIHUD {
     fill(isSettingsHover ? color(255, 230, 180) : color(180, 160, 120));
     noStroke();
     textAlign(CENTER, CENTER);
-    textSize(40); // 字母图标放大
+    textSize(40);
     text("S", settingsBtnX + btnW / 2, btnY + btnH / 2 - 8);
-    textSize(20); // 文字标签放大
+    textSize(20);
     text("Settings", settingsBtnX + btnW / 2, btnY + btnH / 2 + 22);
     this.inGameSettingsBtn = { x: settingsBtnX, y: btnY, w: btnW, h: btnH };
 
-    // --- Pause/Resume 按钮 ---
     let pauseBtnX = settingsBtnX + btnW + btnGap;
     let isPauseHover = mx >= pauseBtnX && mx <= pauseBtnX + btnW && my >= btnY && my <= btnY + btnH;
     let isPaused = (typeof game !== 'undefined' && game.manualPaused);
@@ -1517,27 +1487,24 @@ class UIHUD {
     stroke(isPauseHover ? color(220, 180, 100) : color(120, 100, 70));
     strokeWeight(2);
     rect(pauseBtnX, btnY, btnW, btnH, 8);
-    // --- Pause/Resume 按钮内部 ---
     fill(isPauseHover ? color(255, 230, 180) : color(180, 160, 120));
     noStroke();
     textAlign(CENTER, CENTER);
 
     if (isPaused) {
-      textSize(60); // 播放按钮 ">" 可以稍微大一点
+      textSize(60);
       text(">", pauseBtnX + btnW / 2, btnY + btnH / 2 - 8);
     } else {
-      // 关键改动：减小字号并加粗，消除“长条感”
       textStyle(BOLD);
-      textSize(32); // 从 50 降到 32，让它变短
+      textSize(32);
       text("| |", pauseBtnX + btnW / 2, btnY + btnH / 2 - 10);
-      textStyle(NORMAL); // 恢复普通样式给下面的文字用
+      textStyle(NORMAL);
     }
 
     textSize(20);
     text(isPaused ? "Resume" : "Pause", pauseBtnX + btnW / 2, btnY + btnH / 2 + 25);
     this.pauseBtn = { x: pauseBtnX, y: btnY, w: btnW, h: btnH };
 
-    // --- Monster Info 按钮 ---
     let monsterBtnX = pauseBtnX + btnW + btnGap;
     let isMonsterHover = mx >= monsterBtnX && mx <= monsterBtnX + btnW && my >= btnY && my <= btnY + btnH;
     fill(isMonsterHover ? color(100, 80, 60) : color(55, 45, 35));
@@ -1547,16 +1514,15 @@ class UIHUD {
     let monsterIcon = this.getEnemyImage('basic');
     if (monsterIcon && monsterIcon.width > 0) {
       imageMode(CENTER);
-      let iconSize = 45; // 怪物图标放大
+      let iconSize = 45;
       image(monsterIcon, monsterBtnX + btnW / 2, btnY + btnH / 2 - 5, iconSize, iconSize);
     }
     fill(isMonsterHover ? color(255, 230, 180) : color(180, 160, 120));
     noStroke();
-    textSize(14); // "Enemies" 文字放大
+    textSize(14);
     text("Enemies", monsterBtnX + btnW / 2, btnY + btnH - 12);
     this.monsterInfoBtn = { x: monsterBtnX, y: btnY, w: btnW, h: btnH };
 
-    // --- Dismantle 按钮 ---
     let dismantleBtnX = monsterBtnX + btnW + btnGap;
     let isDismantleHover = mx >= dismantleBtnX && mx <= dismantleBtnX + btnW && my >= btnY && my <= btnY + btnH;
     let isDismantleSelected = this.game.dismantleMode;
@@ -1583,17 +1549,16 @@ class UIHUD {
     fill((isDismantleHover || isDismantleSelected) ? color(255, 230, 180) : color(180, 160, 120));
     noStroke();
     textAlign(CENTER, CENTER);
-    textSize(16); // 文字标签
+    textSize(16);
     text("Dismantle", dismantleBtnX + btnW / 2, btnY + btnH / 2 + 20);
     this.dismantleBtn = { x: dismantleBtnX, y: btnY, w: btnW, h: btnH };
 
-    // --- 金币与数值 (右移并放大) ---
     let coinStartX = dismantleBtnX + btnW + btnGap + 40;
     let coinCX = coinStartX + 50;
     let coinCY = panelCY;
 
     fill(255, 210, 0);
-    ellipse(coinCX - 30, coinCY, 36, 36); // 金币圆圈放大
+    ellipse(coinCX - 30, coinCY, 36, 36);
     fill(180, 130, 0);
     textAlign(CENTER, CENTER);
     textSize(18);
@@ -1603,7 +1568,7 @@ class UIHUD {
 
     fill(255, 225, 70);
     textAlign(LEFT, CENTER);
-    textSize(28); // 金钱数值字号放大
+    textSize(28);
     textStyle(BOLD);
     text(currentGold, coinCX + 5, coinCY);
     textStyle(NORMAL);
@@ -1616,7 +1581,6 @@ class UIHUD {
       text("Dismantle Mode", CANVAS_WIDTH - 20, coinCY);
     }
 
-    // ── 塔防选择卡片渲染 (尺寸依赖 getTowerPanelTabs 的新设置) ──
     const thumbImgMap = {
       basic: imgs.towerBasic,
       slow: imgs.towerSlow,
@@ -1640,7 +1604,7 @@ class UIHUD {
       rectMode(CORNER);
       if (selected) {
         fill(85, 68, 40, 240);
-        stroke(255, 215, 0); // 选中时边框更亮
+        stroke(255, 215, 0);
         strokeWeight(3);
       } else if (hovering && affordable) {
         fill(68, 56, 36, 225);
@@ -1665,23 +1629,21 @@ class UIHUD {
         noTint();
       }
 
-      // 文字区域：根据大卡片重新定位
       let textX = tab.x + THUMB_CX_OFF + THUMB / 2 + 12;
       let nameY = tab.y + tab.h / 2 - 12;
       let priceY = tab.y + tab.h / 2 + 15;
 
       fill(255, 255, 255, affordable ? 240 : 130);
       textAlign(LEFT, CENTER);
-      textSize(18); // 塔名放大
+      textSize(18);
       textStyle(BOLD);
       text(cfg.name.split(' ')[0], textX, nameY);
       textStyle(NORMAL);
 
       fill(255, 215, 0, affordable ? 255 : 110);
-      textSize(16); // 价格放大
+      textSize(16);
       text(`$${cfg.cost}`, textX, priceY);
 
-      // 快捷键提示
       fill(160, 140, 80, affordable ? 200 : 90);
       textAlign(RIGHT, TOP);
       textSize(13);
@@ -1778,21 +1740,19 @@ class UIHUD {
 
     if (mouseIsPressed) {
       if (!this._wasPressed) {
-        this._wasPressed = true; // 锁定，防止连点
+        this._wasPressed = true;
 
-        // --- 专门处理音轨点击 ---
         let tr = this._sliderRects['track'];
         if (tr && mx > tr.x && mx < tr.x + tr.w &&
           my > tr.y && my < tr.y + tr.h) {
-          console.log("切换音轨按钮被点击");
+          console.log("Track switch button clicked");
           this.handleTrackSwitch();
-          return; // 触发后直接返回，避免干扰滑块
+          return;
         }
       }
 
-      // --- 处理滑块滑动 ---
       for (let id in this._sliderRects) {
-        if (id === 'track') continue; // 跳过按钮
+        if (id === 'track') continue;
 
         let r = this._sliderRects[id];
         if (mx > r.x && mx < r.x + r.w &&
@@ -1813,7 +1773,6 @@ class UIHUD {
     }
   }
   updateGlobalMusicVolume(vol) {
-    // 遍历所有音轨并设置音量
     for (let key in this.musicTracks) {
       this.musicTracks[key].setVolume(vol);
     }
@@ -1821,25 +1780,21 @@ class UIHUD {
   renderBrightnessOverlay() {
     let b = this.settings.brightness;
 
-    // 只有当亮度不等于 1.0 时才渲染，节省性能
     if (Math.abs(b - 1.0) < 0.01) return;
 
-    push(); // 开启独立绘图状态，防止污染其他 UI
-    resetMatrix(); // 关键：重置所有 translate/scale，确保从 (0,0) 开始覆盖全屏
+    push();
+    resetMatrix();
 
     if (b < 1.0) {
-      // 变暗：盖黑色半透明 (映射 0.5->1.0 为 200->0 透明度)
       let alpha = map(b, 0.5, 1.0, 200, 0);
       fill(0, 0, 0, alpha);
     } else {
-      // 变亮：盖白色半透明 (映射 1.0->1.5 为 0->100 透明度)
       let alpha = map(b, 1.0, 1.5, 0, 100);
       fill(255, 255, 255, alpha);
     }
 
     noStroke();
     rectMode(CORNER);
-    // 使用 width 和 height 确保覆盖当前画布所有可见区域
     rect(0, 0, width, height);
 
     pop();
@@ -1847,7 +1802,6 @@ class UIHUD {
   handleTrackSwitch() {
     this.currentTrackIndex = (this.currentTrackIndex + 1) % this.trackNames.length;
 
-    // 同步给 settings，确保 drawTrackSelector 里的文字会变
     this.settings.musicTrack = this.currentTrackIndex;
 
     let newName = this.trackNames[this.currentTrackIndex];
@@ -1857,7 +1811,7 @@ class UIHUD {
       this.musicSelect.selected(newName);
     }
   }
-  //In-game settings panel (canvas)
+  // In-game settings panel (canvas)
 
   drawInGameSettings() {
     push();
@@ -2200,56 +2154,45 @@ class UIHUD {
   }
 
   drawTowerPlacementPreview() {
-    // 1. 基础状态检查
     if (this.game.state !== GameState.PLAYING) return;
     if (!this.game.selectedTowerType) return;
 
-    // 2. 检查鼠标是否在可放置的垂直区域内（顶栏和底栏之间）
     let mx = getGameMouseX();
     let my = getGameMouseY();
     if (my < HUD_HEIGHT || my > TOWER_PANEL_TOP) return;
 
-    // 3. 获取当前塔的配置
     let type = this.game.selectedTowerType;
     let cfg = TOWER_TYPES[type] || TOWER_TYPES.basic;
     let currentGold = this.game.economy ? this.game.economy.getGold() : 0;
     let canAfford = currentGold >= cfg.cost;
     let [r, g, b] = cfg.color;
 
-    // 4. 将鼠标位置映射到网格坐标
     let col = pixelToCol(mx);
     let row = pixelToRow(my);
     let gridX = this.game.getTowerCenterXFromAnchor(col);
     let gridY = this.game.getTowerCenterYFromAnchor(row);
 
-    // 5. 核心：计算背景图被压缩后的视觉格子高度
-    // 逻辑：背景图占用的总像素高度除以总行数
     const safeHeight = TOWER_PANEL_TOP - HUD_HEIGHT;
     const visualGridHeight = safeHeight / ROWS;
 
-    // 6. 检查是否可建造
     let tileOk = this.game.canBuildAt(col, row);
     let canPlace = tileOk && canAfford;
     let blocked = !canPlace;
 
-    // 7. 绘制格子高亮层
     push();
     rectMode(CENTER);
     noStroke();
     if (canPlace) {
-      fill(40, 220, 80, 55);    // 绿色 - 可以建造
+      fill(40, 220, 80, 55);
     } else {
-      fill(220, 50, 50, 70);    // 红色 - 被阻挡
+      fill(220, 50, 50, 70);
     }
 
-    // 关键修正：宽度使用原始尺寸，高度使用计算出的视觉高度，以对齐地图格子
     rect(gridX, gridY, CURRENT_GRID_SIZE, visualGridHeight, 4);
 
-    // 8. 如果被阻挡，绘制红色 "✕" 叉号
     if (blocked) {
       stroke(240, 60, 60, 200);
       strokeWeight(2.5);
-      // 叉号也根据视觉高度比例缩放
       let sW = CURRENT_GRID_SIZE * 0.22;
       let sH = visualGridHeight * 0.22;
       line(gridX - sW, gridY - sH, gridX + sW, gridY + sH);
@@ -2257,7 +2200,6 @@ class UIHUD {
     }
     pop();
 
-    // 9. 绘制攻击范围圆圈
     noFill();
     if (blocked) {
       stroke(220, 60, 60, canAfford ? 90 : 50);
@@ -2268,13 +2210,11 @@ class UIHUD {
     let rangeRadius = type === 'crystal' ? (cfg.boostRadius || cfg.range) : cfg.range;
     ellipse(gridX, gridY, rangeRadius * 2, rangeRadius * 2);
 
-    // 10. 绘制防御塔预览半透明图片
     if (!blocked) {
       let previewImg = this.getTowerImage(type);
       if (previewImg && previewImg.width > 0) {
-        tint(255, 180); // 设置透明度
+        tint(255, 180);
         imageMode(CENTER);
-        // 防御塔图片可以稍微根据视觉高度也做一点压缩，或者保持比例
         let imgW = CURRENT_GRID_SIZE * 2;
         let imgH = visualGridHeight * 2;
         image(previewImg, gridX, gridY, imgW, imgH);
@@ -2620,7 +2560,7 @@ class UIHUD {
         dialogY = CANVAS_HEIGHT / 2 - dialogH / 2;
     }
 
-    // Optional per-step override for placing dialog near highlight regions.
+    // Optional per-step override for placing dialog near highlight regions
     if (step.dialogPosition &&
       Number.isFinite(step.dialogPosition.x) &&
       Number.isFinite(step.dialogPosition.y)) {
@@ -2628,7 +2568,7 @@ class UIHUD {
       dialogY = step.dialogPosition.y;
     }
 
-    // Clamp to keep full dialog inside the canvas.
+    // Clamp to keep full dialog inside the canvas
     const minDialogX = 10;
     const maxDialogX = CANVAS_WIDTH - dialogW - 10;
     const minDialogY = 10;
@@ -2636,7 +2576,7 @@ class UIHUD {
     dialogX = constrain(dialogX, minDialogX, maxDialogX);
     dialogY = constrain(dialogY, minDialogY, maxDialogY);
 
-    // Keep dialog close to highlight but never overlapping it.
+    // Keep dialog close to highlight but never overlapping it
     const highlightArea = this.getTutorialHighlightArea(step.highlight);
     if (highlightArea && step.highlight !== 'none') {
       const safePad = 14; // matches dim-mask highlight padding and adds a small gap

@@ -24,14 +24,13 @@ class GameManager {
     this.selectedTowerType = null;
 
     // Prevents click-through when an HTML button callback changes state in the
-    // same event that also triggers the canvas mousePressed handler.
+    // same event that also triggers the canvas mousePressed handler
     this.stateJustChanged = false;
 
     this.debugMode = false;
     this.currentMapImage = null;
 
     this.mapEditMode = false;
-    /** 2=可建 0=不可建；本关内持久，供 M 编辑 / D 预览 / E 导出 */
     this.debugBuildGrid = null;
     this.editGrid = null;
     this.isDragging = false;
@@ -298,19 +297,19 @@ class GameManager {
 
     let levelNum = this.currentLevel || 1;
     console.log('='.repeat(60));
-    console.log(`Level ${levelNum} — 编辑结果导出`);
-    console.log(`  可建造格子: ${buildableCoords.length} 个`);
-    console.log(`  不可建造格子: ${obstacleCoords.length} 个`);
+    console.log(`Level ${levelNum} - Edit export`);
+    console.log(`  Buildable tiles: ${buildableCoords.length}`);
+    console.log(`  Blocked tiles: ${obstacleCoords.length}`);
     console.log('');
 
-    console.log('--- 不可建造格子坐标 [col, row]（复制下面这一行给 Agent）---');
+    console.log('--- Blocked tile coordinates [col, row] ---');
     console.log(JSON.stringify(obstacleCoords));
     console.log('');
 
-    console.log('--- 可建造格子坐标 whitelist（用于 MapData.js）---');
+    console.log('--- Buildable tile whitelist [col, row] ---');
     console.log(JSON.stringify(buildableCoords));
     console.log('='.repeat(60));
-    console.log('提示: 在浏览器控制台右键以上 JSON 可直接复制全文');
+    console.log('Tip: Right-click the JSON in the browser console to copy');
   }
 
   togglePathEditMode() {
@@ -391,7 +390,7 @@ class GameManager {
     let levelNum = this.currentLevel || 1;
     console.log('========== EXPORTED PATH CODE ==========');
     console.log('');
-    console.log(`--- 路径格子坐标 [col, row]（Level ${levelNum}）---`);
+    console.log(`--- Path tile coordinates [col, row] (Level ${levelNum}) ---`);
     console.log(JSON.stringify(this.pathPoints.map(pt => [pt.col, pt.row])));
     console.log('');
     console.log(`function getLevel${levelNum}Waypoints() {`);
@@ -879,16 +878,13 @@ class GameManager {
     let bg = this.currentMapImage || gameImages.mapLevel1;
     if (!bg || bg.width <= 0) return;
 
-    // 1. 获取上下黑框之间的“安全区”高度
-    const safeY = HUD_HEIGHT; // 顶部黑条高度 (45px)
-    const safeHeight = TOWER_PANEL_TOP - HUD_HEIGHT; // 剩余的可见高度
+    const safeY = HUD_HEIGHT;
+    const safeHeight = TOWER_PANEL_TOP - HUD_HEIGHT;
 
-    // 2. 强制将整张背景图渲染在这个安全区内
-    // 参数说明: image(图片, 目标X, 目标Y, 目标宽, 目标高, 原图X, 原图Y, 原图宽, 原图高)
     image(
       bg,
-      0, safeY, DESIGN_WIDTH, safeHeight, // 目标：铺满黑框之间的区域
-      0, 0, bg.width, bg.height           // 源：使用整张背景图
+      0, safeY, DESIGN_WIDTH, safeHeight,
+      0, 0, bg.width, bg.height
     );
   }
   drawGame() {
@@ -1015,8 +1011,8 @@ class GameManager {
 
     fill(220, 220, 220);
     textSize(20);
-    text('左键/拖拽=红(不可建)  右键/拖拽=绿  退出M后草稿保留', 18, 48);
-    text('D=预览草稿  E=导出最新（可在游戏内直接按 E）', 18, 64);
+    text('Left click/drag = red (blocked), right click/drag = green (buildable)', 18, 48);
+    text('D = preview draft, E = export latest', 18, 64);
 
     let btnX = DESIGN_WIDTH - 210;
     let btnY = 12;
@@ -1033,7 +1029,7 @@ class GameManager {
     noStroke();
     textSize(26);
     textAlign(CENTER, CENTER);
-    text('导出坐标 (E)', btnX + btnW / 2, btnY + btnH / 2);
+    text('Export Coordinates (E)', btnX + btnW / 2, btnY + btnH / 2);
 
     this.exportButton = { x: btnX, y: btnY, width: btnW, height: btnH };
 
@@ -1216,15 +1212,12 @@ class GameManager {
       let c = cell.col;
       let r = cell.row;
 
-      // 越界
       if (r < 0 || r >= this.mapGrid.length) return false;
       if (c < 0 || c >= this.mapGrid[0].length) return false;
 
-      // 不能压到 HUD
       let cellCenterY = rowToCenterY(r);
       if (cellCenterY < HUD_HEIGHT) return false;
 
-      // 每一格都必须是 grass
       if (this.mapGrid[r][c] !== TILE_TYPES.GRASS) return false;
     }
 
@@ -1398,7 +1391,7 @@ class GameManager {
   handleClick(mx, my, btn) {
     // Guard against click-through: if state just changed this same event
     // (e.g. an HTML button callback already fired startLevel/setState),
-    // drop this canvas-level click entirely.
+    // drop this canvas-level click entirely
     if (this.stateJustChanged) return;
 
     if (this.pathEditMode) {
@@ -1453,15 +1446,13 @@ class GameManager {
     }
 
     if (this.state === GameState.MENU) {
-      // 调用 UI 层的辅助函数获取点击了第几个按钮 (0: Start, 1: Settings, 2: Exit)
       let btnIdx = this.ui.getClickedMenuButton(mx, my);
 
       if (btnIdx === 0) {
-        this.setState(GameState.LEVEL_SELECT); // 直接进入关卡选择
+        this.setState(GameState.LEVEL_SELECT);
       } else if (btnIdx === 1) {
-        this.setState(GameState.SETTINGS); // 进入设置
+        this.setState(GameState.SETTINGS);
       } else if (btnIdx === 2) {
-        // --- 核心修改：点击 Exit 直接跳转 GitHub ---
         window.location.href = "https://github.com/UoB-COMSM0166/2026-group-14";
       }
       return;
@@ -1498,14 +1489,6 @@ class GameManager {
         return;
       }
 
-      // let backBtn = this.ui.backButton;
-      // if (backBtn &&
-      //   mx > backBtn.x - backBtn.width / 2 && mx < backBtn.x + backBtn.width / 2 &&
-      //   my > backBtn.y - backBtn.height / 2 && my < backBtn.y + backBtn.height / 2) {
-      //   this.sound.play("click1");
-      //   this.setState(GameState.MENU);
-      //   return;
-      // }
       let menuBtnX = 995;
       let menuBtnY = 760;
       let menuBtnW = 417;
@@ -1513,7 +1496,7 @@ class GameManager {
 
       if (mx >= menuBtnX && mx <= menuBtnX + menuBtnW && my >= menuBtnY && my <= menuBtnY + menuBtnH) {
         this.sound.play("click1");
-        this.setState(GameState.MENU); // 执行返回主菜单功能
+        this.setState(GameState.MENU);
         return;
       }
       let levelBtns = this.ui.levelButtons;
