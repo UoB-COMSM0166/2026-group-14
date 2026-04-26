@@ -581,7 +581,7 @@ We used a SusAD diagram to show both positive opportunities and negative risks a
 
 ---
 
-## Social Sustainability
+## Social
 
 Our group designed Defend London with a clear London-themed identity, including recognisable landmarks and city-inspired levels. This gives the game a stronger identity than a generic fantasy tower defense game and adds some cultural value. However, because we use a real city as the theme, we also need to avoid careless or stereotypical representations of London, its people or its culture.
 
@@ -589,7 +589,7 @@ We also think social sustainability is connected to player trust. Players should
 
 ---
 
-## Individual Sustainability, Ethics and Accessibility
+## Individual
 
 From an individual perspective, our group supports players through the tutorial, pause screen, level selection, continue option, try again button and win/lose screens. These features reduce confusion and make the game easier for first-time players to learn.
 
@@ -599,7 +599,7 @@ Ethically, our group tried to avoid unnecessary personal data collection. Player
 
 ---
 
-## Environmental Sustainability
+## Environmental
 
 We designed Defend London as a browser-based game that can run locally. Player progress is saved using `localStorage`, so the basic progression system does not need a remote account server or database. This reduces unnecessary infrastructure and network communication.
 
@@ -607,7 +607,7 @@ The game also uses wave-based enemy spawning instead of creating all enemies at 
 
 ---
 
-## Economic Sustainability
+## Economic
 
 Our group used accessible web technologies to develop Defend London. The project does not require paid infrastructure, a custom backend or platform-specific deployment. This makes it suitable for a student group project and avoids unnecessary cost.
 
@@ -615,7 +615,7 @@ The modular code structure also helps reduce future maintenance cost. Since enem
 
 ---
 
-## Technical Sustainability
+## Technical
 
 We divided the game into multiple modules instead of writing it as one large file. `GameManager.js` coordinates the overall game state and level flow, while other files manage enemies, towers, economy, waves, map data and paths. This makes the project easier to understand, debug and extend.
 
