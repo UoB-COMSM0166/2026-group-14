@@ -30,14 +30,14 @@ VIDEO. Include a demo video of your game here (you don't have to wait until the 
 
 ## Team Members
 
-| Name          | Email | Role |
-|---------------|-------|------|
-| Jiaxi You     | <fl25387@bristol.ac.uk> | TBD |
-| Shasha Tang   | <wj25162@bristol.ac.uk> | TBD |
-| Junjie Wang   | <da25293@bristol.ac.uk> | TBD |
-| Jingjing Liu  | <bd25907@bristol.ac.uk> | TBD |
-| Zejun Zhang   | <tc25992@bristol.ac.uk> | TBD |
-| Mingshu Zhang | <so25258@bristol.ac.uk> | TBD |
+| Name          | Email | GithubID | Role | Completed Work |
+|---------------|-------|----------|------|----------------|
+| Jiaxi You     | <fl25387@bristol.ac.uk> | TBD | Project Manager / Tester | Project management / Testing |
+| Shasha Tang   | <wj25162@bristol.ac.uk> | TBD | Gameplay Developer | Requirements / Gameplay design |
+| Junjie Wang   | <da25293@bristol.ac.uk> | TBD | Combat Developer | Tower system / Combat mechanics |
+| Jingjing Liu  | <bd25907@bristol.ac.uk> | TBD | Level Designer | Level design / Visual assets |
+| Zejun Zhang   | <tc25992@bristol.ac.uk> | TBD | UI Developer | UI / Menu interface |
+| Mingshu Zhang | <so25258@bristol.ac.uk> | TBD | Systems Developer | Grid system / Gameplay systems / Integration |
 
 
 ## Project Report
