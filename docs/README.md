@@ -1,35 +1,30 @@
 # 2026-group-14
-2026 COMSM0166 group 14
-
-# COMSM0166 Project Template
-A project template for the Software Engineering Discipline and Practice module (COMSM0166).
-
-## Info
-
-This is the template for your group project repo/report. We'll be setting up your repo and assigning you to it after the group forming activity. You can delete this info section, but please keep the rest of the repo structure intact.
-
-You will be developing your game using [P5.js](https://p5js.org) a javascript library that provides you will all the tools you need to make your game. However, we won't be teaching you javascript, this is a chance for you and your team to learn a (friendly) new language and framework quickly, something you will almost certainly have to do with your summer project and in future. There is a lot of documentation online, you can start with:
-
-- [P5.js tutorials](https://p5js.org/tutorials/) 
-- [Coding Train P5.js](https://thecodingtrain.com/tracks/code-programming-with-p5-js) course - go here for enthusiastic video tutorials from Dan Shiffman (recommended!)
 
 ## Defend London
 
-Build clever defenses across London as ten unpredictable enemy types force you to rethink every wave.
+> Protect the landmarks. Outsmart the invaders. Defend your city.
 
-<p align="center">
-  <a href="./index.html">
-    <img src="./images/defend-london-cover.png" alt="Defend London cover" width="680">
-  </a>
-</p>
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <a href="./index.html">
+        <img src="./images/defend-london-cover.png" alt="Defend London cover" width="420">
+      </a>
+      <br>
+      🎮 <a href="./index.html">Play Now</a>
+    </td>
+    <td align="center" width="50%">
+      <a href="./demo/demo.mp4">
+        <video controls width="420" src="./demo/demo.mp4">
+          Your browser does not support the video tag.
+        </video>
+      </a>
+      <br>
+      📺 <a href="./demo/demo.mp4">Watch Demo</a>
+    </td>
+  </tr>
+</table>
 
-[Play Defend London](./index.html)
-
-[Watch Demo Video](./demo/demo.mp4)
-
-<video controls width="640" src="./demo/demo.mp4">
-  Your browser does not support the video tag.
-</video>
 
 ## Your Group
 
@@ -52,42 +47,20 @@ Build clever defenses across London as ten unpredictable enemy types force you t
 
 ### Introduction
 
-#### Quick Facts
-
-| Category | Details |
-|---|---|
-| Genre | Tower Defense |
-| Theme | Defend iconic London landmarks from enemy waves |
-| Engine | p5.js + JavaScript |
-| Levels | 3 (Outer City Defenses, River Thames, Tower of London) |
-| Enemy System | 10 enemy types with special abilities |
-| Core Features | Multiple tower classes, interactive tutorial, monster info panel, complete UI system |
-
----
-
 #### What is Defend London?
 
-Defend London is a strategy-focused tower defense game where players protect well-known London landmarks from escalating enemy waves.  
-Players place and upgrade different tower types to counter enemies with diverse abilities, from dodging and charging units to healing specialists and a multi-phase boss.  
-The result is a game that is easy to start, but rewards planning, adaptation, and long-term tactical thinking.
+A tower defense game where players protect iconic London landmarks from waves of invading enemies.  
+Build towers, manage resources, and survive increasingly challenging waves across three beautifully illustrated levels.
 
 ---
 
-#### What Makes It Special?
+#### What Makes It Special ✨
 
-| Feature | Standard Tower Defense Pattern | Defend London Approach |
+| 🏛️ London Identity | 👾 Diverse Enemies | 🎓 Guided Experience |
 |---|---|---|
-| Setting and Identity | Generic fantasy or abstract maps | London-themed levels built around recognizable landmarks |
-| Enemy Design | Stat variations only | 10 enemy archetypes with gameplay-changing abilities |
-| Player Guidance | Minimal onboarding | Interactive tutorial + monster info panel + full UI feedback |
+| Levels based on real landmarks: outer defenses, River Thames, and the Tower of London. | 10 unique enemy types with abilities like charging, dodging, diving, and healing. | An interactive tutorial helps new players learn core mechanics step by step. |
 
 ---
-
-#### Project Overview
-
-This report explains how the game moved from concept to implementation through requirements analysis, system design, development, and evaluation.  
-It presents our architecture decisions, balancing strategy, testing results, and reflections on sustainability, ethics, and accessibility.  
-Together, these sections show both the creative vision and the software engineering practices behind Defend London.
 
 ### Requirements 
 We use a GitHub Kanban board to track our progress; you can access it via the link here.
@@ -115,15 +88,8 @@ During the comparison, the team finally came to the decision to develop a tower 
 - Players can win the game by developing their own defense strategy.
 
 #### Paper prototype
-During the discussion, we analyzed a range of possible gameplay ideas and considered several different types of games that could be developed for the project. This stage helped us explore different directions and think about the kind of experience we wanted to create. After comparing these ideas, we selected two prototypes to develop further and discussed them in more detail.
-
-The first prototype was Double Steal, which focused on direct character control in a multi-level environment. In this prototype, the player would move through different floors of the map, avoid dangers, manage health, and complete objectives in various locations. The second prototype was Defend London, a tower defense game focused on defending iconic London landmarks from waves of enemies through tower placement and upgrades.
-
-[Watch Demo - Tower Defense London](./demo/paper-prototype.MOV)
-
-[Watch Demo - Double Steal](./demo/paper-prototype2.mp4)
-
-After comparing the two concepts, we decided to continue with Defend London because it offered a more focused and coherent gameplay structure. It also seemed more suitable for teamwork because the mechanics could be divided more naturally into separate systems, such as map design, enemy behavior, tower logic, and interface development.
+We explored paper prototypes early to compare gameplay direction and technical feasibility.  
+To avoid repetition, the full visual comparison (two prototypes, side-by-side GIFs, and selection rationale) is presented in the **Design** section under **Paper Prototypes**.
 
 #### Identifying stakeholders
 We identified stakeholders using an onion model approach
@@ -200,73 +166,174 @@ This preparation work has not only improved team collaboration and consensus but
 
 ### Design
 
-15% ~750 words 
-System architecture. Class diagrams, behavioural diagrams. 
+#### 1) Design Overview
 
-#### System architecture
-The system architecture of the tower defense London is designed as a modular and scalable structure, where each subsystem is responsible for a specific aspect of the gameplay. At the core of the system, the Game Manager acts as the central controller, coordinating the overall game flow and managing the lifecycle of different components.
+Defend London uses a modular architecture: each subsystem owns one responsibility, and `GameManager` coordinates the full loop.  
+This structure lets us scale enemy complexity, tower mechanics, and UI features without rewriting the whole game.
 
-Once enemies are spawned, the Enemy System manages their behavior, including movement along predefined paths and handling different enemy types. In parallel, the Tower System controls the placement and attack behavior of defensive towers, continuously scanning for targets within range and initiating attacks.
+```mermaid
+flowchart TD
+    GM[GameManager<br/>state + level flow]
+    LV[Level System<br/>map, waves, entities]
+    EN[Enemy System<br/>movement + abilities]
+    TW[Tower System<br/>targeting + attacks]
+    CB[Combat System<br/>damage, effects, status]
+    EC[Economy System<br/>costs + rewards]
+    UI[UI/HUD System<br/>feedback + panels]
 
-The Combat System serves as the interaction layer between towers and enemies, handling hit detection and damage calculation. Based on combat outcomes, the Economy System updates in-game resources such as game coins, rewarding enemy kills and managing costs for tower construction.
+    GM --> LV
+    LV --> EN
+    LV --> TW
+    EN --> CB
+    TW --> CB
+    CB --> EC
+    LV --> UI
+    EC --> UI
+    GM --> UI
+```
 
-Finally, the UI System reflects all changes in real time, providing visual feedback to the player, including health, economy, wave progression, and game status. Through this modular design, the system ensures clear separation of concerns, making the game easier to maintain, extend, and optimize.
+---
 
-#### Class Diagram
-![Class-Diagram](./images/class-diagram.png)
-A more detailed explanation of our game design is provided by the Class Diagram, it effectively illustrates the game flow and core features of the system.
+#### 2) Paper Prototypes
 
-###### Game Control
+Before coding, we compared two paper prototypes to test gameplay loops and team fit.
 
-The Game class is responsible for the overall flow of the program, including starting a level, updating the game during play, and ending the level with a result. The GameState enumeration supports this by defining the main states of the game, such as menu, playing, paused, win, and lose. This helps the game switch clearly between different stages.
+<table>
+<tr>
+<td align="center" width="50%">
+<img src="./images/paper-prototype-ezgif.com-video-to-gif-converter.gif" width="320" alt="Prototype A Defend London">
+<br><b>Prototype A: Defend London</b>
+</td>
+<td align="center" width="50%">
+<img src="./images/paper-prototype2-ezgif.com-video-to-gif-converter.gif" width="320" alt="Prototype B Double Steal">
+<br><b>Prototype B: Double Steal</b>
+</td>
+</tr>
+</table>
 
-###### Level Management
+| Aspect | Defend London | Double Steal |
+|---|---|---|
+| Genre | Tower Defense | Action Platformer |
+| Core loop | Place towers -> control wave pressure | Navigate floors -> avoid hazards |
+| Engineering fit | Clear modular split across systems | Tighter coupling between mechanics |
+| Team decision | Selected | Rejected |
 
-The Level class acts as the centre of the gameplay system. It contains the Map, Landmark, Economy, WaveManager, and the lists of towers and enemies. Because of this, it is responsible for updating the state of the level and checking whether the level has been completed.
+We selected Defend London because its system boundaries were clearer, making implementation and testing easier to coordinate across team roles.
 
-##### Map and Building
+---
 
-The Map class stores the enemy path and the available build slots. These build slots define where towers can be placed. The BuildController handles the tower placement process by checking whether a slot is valid and whether the player has enough resources to build a tower. This separates the map layout from the player’s building actions.
+#### 3) Core Systems Design
 
-##### Combat System
+### 🗼 Tower System
 
-Combat is mainly handled through the interaction between Tower and Enemy. Towers have attributes such as range, damage, and cooldown, which allow them to attack enemies within range. Enemies move along the predefined path, take damage from towers, and can damage the Landmark if they reach the end of the route.
+Tower values are defined in central config tables (`TOWER_TYPES`), which allows quick balancing updates without deep code edits.
 
-##### Waves and Enemy Creation
+| Tower | Cost | Damage | Range | Fire Rate | Special Ability |
+|---|---:|---:|---:|---:|---|
+| <img src="../game/assets/tower_basic.png" width="36"> **Basic Tower** | 60 | 15 | 150 | 55 | Balanced baseline damage |
+| <img src="../game/assets/tower_slow.png" width="36"> **Slow Tower** | 85 | 12 | 140 | 70 | Applies 45% slow for 100 frames |
+| <img src="../game/assets/tower_area.png" width="36"> **Area Tower** | 130 | 13 | 200 | 85 | Pulsing AoE damage in range |
+| <img src="../game/assets/tower3.png" width="36"> **Crystal Tower** | 120 | 15 | 160 | 150 | Boost aura: +25% damage, +10% fire rate |
+| <img src="../game/assets/tower_steam.png" width="36"> **Steam Cannon** | 180 | 55 | 220 | 200 | Piercing shots (up to 3 targets) |
+| <img src="../game/assets/tower_alchemist.png" width="36"> **Alchemist Tower** | 150 | 20 | 170 | 70 | Random potion effects (poison/freeze/weaken/explosion) |
 
-The WaveManager controls the spawning and progression of enemy waves during the level. It works together with the Wave class, which stores the number and type of enemies in each wave. The EnemyFactory is used to create enemy objects, helping separate enemy creation from wave control logic.
+> **Design Philosophy:** Towers are trade-offs, not strict upgrades. Players choose between reliable DPS, control, AoE, support synergy, and high-risk burst tools.
 
-##### Resources and Interface
+### 👾 Enemy System
 
-The Economy class manages resources such as gold and diamonds, including checking whether the player can afford certain actions and rewarding resources when needed. The UIHUD displays important gameplay information, such as current gold, landmark health, and wave information, helping the player understand the current state of the game.
+Enemy behavior is data-driven through `ENEMY_STATS`, and each level introduces abilities that specifically counter common player habits.
 
-#### Sequence Diagram
-![Sequence-Diagram](./images/sequence-diagram.png)
-The following sequence diagram illustrates how the main subsystems of the tower defense game interact during gameplay. It shows the main gameplay update process in Defend London during each frame of the game loop. It explains how the game updates the level, spawns enemies, processes movement and attacks, and checks whether the player has won or lost.
+<table>
+<tr>
+<th>Level 1: Fundamentals</th>
+<th>Level 2: Ability Pressure</th>
+<th>Level 3: Counter-Strategy</th>
+</tr>
+<tr>
+<td>
 
-##### Game and Level Update
+| Enemy | HP / SPD | Ability |
+|---|---|---|
+| <img src="../game/assets/enemy_guard.png" width="28"> Guard | 100 / 2.0 | None |
+| <img src="../game/assets/enemy_pigeon.png" width="28"> Pigeon | 60 / 3.0 | High speed |
+| <img src="../game/assets/enemy_hedgehog.png" width="28"> Hedgehog | 300 / 1.0 | High HP tank |
 
-The process begins when the Game class calls update(dt) on the Level class. This starts the update cycle for the current frame and allows the level to process all active gameplay elements.
+</td>
+<td>
 
-##### Enemy Spawning
+| Enemy | HP / SPD | Ability |
+|---|---|---|
+| <img src="../game/assets/monster1.png" width="28"> Knight | 180 / 1.6 | Charge at low HP |
+| <img src="../game/assets/monster2.png" width="28"> Archer | 90 / 2.2 | 25% dodge chance |
+| <img src="../game/assets/monster3.png" width="28"> Giant | 500 / 0.9 | Leap forward |
 
-The Level class first updates the WaveManager. If new enemies need to be spawned, the WaveManager calls the EnemyFactory to create enemies of the required type. These newly created enemies are then added to the list of active enemies in the level.
+</td>
+<td>
 
-##### Enemy Movement
+| Enemy | HP / SPD | Ability |
+|---|---|---|
+| <img src="../game/assets/goblin_bomber.png" width="28"> Goblin Bomber | 120 / 2.2 | Explosion disables towers |
+| <img src="../game/assets/diving_lizard.png" width="28"> Diving Lizard | 150 / 3.3 | Untargetable dive phase |
+| <img src="../game/assets/treant_mage.png" width="28"> Treant Mage | 200 / 1.2 | Area healing |
+| <img src="../game/assets/gentleman_bug.png" width="28"> Gentleman Bug | 2500 / 0.8 | Multi-phase boss |
 
-After spawning, the Level updates each enemy in the active enemy list. Each enemy moves along the path by running its update(dt, path) method. If an enemy reaches the end of the path, it damages the Landmark and is removed from the level.
+</td>
+</tr>
+</table>
 
-##### Tower Attacks
+> **Design Philosophy:** Enemies are tactical puzzles. The team designed abilities to force adaptation (target priority, spacing, timing), not just inflate numbers.
 
-Once enemy movement has been processed, the Level updates each tower. Each tower checks the current list of enemies and attacks when a target is within range. The attack causes damage to the enemy through the takeDamage(damage) method.
+### ⚔️ Combat Loop
 
-##### Enemy Removal and Rewards
+`WaveManager` spawns enemy groups, enemies advance along waypoints, towers target in-range enemies, and `Combat` resolves damage and status effects.  
+Economy then rewards kills and feeds back into placement decisions, creating the core strategic loop of plan -> react -> rebuild.
 
-If a tower attack kills an enemy, the Economy system rewards the player with gold using addGold(rewardGold). After this, the defeated enemy is removed from the active enemy list. This connects combat directly with the game’s resource system.
+---
 
-##### End Conditions
+#### 4) UML Diagrams
 
-At the end of the update cycle, the level checks whether the game should finish. If the Landmark has been destroyed, the Game ends the level with a lose result. If the level has been cleared, meaning all waves are completed and all enemies have been removed, the Game ends the level with a win result.
+### Class Diagram
+
+![Class Diagram](./images/class-diagram.png)
+
+<details>
+<summary>Key classes (concise)</summary>
+
+| Class | Responsibility |
+|---|---|
+| `GameManager` | Controls game state transitions and level lifecycle |
+| `Level` | Holds map, towers, enemies, economy, and wave state |
+| `Tower` | Performs targeting, attacks, and special effects |
+| `Enemy` | Handles path movement, HP, and per-type abilities |
+| `WaveManager` | Manages wave timing, spawning, and progression |
+| `UIHUD` | Renders gameplay feedback and player-facing panels |
+
+</details>
+
+### Sequence Diagram
+
+![Sequence Diagram](./images/sequence-diagram.png)
+
+<details>
+<summary>Main frame update flow</summary>
+
+1. `GameManager` calls `Level.update(dt)`  
+2. `WaveManager` checks timers and spawns enemies  
+3. `Enemy` objects update movement and abilities  
+4. `Tower` objects select targets and apply attacks/effects  
+5. Economy/UI update and win/lose conditions are evaluated
+
+</details>
+
+---
+
+#### 5) Key Design Decisions
+
+| Decision | Why it matters |
+|---|---|
+| **Centralized gameplay config (`TOWER_TYPES`, `ENEMY_STATS`)** | Enables rapid balancing with low regression risk |
+| **Modular subsystem boundaries** | Supports parallel development and cleaner debugging |
+| **Progressive enemy ability rollout by level** | Builds player learning curve while preserving challenge |
 
 ### Implementation
 
