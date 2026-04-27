@@ -67,76 +67,84 @@ Build towers, manage resources, and survive increasingly challenging waves acros
 We used a GitHub Kanban board to track requirement progress and development tasks:  
 https://github.com/orgs/UoB-COMSM0166/projects/168
 
-#### 1) Ideation Summary
+### Ideation: Why Tower Defense?
 
-Our team compared game genres using three criteria: uniqueness, strategic depth, and implementation clarity.
+At the early stage, our team evaluated multiple game genres based on three criteria: uniqueness compared to past projects, strategic depth for players, and clarity of implementation scope.
 
-| Genre | Pros | Cons | Decision |
-|---|---|---|---|
-| Action | High moment-to-moment excitement | Complex AI reactions and timing-heavy design | Rejected |
-| Puzzle | Strong potential for narrative depth | Story and hint design too time-consuming | Rejected |
-| Shooting | Familiar and easy to start | Overused by past groups | Rejected |
-| **Tower Defense** | Modular systems and strategic choice | No major blocking risk | **Selected** |
-
-**Why Tower Defense?**
-- Fewer past teams explored this genre, so it stayed distinctive.
-- Enemy behavior is rule-based and easier to validate.
-- Players can build personal strategies through tower combinations.
-
-#### 2) Stakeholders
-
-We identified stakeholders using an onion model:
-
-![Onion model](./images/onion_model.png)
-
-Primary stakeholders are players (casual and strategic), while secondary stakeholders include developers and designers maintaining and extending the game.
-
-#### 3) User Requirements
-
-![Use Case Diagram](./images/use_case.png)
-
-| Flow | Steps |
-|---|---|
-| Main | Start game -> Waves begin -> Select tower -> Place tower -> Defend landmark |
-| Alternative | Open settings -> Adjust BGM/volume |
-
-| Role | Story | Value |
+| Genre | Key Challenge | Decision |
 |---|---|---|
-| Casual Player | I want auto-collect resources. | I can focus on strategy instead of repetitive clicking. |
-| Strategic Player | I want to preview tower range before placement. | I can optimize layout without trial-and-error. |
-| Strategic Player | I want a next-wave preview. | I can prepare for enemy abilities in advance. |
+| Action | Complex real-time enemy AI | ❌ |
+| Puzzle | Time-consuming narrative design | ❌ |
+| Shooting | Overdone by past teams | ❌ |
+| **Tower Defense** | — | ✅ Selected |
 
-#### 4) Development Epics
+We chose tower defense because few past teams had explored this genre, enemy behavior is predictable and rule-based, and the modular structure supports both strategic player choice and clear team task division.
+
+---
+
+### Stakeholders
+
+We identified stakeholders using an onion model approach. The primary stakeholders are players, including casual players seeking relaxed play and strategic players looking for optimization depth. Secondary stakeholders include developers maintaining the codebase and designers balancing gameplay systems.
+
+<img src="./images/onion_model.png" alt="Onion Model" width="520">
+
+---
+
+### Use Case Diagram
+
+The Use Case Diagram captures system requirements from the player's perspective, with the player acting as the primary actor across the core game loop.
+
+<img src="./images/use_case.png" alt="Use Case Diagram" width="520">
+
+In the main flow, the player starts a session, enemy waves begin, and towers are selected and placed to defend the landmark. An alternative flow allows the player to open settings and adjust volume or background music.
+
+---
+
+### User Stories
+
+To keep development user-centered, we prioritized three core player stories:
+
+- **Casual Player:** "I want auto-collected resources so I can focus on strategy rather than clicking every dropped coin."
+- **Strategic Player:** "I want to see tower attack range before placing, so I can optimize my layout without memorizing every radius."
+- **Strategic Player:** "I want a next-wave preview showing upcoming enemy types, so I can prepare rather than be surprised."
+
+These stories guided feature prioritization and kept design decisions anchored to player experience.
+
+---
+
+### Development Epics
+
+We defined five core epics that map to the essential systems of Defend London:
 
 | Epic | Description | Key Acceptance Criteria |
 |---|---|---|
-| Enemy Wave System | Handles spawning, path traversal, and scaling difficulty. | 3+ enemy archetypes; enemies move from spawn to landmark via path. |
-| Tower System | Supports placement, targeting, and extension of tower types. | Place only on valid tiles; towers auto-target enemies in range. |
-| Game Interface | Provides real-time status and interaction controls. | HUD updates health/coins/waves; settings menu works during play. |
-| Audio System | Improves feedback and immersion through music and SFX. | Core action SFX implemented; players can select different BGM tracks. |
-| Map and Environment | Defines tactical map structure and visual identity. | Path/buildable areas clearly separated; themed environmental assets used. |
+| Enemy Wave System | Spawning, pathfinding, and difficulty scaling | 3+ enemy types; navigation from start to landmark |
+| Tower System | Building, upgrades, and modular tower types | Placement validation; automatic targeting in range |
+| Game Interface | Real-time HUD and in-game navigation | Live updates for health, coins, and wave number |
+| Audio System | Background music and gameplay sound effects | Distinct sounds for placement, damage, and enemy death |
+| Map & Environment | Grid logic and visual theming | Clear path/buildable separation across levels |
 
-#### 5) Brief Reflection
+---
 
-This phase showed us that epics express product-level value, while user stories convert that value into implementable tasks.  
-The "As a..., I want..., so that..." format kept us user-focused, and acceptance criteria aligned the team on what "done" means before coding.
+### Reflection
+
+This requirements phase taught us that epics represent product-level value, while user stories translate that value into actionable and testable tasks. The "As a... I want... so that..." format kept us focused on player outcomes, and clear acceptance criteria aligned the team on what counted as done before implementation.
 
 ### Design
 
-#### 1) Design Overview
+### Architecture Overview
 
-Defend London follows a modular architecture where each subsystem owns one responsibility and `GameManager` coordinates gameplay flow.
+Defend London follows a modular architecture where each subsystem handles one responsibility: towers handle targeting and attacks, enemies handle movement and abilities, and UI renders game state. `GameManager` coordinates these systems through frame updates and state transitions between menu, gameplay, and end states.
 
 ```mermaid
 flowchart TD
-    GM[GameManager<br/>state + level flow]
-    LV[Level System<br/>map, waves, entities]
-    EN[Enemy System<br/>movement + abilities]
-    TW[Tower System<br/>targeting + attacks]
-    CB[Combat System<br/>damage, effects, status]
-    EC[Economy System<br/>costs + rewards]
-    UI[UI/HUD System<br/>feedback + panels]
-
+    GM[GameManager]
+    LV[Level]
+    EN[Enemy System]
+    TW[Tower System]
+    CB[Combat System]
+    UI[UI/HUD]
+    EC[Economy]
     GM --> LV
     LV --> EN
     LV --> TW
@@ -145,14 +153,15 @@ flowchart TD
     CB --> EC
     LV --> UI
     EC --> UI
-    GM --> UI
 ```
+
+This separation lets team members work in parallel and makes debugging more efficient because issues can be isolated to a specific subsystem.
 
 ---
 
-#### 2) Paper Prototypes
+### Paper Prototypes
 
-Before implementation, we compared two paper prototypes to validate gameplay direction and teamwork fit.
+Before coding, we explored two concepts through paper prototyping to compare gameplay loops and team-fit complexity.
 
 <table>
 <tr>
@@ -167,73 +176,66 @@ Before implementation, we compared two paper prototypes to validate gameplay dir
 </tr>
 </table>
 
-| Aspect | Defend London | Double Steal |
-|---|---|---|
-| Genre | Tower Defense | Action Platformer |
-| Engineering fit | Clear modular split across systems | Tighter coupling between mechanics |
-| Team decision | Selected | Rejected |
+Prototype A focused on a tower defense loop where players place defenses and react to incoming waves. Prototype B focused on action-platform traversal across floors with timing-sensitive hazards.
 
-Defend London was selected because its system boundaries supported clearer ownership, testing, and integration.
+We selected Defend London because tower, enemy, wave, and UI boundaries mapped naturally to team responsibilities, reducing integration risk during development.
 
 ---
 
-#### 3) Core Systems Design
+### Core Systems Design
 
 ### 🗼 Tower System
 
-Tower balance is data-driven through `TOWER_TYPES`, so iteration can happen quickly while preserving behavior consistency.
+Tower behavior is defined in centralized config tables (`TOWER_TYPES`), allowing balance changes without modifying core loop logic.
 
 | Tower | Cost | Damage | Special Ability |
 |---|---:|---:|---|
-| <img src="../game/assets/tower_basic.png" width="34"> **Basic Tower** | 60 | 15 | Balanced baseline |
-| <img src="../game/assets/tower_slow.png" width="34"> **Slow Tower** | 85 | 12 | 45% slow effect |
-| <img src="../game/assets/tower_area.png" width="34"> **Area Tower** | 130 | 13 | Pulsing AoE damage |
-| <img src="../game/assets/tower3.png" width="34"> **Crystal Tower** | 120 | 15 | +25% nearby tower damage |
-| <img src="../game/assets/tower_steam.png" width="34"> **Steam Cannon** | 180 | 55 | Piercing up to 3 targets |
-| <img src="../game/assets/tower_alchemist.png" width="34"> **Alchemist Tower** | 150 | 20 | Random potion effects |
+| Basic Tower | 60 | 15 | Balanced baseline |
+| Frost Tower | 85 | 12 | 45% slow effect |
+| Area Tower | 130 | 13 | Pulsing AoE damage |
+| Crystal Tower | 120 | 15 | +25% damage boost to nearby towers |
+| Steam Cannon | 180 | 55 | Piercing shots (up to 3 targets) |
+| Alchemist Tower | 150 | 20 | Random potion effects |
 
-> **Design Philosophy:** Towers are trade-offs, not strict upgrades.
+The Crystal Tower highlights our trade-off philosophy: support value grows in coordinated layouts, so players must choose between direct damage and long-term synergy.
 
 ### 👾 Enemy System
 
-Enemy behavior is defined in `ENEMY_STATS`, with complexity increasing by level.
+Enemy behavior is data-driven through `ENEMY_STATS`, with level progression introducing new counters to common player strategies.
 
 | Level | Enemies | Key Abilities |
 |---|---|---|
-| 1: Basics | <img src="../game/assets/enemy_guard.png" width="22"> Guard, <img src="../game/assets/enemy_pigeon.png" width="22"> Pigeon, <img src="../game/assets/enemy_hedgehog.png" width="22"> Hedgehog | Speed and tank variation |
-| 2: Abilities | <img src="../game/assets/monster1.png" width="22"> Knight, <img src="../game/assets/monster2.png" width="22"> Archer, <img src="../game/assets/monster3.png" width="22"> Giant | Charge, dodge, leap |
-| 3: Counter-play | <img src="../game/assets/goblin_bomber.png" width="22"> Bomber, <img src="../game/assets/diving_lizard.png" width="22"> Lizard, <img src="../game/assets/treant_mage.png" width="22"> Mage, <img src="../game/assets/gentleman_bug.png" width="22"> Boss | Explosion, dive, heal, multi-phase |
+| Level 1 | Guard, Pigeon, Hedgehog | Basic speed/HP variation |
+| Level 2 | Knight, Archer, Giant | Charge, dodge, leap |
+| Level 3 | Bomber, Lizard, Mage, Boss | Explosion, dive, heal, multi-phase |
 
-> **Design Philosophy:** Enemies are puzzles that force adaptation, not simple stat inflation.
-
-### ⚔️ Combat Loop
-
-Each frame follows the same loop: `WaveManager` spawns enemies, enemies move, towers attack, and combat resolves status effects and damage.  
-Rewarded gold then feeds back into tower placement, creating a repeatable strategy cycle.
+Treant Mage forces target prioritization by healing nearby enemies, while Goblin Bomber punishes tower clustering by disabling nearby defenses on death. These patterns turn enemies into tactical puzzles rather than pure stat checks.
 
 ---
 
-#### 4) UML Diagrams
+### UML Diagrams
 
 ### Class Diagram
 
 ![Class Diagram](./images/class-diagram.png)
-`GameManager` controls state flow, `Level` aggregates active systems, and `Tower`/`Enemy` interactions drive combat updates.
+
+The class model shows how `Game`/`GameManager` orchestrates `Level`, while `Level` manages tower lists, enemy lists, and wave progression services. Combat behavior emerges from `Tower` and `Enemy` interactions, with configuration-driven variation for unit types.
 
 ### Sequence Diagram
 
 ![Sequence Diagram](./images/sequence-diagram.png)
-The runtime loop is frame-based: update level, spawn enemies, move enemies, execute tower attacks, then evaluate economy/UI and win-lose conditions.
+
+Each frame follows the same sequence: update level state, process wave spawning, update enemy movement, run tower targeting/attacks, resolve effects, then refresh UI and evaluate win/lose conditions. This keeps combat behavior deterministic and easier to test.
 
 ---
 
-#### 5) Key Design Decisions
+### Key Design Decisions
 
-| Decision | Why it matters |
-|---|---|
-| **Centralized gameplay config (`TOWER_TYPES`, `ENEMY_STATS`)** | Enables rapid balancing with low regression risk |
-| **Modular subsystem boundaries** | Supports parallel development and cleaner debugging |
-| **Progressive enemy ability rollout by level** | Builds player learning curve while preserving challenge |
+**Centralized Configuration Tables.** Tower and enemy parameters are stored in dedicated config objects, which enables fast balancing without changing core update logic. This reduces regression risk during playtest-driven iteration.
+
+**Modular Subsystem Boundaries.** Towers, enemies, waves, economy, and UI are separated into focused modules with clear interfaces. This supports parallel development and keeps debugging localized.
+
+**Progressive Ability Introduction.** Enemy complexity increases across levels rather than being front-loaded. This pacing improves onboarding while preserving challenge in later stages.
 
 ### Implementation
 
