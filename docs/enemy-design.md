@@ -4,18 +4,18 @@ This document summarizes enemy differentiation in **Defend London**.
 
 ## Enemy Design Matrix
 
-| Enemy (Image + Name) | Role | Core Stats (HP / Speed) | Skill Mechanics (Trigger) | Gameplay Pressure |
+| Enemy (Image + Name) | Role | HP / SPD | Skill (Trigger) | Pressure |
 |---|---|---|---|---|
-| ![Guard](../game/assets/enemy_guard.png)<br>**Guard** (`basic`) | Standard unit | 100 / 2.0 | No special skill | Establishes baseline pacing and economy loop |
-| ![Pigeon](../game/assets/enemy_pigeon.png)<br>**Pigeon** (`fast`) | Speed runner | 60 / 3.0 | No active skill (high base speed) | Punishes weak coverage and reaction delay |
-| ![Hedgehog](../game/assets/enemy_hedgehog.png)<br>**Hedgehog** (`tank`) | Frontline tank | 300 / 1.0 | No active skill (high HP) | Absorbs damage and stalls defense lines |
-| ![Knight](../game/assets/monster1.png)<br>**Knight** (`knight`) | Mid-game pressure unit | 180 / 1.6 | **Charge**: at HP <= 40%, gains 2.5x speed for 120 frames | Breaks timing expectations with sudden rush |
-| ![Archer](../game/assets/monster2.png)<br>**Archer** (`archer`) | Evasive harasser | 90 / 2.2 | **Dodge**: 25% chance to evade incoming damage | Reduces consistency of single-target burst |
-| ![Giant](../game/assets/monster3.png)<br>**Giant** (`giant`) | Heavy siege unit | 500 / 0.9 | **Leap**: every 300 frames, jumps forward along path | Skips part of kill zone time and disrupts focus fire |
-| ![Goblin Bomber](../game/assets/goblin_bomber.png)<br>**Goblin Bomber** (`goblinBomber`) | Disruption specialist | 120 / 2.2 | **Explode on death**: disables towers within radius for 180 frames | Forces spacing and recovery planning |
-| ![Diving Lizard](../game/assets/diving_lizard.png)<br>**Diving Lizard** (`divingLizard`) | Infiltration threat | 150 / 3.3 | **Dive cycle** (after HP < 80%): becomes untargetable/undamageable during dive windows | Creates damage downtime and leak risk |
-| ![Treant Mage](../game/assets/treant_mage.png)<br>**Treant Mage** (`treantMage`) | Support healer | 200 / 1.2 | **Heal pulse**: every 180 frames, heals nearby enemies for 5% max HP | Extends wave endurance and amplifies group value |
-| ![Gentleman Bug](../game/assets/gentleman_bug.png)<br>**Gentleman Bug** (`gentlemanBug`) | Multi-phase boss | 2500 / 0.8 | **Boss kit**: Phase 2 (<= 60% HP) gains 50% damage reduction; Phase 3 (<= 30% HP) enrages (2x speed) and becomes slow-immune; periodically summons minions and applies global taunt debuff to towers | Tests sustained DPS, control resilience, and adaptation under stacked mechanics |
+| <img src="../game/assets/enemy_guard.png" alt="Guard" width="56"><br><strong>Guard</strong><br><sub>`basic`</sub> | Standard | 100 / 2.0 | None | Baseline pacing |
+| <img src="../game/assets/enemy_pigeon.png" alt="Pigeon" width="56"><br><strong>Pigeon</strong><br><sub>`fast`</sub> | Speed runner | 60 / 3.0 | None (high speed) | Leak pressure |
+| <img src="../game/assets/enemy_hedgehog.png" alt="Hedgehog" width="56"><br><strong>Hedgehog</strong><br><sub>`tank`</sub> | Tank | 300 / 1.0 | None (high HP) | Frontline soak |
+| <img src="../game/assets/monster1.png" alt="Knight" width="56"><br><strong>Knight</strong><br><sub>`knight`</sub> | Mid-game diver | 180 / 1.6 | **Charge** at <=40% HP, 2.5x speed, 120f | Sudden rush timing |
+| <img src="../game/assets/monster2.png" alt="Archer" width="56"><br><strong>Archer</strong><br><sub>`archer`</sub> | Evasive | 90 / 2.2 | **Dodge** 25% hit evade | Burst inconsistency |
+| <img src="../game/assets/monster3.png" alt="Giant" width="56"><br><strong>Giant</strong><br><sub>`giant`</sub> | Heavy siege | 500 / 0.9 | **Leap** every 300f | Skip kill-zone time |
+| <img src="../game/assets/goblin_bomber.png" alt="Goblin Bomber" width="56"><br><strong>Goblin Bomber</strong><br><sub>`goblinBomber`</sub> | Disruptor | 120 / 2.2 | **Death explode**: disable towers 180f | Spacing tax |
+| <img src="../game/assets/diving_lizard.png" alt="Diving Lizard" width="56"><br><strong>Diving Lizard</strong><br><sub>`divingLizard`</sub> | Infiltrator | 150 / 3.3 | **Dive** after <80% HP (untargetable window) | DPS downtime |
+| <img src="../game/assets/treant_mage.png" alt="Treant Mage" width="56"><br><strong>Treant Mage</strong><br><sub>`treantMage`</sub> | Support | 200 / 1.2 | **Heal pulse**: 5% max HP in 200 radius every 180f | Extends wave life |
+| <img src="../game/assets/gentleman_bug.png" alt="Gentleman Bug" width="56"><br><strong>Gentleman Bug</strong><br><sub>`gentlemanBug`</sub> | Boss | 2500 / 0.8 | **P2** 50% DR (<=60% HP), **P3** 2x speed + slow immune (<=30%), summon + taunt wave | Multi-system stress |
 
 ## Design Intent
 

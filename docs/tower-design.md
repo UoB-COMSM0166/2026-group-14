@@ -4,14 +4,14 @@ This document summarizes tower functionality and tactical roles in **Defend Lond
 
 ## Tower Design Matrix
 
-| Tower (Image + Name) | Cost | Range | Damage | Fire Rate (frames/shot) | Core Function | Best Use Cases |
+| Tower (Image + Name) | Cost | Range | DMG | FR (f/shot) | Core Function | Best Use |
 |---|---:|---:|---:|---:|---|---|
-| ![Basic Tower](../game/assets/tower_basic.png)<br>**Basic Tower** (`basic`) | 60 | 150 | 15 | 55 | Reliable all-round single-target DPS | Early setup, flexible filler, stable lane coverage |
-| ![Slow Tower](../game/assets/tower_slow.png)<br>**Slow Tower** (`slow`) | 85 | 140 | 12 | 70 | Applies slow on hit (`slowEffect = 0.45`, `duration = 100`) | Containing fast units and enabling kill-zone uptime |
-| ![Area Tower](../game/assets/tower_area_fire.png)<br>**Area Tower** (`area`) | 130 | 200 | 13 | 85 | Pulse-based AoE damage to all enemies in range | Dense waves, summon swarms, mid-late crowd control |
-| ![Crystal Tower](../game/assets/tower3.png)<br>**Crystal Tower** (`crystal`) | 120 | 160 | 15 | 150 | Aura support: buffs nearby towers (damage + fire-rate, capped) | Building high-value tower clusters and anchor zones |
-| ![Steam Cannon](../game/assets/tower_steam.png)<br>**Steam Cannon** (`steam`) | 180 | 220 | 55 | 200 | Piercing impact (up to 3 targets) + charge stacking on repeated focus | Breaking tank lines and punishing grouped enemies |
-| ![Alchemist Tower](../game/assets/tower_alchemist.png)<br>**Alchemist Tower** (`alchemist`) | 150 | 170 | 20 | 70 | Random potion effects: explosion, poison, freeze, weaken | Mixed waves, utility pressure, boss prep and control |
+| <img src="../game/assets/tower_basic.png" alt="Basic Tower" width="56"><br><strong>Basic Tower</strong><br><sub>`basic`</sub> | 60 | 150 | 15 | 55 | Reliable single-target DPS | Early core coverage |
+| <img src="../game/assets/tower_slow.png" alt="Slow Tower" width="56"><br><strong>Slow Tower</strong><br><sub>`slow`</sub> | 85 | 140 | 12 | 70 | On-hit slow (`0.45`, 100f) | Catch fast lanes |
+| <img src="../game/assets/tower_area_fire.png" alt="Area Tower" width="56"><br><strong>Area Tower</strong><br><sub>`area`</sub> | 130 | 200 | 13 | 85 | Pulse AoE in range | Dense wave clear |
+| <img src="../game/assets/tower3.png" alt="Crystal Tower" width="56"><br><strong>Crystal Tower</strong><br><sub>`crystal`</sub> | 120 | 160 | 15 | 150 | Aura buff (damage + fire-rate, capped) | Build tower clusters |
+| <img src="../game/assets/tower_steam.png" alt="Steam Cannon" width="56"><br><strong>Steam Cannon</strong><br><sub>`steam`</sub> | 180 | 220 | 55 | 200 | Pierce (up to 3) + charge stacks | Break tank packs |
+| <img src="../game/assets/tower_alchemist.png" alt="Alchemist Tower" width="56"><br><strong>Alchemist Tower</strong><br><sub>`alchemist`</sub> | 150 | 170 | 20 | 70 | Random potion effects (explode/poison/freeze/weaken) | Mixed-wave control |
 
 ## Design Intent
 
