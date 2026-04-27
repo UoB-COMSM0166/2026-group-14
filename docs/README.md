@@ -295,7 +295,7 @@ Each frame: the game calls `update()` → wave manager spawns enemies → enemie
 
 #### Development timeline
 
-Our development followed a **12-week** iterative process in **four** phases. Each stage below is **outcome-oriented**: what we set out to do, and what we delivered.
+Our development followed a **12-week** iterative process in **four** phases.
 
 ---
 
@@ -313,10 +313,10 @@ Our development followed a **12-week** iterative process in **four** phases. Eac
 **Focus:** Core architecture and basic systems
 
 **Deliverables**
-- **Game loop** and **state hand-offs** through `GameManager`
-- **Grid-based map** with per-cell types (`TILE_TYPES` in `MapData.js`); default **30×30 px** logical cells (`constants.js`)
-- **Basic tower placement** and projectiles; enemies follow a **waypoint path**
-- **Placeholder HUD** to prove the loop end-to-end
+- **Game loop** and **state management** (`GameManager` + `GameState`)
+- **Grid-based map** with per-cell types (`MapData.js`); **configurable** cell size via `LEVEL_GRID_CONFIG` (default **30×30 px** in `constants.js`)
+- **Basic tower placement** and projectiles
+- **Enemy pathfinding** along **waypoint** lists in `Path.js`
 
 </td>
 </tr>
@@ -335,13 +335,13 @@ Our development followed a **12-week** iterative process in **four** phases. Eac
 </td>
 <td width="60%">
 
-**Focus:** Feature development and system variety
+**Focus:** Feature development and variety
 
 **Deliverables**
-- **Six tower types** with distinct roles (support, AoE, piercing, potions, etc.), driven by `TOWER_TYPES`
-- **Wave pipeline** and **economy** (gold, sell, upgrade hooks)
-- **Path / map debug tooling** (e.g. path export to `Path.js`, map paint mode) to speed level integration
-- **Audio** wired through a central sound path for BGM and SFX
+- **Six tower types** with distinct abilities (`TOWER_TYPES` in `constants.js`)
+- **Ten enemy types** with varied stats and behaviours (`ENEMY_STATS`)
+- **Wave management** (`WaveManager` + `LEVEL_*_WAVE_CONFIGS`)
+- **Economy**: gold, **wave clear bonus** (`WAVE_CLEAR_BONUS_GOLD`), selling and refunds
 
 </td>
 </tr>
@@ -360,13 +360,13 @@ Our development followed a **12-week** iterative process in **four** phases. Eac
 </td>
 <td width="60%">
 
-**Focus:** Content depth and balance
+**Focus:** Content expansion and balancing
 
 **Deliverables**
-- **Three London-themed levels** with hand-drawn maps and tuned paths
-- **Ten enemy types** and a **multi-phase boss** (Gentleman Bug) using shared behaviour building blocks
-- **Enemy abilities** (e.g. charge, dodge, dive, heal, explode) tuned via **`ENEMY_STATS`**
-- **Monster info** panel and repeated **playtest → config** iteration
+- **Three London-themed levels** with hand-drawn backgrounds
+- **Multi-phase boss** (Gentleman Bug) and abilities such as **charge**, **dodge**, **dive**, **heal**, **explode**
+- **Balance tuning** using **spreadsheet-style reasoning** and **in-game configs** (not a single runtime formula)
+- **Heuristic models** (e.g. **player firepower** vs **enemy pressure**) to compare waves before playtesting
 
 </td>
 </tr>
@@ -385,12 +385,13 @@ Our development followed a **12-week** iterative process in **four** phases. Eac
 </td>
 <td width="60%">
 
-**Focus:** Testing, onboarding, and UX
+**Focus:** Testing and refinement
 
 **Deliverables**
-- **Eight-step interactive tutorial** (`TUTORIAL_STEPS` in `constants.js`, driven by `GameManager` + `UIHUD`)
-- **Settings** (e.g. volume, brightness) and **win/loss** flow with clear feedback
-- **Bug fixes** from heuristic review and playtests; **performance** pass on the per-frame `update()` chain
+- **Debug tools** for **grid / path alignment** (overlay, path editor, console export — see Technical challenges)
+- **Settings** (volume, brightness, BGM selection) and consistent **menu vs in-game** flows where possible
+- **Win / loss** screens with clear feedback
+- **Bug fixes** from playtesting and heuristic review
 
 </td>
 </tr>
@@ -398,22 +399,44 @@ Our development followed a **12-week** iterative process in **four** phases. Eac
 
 ---
 
-#### Technical highlights
+#### Technical highlight: state management
 
-##### Grid system and tile mapping
+Switching between **menu**, **level select**, **playing**, **paused**, **win**, **lose**, and other modes risks **orphaned UI** or **input handlers** if every screen is bolted on ad hoc.
 
-The world is divided into a **logical grid**: each cell has a **type** (grass / path / obstacle) that governs **building** and **enemy movement**. `LEVEL_GRID_CONFIG` stores **per-level offsets and cell size** so the grid lines up with painted backgrounds.
-
-| Tile / role | Function | Typical look |
-|-------------|----------|--------------|
-| **Grass** | **Build** towers (where rules allow) | Park / open ground |
-| **Path** | Enemy **route** | Road |
-| **Obstacle** | **Blocks** build and walk | Trees, walls, off-map |
-
-A **debug overlay** (**D** in-game) shows **tile colours and coordinates**; **path edit mode** (**N**) lets us **place waypoints** and **export** arrays for `getLevel…Waypoints()` in `Path.js`—the screenshot below is **Level 3 (Buckingham Palace)** with grid, path, and **console export**.
+We centralised transitions in **`GameManager.setState`**, backed by a single **`GameState`** string enum in `constants.js` (the code does **not** use a separate class named `GameStateManager`; the **manager** role lives in **`GameManager`**).
 
 ```javascript
-// Per-level grid alignment (excerpt from constants.js)
+const GameState = {
+  MENU: 'menu',
+  PLAYING: 'playing',
+  PAUSED: 'paused',
+  WIN: 'win',
+  LOSE: 'lose',
+};
+```
+
+The full enum also includes **`LOGIN`**, **`LEVEL_SELECT`**, **`SETTINGS`**, **`IN_GAME_SETTINGS`**, **`MONSTER_INFO`**, and **`INSTRUCTIONS`**. Each transition runs through the same **dispatch** so **draw** and **keyboard** logic stay aligned with the **current** state.
+
+| State (core loop) | On entry (concept) | On exit (concept) |
+|-------------------|--------------------|-------------------|
+| **MENU** | Show main menu; accept navigation to settings / level flow | Hand off before loading a level |
+| **PLAYING** | Spawn **economy**, **waves**, **map**; run per-frame **update** | Pause or tear down level objects when leaving |
+| **PAUSED** | Freeze gameplay **update**; show pause UI | Resume **PLAYING** branch |
+| **WIN** / **LOSE** | Show outcome UI; record stats if needed | Return to **menu** or **retry** without leaking level state |
+
+**Result.** Playtests and heuristic sessions did **not** surface crashes from **rapid menu ↔ play ↔ pause ↔ end-screen** navigation; state stayed **predictable** for testers.
+
+---
+
+#### Technical challenges
+
+##### Challenge 1: Debug grid system
+
+**Problem.** **Hand-drawn** backgrounds did not always match the **logical grid**: towers could look “off” the art, or **pathing** could disagree with the painted road unless **offsets** and **cell size** were tuned.
+
+**Solution.** We added **developer overlays**: **`D`** toggles **`drawDebugGrid()`** in `GameManager.js` (green tint = **tower-buildable** in the current view, red tint = **not buildable**; cell indices drawn for alignment). **`LEVEL_GRID_CONFIG`** holds **`offsetX`**, **`offsetY`**, and **`gridSize`** per level. **`N`** toggles **path edit mode** with **waypoint** placement and **console export** for `Path.js` (see `./images/dev/grid-debug.png`).
+
+```javascript
 const LEVEL_GRID_CONFIG = {
   1: { offsetX: 0, offsetY: -15, gridSize: 30 },
   2: { offsetX: 0, offsetY: 0, gridSize: 30 },
@@ -421,213 +444,126 @@ const LEVEL_GRID_CONFIG = {
 };
 ```
 
-![Path editor: grid overlay, waypoints, and devtools export for Path.js](./images/dev/grid-debug.png)
-*Path edit on Level 3: numbered route, build grid, and copied waypoint list for `Path.js`.*
+| Debug overlay (D key) | Colour (approx.) | Role |
+|-----------------------|------------------|------|
+| **Buildable** | Green (transparent) | Cells where **towers** may be placed |
+| **Non-buildable** | Red tint | **Path**, **obstacle**, HUD band, or other blocked cells |
 
-##### Interactive tutorial system
+**Result.** **Alignment** and **path export** became **fast iteration** loops instead of pixel-guessing; remaining issues were caught **before** final release builds.
 
-New players are **paused** in-game while an **8-step** walkthrough **spotlights** one UI area at a time (darkened backdrop + `highlightArea` windows).
+##### Challenge 2: Balance formula
 
-| Step | Highlight / area | Lesson |
-|------|------------------|--------|
-| 1 | Welcome dialog | **Tower defense** — how the session is structured |
-| 2 | **Landmark** | **Objective** — keep the landmark alive |
-| 3 | **Path** | **Enemy route** — they follow the road to the landmark |
-| 4 | **Tower panel** | **Selection** — choose a tower type and cost |
-| 5 | **Buildable grass** | **Placement** — click **green** cells to build |
-| 6 | **Gold** | **Economy** — spend and earn from kills |
-| 7 | **Lives (HUD)** | **Failure** — **lives** reach **0** → **game over** |
-| 8 | Ready / dismiss | **Play** — apply what you learned |
+**Problem.** Early playtests swung between **too much gold** (trivial waves) and **over-tuned enemies** (unfair spikes). **Pure gut-feel** tuning was slow and **hard to justify** in team review.
 
-A dark **overlay** keeps **attention** on the **current** step. In-game, the tutorial uses **Level 1**; the figure below shows that **play space** in context.
+**Solution.** We combined **(A)** **authoritative tables in code** — `TOWER_TYPES`, `ENEMY_STATS`, `LEVEL_*_WAVE_CONFIGS`, per-kill **`reward`**, and **`WAVE_CLEAR_BONUS_GOLD`** (`constants.js` / `GameManager.js`) — with **(B)** simple **design-time formulas** to reason about scaling. The expressions below are **heuristic models** used **alongside** playtesting; **tower prices** in the shipped game are **fixed per type** in `TOWER_TYPES`, not generated by the tier line at runtime.
 
-![Level 1 — where the guided tutorial runs](./images/dev/tutorial.png)
-*Level 1 (Big Ben): the tutorial runs on this map.*
-
----
-
-#### Technical challenges
-
-##### Challenge 1: Game state management
-
-**Problem.** Many **screens** (menu, login, level select, **playing**, paused, settings, win, lose, monster info) need **clean transitions** without **leaving listeners** or **half-initialised** subsystems.
-
-**Solution.** A single **`GameState` enum** and a **`setState` path** in `GameManager` so each transition runs the right **draw** / **input** branch. States are **strings** for easy logging and `switch` dispatch.
-
-```javascript
-const GameState = {
-  MENU: 'menu',
-  LOGIN: 'login',
-  LEVEL_SELECT: 'level_select',
-  PLAYING: 'playing',
-  PAUSED: 'paused',
-  WIN: 'win',
-  LOSE: 'lose',
-  // … settings, in-game settings, monster info, instructions
-};
+```text
+Cost ≈ BaseCost × (1 + 0.15 × TowerTier)          // design-time only
+HP ≈ BaseHP × (1 + 0.2 × WaveNumber) × L_mult     // design-time only
+Reward ≈ EnemyHP × 0.1 + BaseReward                 // design-time only
 ```
 
-**Result.** In **heuristic and playtest** runs we saw **no crashes** from **menu ↔ play ↔ end-screen** navigation; **pause** and **resume** stay **safe** for fast toggling.
+**Principle (team rule of thumb):** after clearing a wave, income from **kills + wave bonus** should usually allow **roughly a few** new **mid-tier** placements if the player defends well — tight enough to force choices, not a gold flood.
 
-##### Challenge 2: Enemy ability system
+| Parameter | Level 1 | Level 2 | Level 3 | Source in code |
+|-----------|--------:|--------:|--------:|----------------|
+| **Starting gold** | **300** | **550** | **600** | `INITIAL_GOLD` (300) + per-level offsets in `GameManager` **level configs** (+0 / +250 / +300) |
+| **Wave count** | **3** | **6** | **6** | Length of `LEVEL_1_WAVE_CONFIGS` … `LEVEL_3_WAVE_CONFIGS` in `constants.js` |
 
-**Problem.** **Ten** enemy **archetypes** and **active abilities** risked **giant if-chains** and **copy-paste** stat edits.
+We did **not** encode a literal **`LevelMultiplier` column** (e.g. 1.0 / 1.3 / 1.6) as a single constant table; difficulty scales through **wave composition**, **HP/count** in configs, and **starting gold** above. If you reuse the **1.0 / 1.3 / 1.6** idea in coursework, treat it as a **student model** and check it against these **implemented** numbers.
 
-**Solution.** **Data-first** design: **stats and behaviour** live in **`ENEMY_STATS`**, with **shared** logic for movement, skills, and boss **phases**. Tuning is mostly **table edits** plus **localised** code paths.
-
-| Ability (examples) | Trigger (concept) | Player-facing effect |
-|--------------------|-------------------|----------------------|
-| **Charge** | Low health | **Speed** surge |
-| **Dodge** | On hit | **Chance** to ignore a hit |
-| **Dive** | Timed | Short **untargetable** window |
-| **Heal** (aura) | While alive | Allies **regen** in range |
-| **Explode** | On death | **Tower** disable or **AoE** damage |
-
-**Result.** New or adjusted enemies mostly require **config** and **asset** hooks; the **Gentleman Bug** **boss** **phases** re-use the same **pattern** instead of a **one-off** spaghetti file.
+**Result.** Feedback shifted from vague “**too easy / hard**” to **which wave** and **which enemy group** to change — a sign that **economy and pressure** were understandable and **tunable**.
 
 ### Evaluation
 
-- 15% ~750 words
+#### Evaluation design
 
-After developing a deliverable prototype of the game, it was important to evaluate its functionality and playability in order to identify potential flaws at an early stage. To assess the overall quality of the game and develop a comprehensive vision for future improvements, we used both quantitative and qualitative testing methods.
+We ran a **mixed-methods** evaluation: **qualitative** discovery (think-aloud and heuristic review), then **quantitative** comparison of perceived **workload** and **usability** under two in-game conditions.
 
-#### Qualitative evaluation
-For the Qualitative evaluation, we first explored potential issues through a Think Aloud study conducted with two participants from another project group. The main objective of this method was to have the users’ first gameplay experience. Through this process, we aimed to gain a fundamental understanding of the game’s quality and identify early indicators for future improvements.
+**Quantitative user study (within-subject, *n* = 10).** Each participant played **two sessions** in **randomised order**:
 
-#### Think Aloud Evaluation 1: 15/03/2026
-- **Positive**: The game interface is visually appealing and clean, allowing players to quickly understand how to operate the game. The rules are simple and clear, making the game easy to learn and play.
-- **Negative**: Some monsters’ UI occasionally disappears, making them difficult to see.
+| Condition | Map | Role in analysis |
+|-----------|-----|------------------|
+| **Simple mode** | **Level 1** (Big Ben) | Low difficulty baseline |
+| **Hard mode** | **Level 3** (Buckingham Palace) | High difficulty stress test |
 
-#### Think Aloud Evaluation 2: 15/03/2026
-- **Positive**: The game provides effective interactive feedback. The click sounds are clear, and there are appropriate sound effects for events such as monster deaths, tower placement, and losing HP. When a tower is placed in an invalid location, the game immediately provides a warning.
-- **Negative**: The font size for monster and tower information is a bit small, which affects readability.The game lacks flexibility, as the music volume and brightness cannot be adjusted.
+After **each** session, participants completed:
 
-The feedback mainly focused on the UI design and scalability of the game. To further investigate these issues in a more systematic and detailed manner, we applied a heuristic evaluation method. This approach allows evaluators to assess the game based on established usability principles from different perspectives.
+- **NASA-TLX** (weighted): Mental, Physical, and Temporal demand, Performance, Effort, Frustration — then **pairwise weights** per participant before computing an **overall workload** score.
+- **SUS** (10 items): perceived usability on a **0–100** scale; industry **benchmark = 68**.
 
-The heuristic evaluation was conducted by the team members, as this method requires a deeper understanding of the game’s design and underlying technical implementation in order to identify issues more precisely. After analysing the results from the Think Aloud evaluation and conducting additional testing, we developed the following Heuristic Evaluation Table.
+**Environment:** Chrome, Edge, Firefox (current versions); **p5.js** game; desktop **Windows / macOS**. We also logged **task completion**, obvious **interaction errors**, and **frame behaviour** during heavy waves (see Software testing).
 
-#### Heuristic Evaluation
-| Category | Issue | Heuristic | Frequency | Impact | Persistence | Severity |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Enemy** | diving enemies could still be targeted while they were underwater | Error prevention | 3 | 2 | 2 | 2.33 |
-| **Enemy** | Missing information on monster waves | Help and documentation | 2 | 2 | 3 | 2.33 |
-| **Tower** | lack of detailed stats and functional explanations for towers| Recognition rather than recall | 2 | 2 | 1 | 1.67 |
-| **Game** | No options to adjust volume, brightness, or select different background music (BGM). | User control and freedom | 3 | 4 | 3 | 3.33 |
-| **Settings** |The settings UI on the main menu does not scale properly to screen size  | Consistency and standards | 3 | 2 | 2 | 2.33 |
-| **Settings** |The settings menu UI is inconsistent between the main menu and the in-game interface.| Consistency and standards| 1 | 2 | 3 | 2 |
-| **Enemy** | Visual bug where certain monster images occasionally fail to render. | Consistency and standards | 3 | 2 | 1 | 2 |
-| **Menu** | Font size is too small, making it difficult to read game information comfortably. | UAesthetic and minimalist design | 2 | 3 | 2 | 2.33 |
+**Qualitative (supporting).** Two **think-aloud** sessions (external participants) plus a **team heuristic** pass informed issue lists and UI priorities; details align with the severity table we used during iteration (see earlier report drafts in [`docs/weekly_progress/week9_evaluation_quality_and_testing/week9_evaluation_quality_and_testing.md`](./weekly_progress/week9_evaluation_quality_and_testing/week9_evaluation_quality_and_testing.md)).
 
-#### Development Focus
-Based on the results, our next development focus will be concentrated on the following aspects:
-- Fixing critical bugs to prevent game crashes and ensure stable gameplay
-- Improving UI readability and ensuring consistent rendering across different devices
-- Enhancing game flexibility by adding more background music options and a volume control system
-- Providing clear and accessible information about game mechanics
+**Figure set (recommended for the report).** Use **three** charts under `./images/eval/`: **(1)** NASA-TLX aggregate, **(2)** SUS aggregate (benchmark line), **(3)** SUS **per-user** (shows every participant vs **68** and makes the **paired** pattern obvious). Weight heatmaps for TLX live in [`docs/weekly_progress/week8_quantitative_evaluations/TLX_evaluations.md`](./weekly_progress/week8_quantitative_evaluations/TLX_evaluations.md) if you need supplementary material.
 
-#### Quantitative evaluation
+---
 
-For quantitative evaluation, we used the NASA-TLX method together with a structured test plan documented in a dedicated Tower Defense Game Test Document. The test document provided a systematic basis for evaluating the game’s functional behaviour and the players’ perceived workload.
+#### User testing: NASA-TLX
 
-The Tower Defense Game Test Document began with an overview of purpose and scope, stating that it is used to systematically test the tower defense game developed with p5.js and verify whether functions, combat logic, UI interaction, boundary performance, and compatibility meet expected design requirements.
+![Aggregate NASA-TLX workload: Simple vs Hard mode](./images/eval/nasa-tlx-aggregate.png)
+*Aggregate NASA-TLX (weighted) workload. Source charts: [`NASA_TLX_Final_Comparison.png`](./weekly_progress/week8_quantitative_evaluations/NASA_TLX_Final_Comparison.png).*
 
-The quantitative evaluation was executed in a controlled environment:
+| Condition | Mean workload | Interpretation |
+|-----------|---------------|----------------|
+| **Simple (Level 1)** | **31.3** | Low–moderate cognitive load |
+| **Hard (Level 3)** | **71.3** | High load — strategy and time pressure dominate |
 
-- Browsers: Chrome, Edge, Firefox (latest versions)
-- Framework: p5.js
-- Devices: PC (Windows/macOS, standard screen resolution)
-- Tools: browser developer tools for checking localStorage, frame rate, and error logs
+Moving from **Simple** to **Hard** roughly **more than doubles** perceived workload (about **+128%** on the aggregate score), matching the design goal that **Level 3** should feel **taxing** rather than “more of the same UI friction.” A **Wilcoxon signed-rank** test on paired scores gave **W = 0**, **p < 0.05** (every participant ranked **Hard** heavier than **Simple**), reported in [`TLX_evaluations.md`](./weekly_progress/week8_quantitative_evaluations/TLX_evaluations.md).
 
-The test process included 24 specific cases across five core modules: Functional Testing, Combat & Balancing Testing, UI & UX Testing, Boundary & Robustness Testing, and Compatibility & Performance Testing.
+---
 
-The test module summary is shown below:
+#### User testing: SUS
 
-| Test Module | Number of Cases | Focus Area |
-| --- | --- | --- |
-| Functional Testing | 6 | Core gameplay interactions and build mechanics |
-| Combat & Balancing Testing | 6 | Tower-enemy interaction, targeting logic, and balance |
-| UI & UX Testing | 6 | Menu flow, settings controls, save/load, and interface feedback |
-| Boundary & Robustness Testing | 4 | Stability under edge cases, click handling, and game over logic |
-| Compatibility & Performance Testing | 2 | Browser compatibility and high-load frame rate behaviour |
+![Aggregate SUS: Simple vs Hard vs benchmark 68](./images/eval/sus-aggregate.png)
+*Aggregate SUS. Source: [`SUS_Final_Comparison.png`](./weekly_progress/week8_quantitative_evaluations/SUS_Final_Comparison.png).*
 
-Key quantitative methods were:
+| Condition | Mean SUS | Adjective rating (Bangor) |
+|-----------|----------|-----------------------------|
+| **Simple (Level 1)** | **88.0** | Excellent (“A”) |
+| **Hard (Level 3)** | **74.3** | Good (“B”) |
+| **Industry benchmark** | **68** | Acceptable threshold |
 
-- **NASA-TLX**: players completed the NASA Task Load Index questionnaire after each play session to quantify cognitive workload, effort, frustration, and overall task difficulty.
-- **Task Completion Rate**: recording whether key tasks such as tower placement, wave progression, and level completion were successful.
-- **Error Rate**: logging incorrect behaviours such as invalid placement, blocked actions, save/load failures, and unintended game responses.
-- **Performance Testing**: observing frame rate stability and browser compatibility during late high-pressure waves.
+Both conditions sit **above 68**, so players judged the **interface** usable even when the **game** was hard. The **~13.7** point drop from **Simple** to **Hard** reflects **challenge**, not broken menus — consistent with the narrative in [`SUS_evaluations.md`](./weekly_progress/week8_quantitative_evaluations/SUS_evaluations.md).
 
-The NASA-TLX evaluation involved 10 players, including 5 with prior tower defense experience and 5 without. The average scores for each dimension are shown below:
+![SUS per user: all 10 participants vs benchmark](./images/eval/sus-per-user.png)
+*Per-participant SUS: **every** user stayed **above 68** in **both** conditions, and **every** user rated **Simple** higher than **Hard** — strong evidence of **consistent** measurement rather than one outlier driving the mean.*
 
-| Evaluation Dimension | Overall Average Score | Load Level |
-| --- | --- | --- |
-| Mental Demand | 40.4 | Medium |
-| Physical Demand | 22.0 | Low |
-| Temporal Demand | 37.7 | Medium |
-| Performance | 29.7 | Low |
-| Effort | 35.5 | Medium |
-| Frustration | 24.0 | Low |
-| Overall Task Load | 31.6 | Low-Medium |
+---
 
-Key quantitative observations from the test document:
+#### Key findings
 
-- the core interactions such as tower placement and wave progression behaved as expected in most cases
-- the save system preserved progress across browser refreshes when the same nickname was used
-- compatibility tests confirmed normal behaviour in Chrome, Edge, and Firefox
-- performance tests showed stable frame rate and no obvious lag during later waves with many enemies and towers
+| Metric | Simple (Lv1) | Hard (Lv3) | Main takeaway | Significance |
+|--------|-------------|------------|---------------|--------------|
+| **NASA-TLX (workload)** | 31.3 | 71.3 | Hard mode **increases** perceived cognitive/temporal pressure as intended | Wilcoxon **W = 0**, **p < 0.05** |
+| **SUS (usability)** | 88.0 | 74.3 | Usability **remains high** under stress; both **beat 68** | Same paired pattern; **p < 0.05** (see week 8 write-up) |
 
-These quantitative measures gave us concrete evidence that the game’s systems were functioning correctly, and NASA-TLX provided a structured way to compare player workload before and after the usability improvements.
+**Takeaway:** Quantitative results support the product story: **difficulty scales through gameplay**, while **UI learnability** stays in a **good-to-excellent** band. Qualitative and heuristic work then turns those signals into **concrete** HUD, settings, and wave-info fixes.
 
-#### Description of how code was tested
+---
 
-We tested the code at three levels:
+#### Software testing
 
-- **Manual functional testing**: played the game directly to verify core interactions such as tower placement, enemy movement, wave progression, and level completion.
-- **Heuristic review**: the team inspected interface flows and interaction design using usability principles, checking for consistency, error prevention, and clear feedback.
-- **Technical validation**: used the in-game debug overlay and map tools to confirm that enemy pathing matched the visible map, that buildable tiles aligned correctly, and that tower targeting logic responded appropriately after tuning range and cooldown values.
+We did **not** rely on a large automated **unit-test** suite in this module (see `tests/`); instead we combined **black-box** case runs from our test document with **white-box–style** checks on critical paths.
 
-Our testing approach was deliberately hands-on. By replaying the game after each fix and checking the reported issues, we confirmed that each change improved usability without introducing new regressions.
+##### Black-box testing
 
-#### Summary of outcomes
+Behaviour verified **without** reading implementation line-by-line; examples:
 
-##### Positive observations
+| Test case | Input | Expected | Outcome |
+|-----------|-------|----------|---------|
+| Valid tower placement | Click **grass** build cell with enough gold | Tower appears; gold deducted | Pass |
+| Invalid placement | Click **path** / **obstacle** | Blocked + feedback | Pass |
+| Wave flow | Clear wave | Countdown / next wave or **victory** | Pass |
+| Insufficient gold | Pick expensive tower | Cannot place; no charge | Pass |
+| Defeat | Landmark **HP → 0** | **Lose** screen / retry path | Pass |
 
-- The core tower defense loop is clear: players can choose towers, place them on a grid, and see enemies move along defined London-themed paths.
-- The audio and feedback system works well for basic events: tower placement, enemy death, and landmark damage are all clearly communicated.
-- The balance model created for gold income and enemy pressure produced a sense of tension while still allowing players to recover through good strategy.
+Full IDs (FT-001 … CP-002) are tabulated in [`week9_evaluation_quality_and_testing.md`](./weekly_progress/week9_evaluation_quality_and_testing/week9_evaluation_quality_and_testing.md).
 
-##### Key issues identified
+##### White-box testing
 
-1. **UI readability and information clarity**
-   - Some tower and enemy statistics were too small or hard to read during active gameplay.
-   - Monster icons and status labels were not always visible, especially when many enemies appeared at once.
-
-2. **Settings and control flexibility**
-   - Players could not adjust volume or brightness in-game, which reduced accessibility and personalization.
-   - The settings panel appeared inconsistent between the main menu and the in-game interface.
-
-3. **Usability gaps**
-   - A lack of explicit wave-preview detail made some waves feel unexpectedly hard.
-   - The menu and tutorial flow could better explain the difference between support towers and direct-damage towers.
-
-4. **Rendering and consistency bugs**
-   - Some enemy images occasionally failed to render or disappeared during fast movement.
-   - Buildable grid cells and the background visuals were sometimes misaligned on edge cases, making it unclear where towers could be placed.
-
-#### Improvements to implement
-
-Based on evaluation, the next development cycle should focus on:
-
-- improving HUD readability with larger text and clearer iconography
-- adding music/volume controls and a consistent settings experience
-- giving players better wave preview and tower information before placement
-- fixing rendering glitches for enemies and ensuring grid alignment stays consistent across all levels
-
-#### Testing notes
-
-- The Think Aloud study highlighted user-facing problems quickly, especially around the tutorial and information density.
-- Heuristic review by the team was effective for catching issues that testers did not explicitly mention, such as consistency in menu layout and error prevention during tower placement.
-- The debug overlay and map grid tooling proved valuable for ensuring pathing and tower placement logic matched the player-visible environment.
+Targeted **inspection** and **manual** execution of sensitive logic (no claimed **code-coverage %**): stepping through **`WaveManager`** state (`waiting` → `spawning` → `active`), **`Economy`** refunds and sell paths, **`Tower`** range and slow/splash branches, and **`GameManager`** win/lose gates — plus **debug-grid** verification that **logical tiles** matched **art**. This caught integration bugs that black-box runs alone often miss.
 
 ### Process
 
