@@ -29,6 +29,12 @@ Defend London is a London-themed tower defense game in which players must protec
 Play the game: [Start](https://uob-comsm0166.github.io/2026-group-14/game/)
 Demo video: 
 
+## Repository Structure Note
+
+- Runtime source of truth: `game/`
+- Root `index.html` is a launcher page that links to `game/index.html`
+- New gameplay code and assets should be added under `game/` only
+
 ## Your Group
 
 ![Group photo](./images/group-photo.png)

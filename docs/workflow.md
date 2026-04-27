@@ -31,10 +31,10 @@
 
 | Module           | Files to Modify                                                |
 | ---------------- | -------------------------------------------------------------- |
-| **Tower System** | `src/js/Tower.js` (modify `draw`, `update`, `attack` methods) |
-| **Enemy System** | `src/js/Enemy.js` + `src/js/WaveManager.js`                   |
-| **Map System**   | `src/js/GameMap.js` + `src/js/Path.js`                        |
-| **UI System**    | `src/js/UIHUD.js` + `src/css/style.css`                       |
+| **Tower System** | `game/js/Tower.js` (modify `draw`, `update`, `attack` methods) |
+| **Enemy System** | `game/js/Enemy.js` + `game/js/WaveManager.js`                  |
+| **Map System**   | `game/js/GameMap.js` + `game/js/Path.js`                       |
+| **UI System**    | `game/js/UIHUD.js` + `game/style.css`                          |
 
 ---
 
@@ -42,10 +42,10 @@
 
 >  **Do NOT modify the following files:**
 
-- `src/js/GameManager.js`
-- `src/js/Economy.js`
-- `src/js/Landmark.js`
-- `src/js/constants.js`
+- `game/js/GameManager.js`
+- `game/js/Economy.js`
+- `game/js/Landmark.js`
+- `game/js/constants.js`
 
 ---
 
