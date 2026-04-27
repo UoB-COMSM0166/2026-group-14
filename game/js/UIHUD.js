@@ -469,11 +469,11 @@ class UIHUD {
 
     this.levelButtons = [
       // highlightArea: { x: 208, y: 317, w: 230, h: 234 }
-      { level: 1, x: 323, y: 434, width: 230, height: 234, unlocked: true, name: "THE OUTER DEFENSES" },
+      { level: 1, x: 323, y: 434, width: 230, height: 234, unlocked: true, name: "BIG BEN" },
       // highlightArea: { x: 958, y: 392, w: 229, h: 225 }
-      { level: 2, x: 1072.5, y: 504.5, width: 229, height: 225, unlocked: true, name: "RIVER THAMES PATROL" },
+      { level: 2, x: 1072.5, y: 504.5, width: 229, height: 225, unlocked: true, name: "TOWER BRIDGE" },
       // highlightArea: { x: 1447, y: 156, w: 325, h: 222 }
-      { level: 3, x: 1609.5, y: 267, width: 325, height: 222, unlocked: true, name: "TOWER OF LONDON SIEGE" }
+      { level: 3, x: 1609.5, y: 267, width: 325, height: 222, unlocked: true, name: "BUCKINGHAM PALACE" }
     ];
 
     for (let btn of this.levelButtons) {
@@ -1080,7 +1080,10 @@ class UIHUD {
     textStyle(NORMAL);
     textSize(24);
     fill(255, 170, 170);
-    text("Big Ben has fallen...", CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 - 175);
+    let landmarkLabel = (this.game && this.game.landmark && this.game.landmark.name)
+      ? this.game.landmark.name
+      : "Landmark";
+    text(landmarkLabel + " has fallen...", CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 - 175);
 
     let panelW = 500;
     let panelH = 172;

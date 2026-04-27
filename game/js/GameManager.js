@@ -76,8 +76,8 @@ class GameManager {
         totalWaves: 6
       },
       3: {
-        name: "Level 3 — Tower of London Siege",
-        landmarkName: "Tower of London",
+        name: "Level 3 — Buckingham Palace",
+        landmarkName: "Buckingham Palace",
         landmarkHp: LANDMARK_MAX_HP + 20,
         landmarkX: CANVAS_WIDTH - 100,
         landmarkY: CANVAS_HEIGHT / 2,

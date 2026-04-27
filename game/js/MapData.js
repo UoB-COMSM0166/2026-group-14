@@ -52,7 +52,7 @@ const LEVEL_1_GRID = (() => {
   return g;
 })();
 
-// Level 2 - River Thames Patrol (15 rows x 32 cols, 243 buildable cells)
+// Level 2 - Tower Bridge (15 rows x 32 cols, 243 buildable cells)
 
 const LEVEL_2_GRID = (() => {
 const g = Array.from({ length: ROWS }, () => new Array(COLS).fill(0));
@@ -1459,7 +1459,7 @@ const g = Array.from({ length: ROWS }, () => new Array(COLS).fill(0));
   return g;
 })();
 
-// Level 3 - Tower of London Siege grid data
+// Level 3 - Buckingham Palace grid data
 // 30 rows × 64 cols
 
 

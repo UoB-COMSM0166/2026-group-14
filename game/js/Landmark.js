@@ -2,7 +2,7 @@
 
 class Landmark {
   /**
-   * @param {string} name - Landmark name (e.g. "Big Ben")
+   * @param {string} name - Landmark name (e.g. "Big Ben", "Tower Bridge", "Buckingham Palace")
    * @param {number} maxHp - Max HP
    * @param {number} x - X coordinate on canvas
    * @param {number} y - Y coordinate on canvas

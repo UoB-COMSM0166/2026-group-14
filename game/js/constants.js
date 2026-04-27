@@ -430,7 +430,7 @@ const LEVEL_1_WAVE_CONFIGS = [
   }
 ];
 
-// Level 2 - River Thames Patrol
+// Level 2 - Tower Bridge
 const LEVEL_2_WAVE_CONFIGS = [
   {
     waveNumber: 1,
@@ -490,7 +490,7 @@ const LEVEL_2_WAVE_CONFIGS = [
   }
 ];
 
-// Level 3 - Tower of London Siege
+// Level 3 - Buckingham Palace
 const LEVEL_3_WAVE_CONFIGS = [
   {
     waveNumber: 1,

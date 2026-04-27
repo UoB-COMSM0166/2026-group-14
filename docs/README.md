@@ -58,7 +58,55 @@ Build towers, manage resources, and survive increasingly challenging waves acros
 
 | 🏛️ London Identity | 👾 Diverse Enemies | 🎓 Guided Experience |
 |---|---|---|
-| Levels based on real landmarks: outer defenses, River Thames, and the Tower of London. | 10 unique enemy types with abilities like charging, dodging, diving, and healing. | An interactive tutorial helps new players learn core mechanics step by step. |
+| Levels based on real landmarks: **Big Ben**, **Tower Bridge**, and **Buckingham Palace**. | 10 unique enemy types with abilities like charging, dodging, diving, and healing. | An interactive tutorial helps new players learn core mechanics step by step. |
+
+The sections below follow our decision flow: **ideation** (genre and prototypes), **requirements** (stakeholders through epics), then **design** (architecture, systems, and UML).
+
+---
+
+### Ideation
+
+#### Genre Exploration
+
+At the start of the project, we evaluated multiple game genres against three criteria: uniqueness compared to past student projects, strategic depth for players, and clarity of implementation scope.
+
+| Genre | Key Challenge | Decision |
+|---|---|---|
+| Action | Complex real-time enemy AI | ❌ |
+| Puzzle | Time-consuming narrative design | ❌ |
+| Shooting | Overdone by past teams | ❌ |
+| **Tower Defense** | — | ✅ |
+
+Tower defense stood out because enemy behavior is predictable and rule-based, the modular structure maps naturally to team responsibilities, and few past teams had explored this genre.
+
+#### Paper Prototypes
+
+To validate our direction, we built two paper prototypes before writing any code:
+
+<table>
+<tr>
+<td align="center" width="50%">
+<img src="./images/paper-prototype-ezgif.com-video-to-gif-converter.gif" width="320" alt="Paper prototype A">
+<br><b>Prototype A: Defend London</b>
+<br>Tower defense · Place towers → Survive waves
+</td>
+<td align="center" width="50%">
+<img src="./images/paper-prototype2-ezgif.com-video-to-gif-converter.gif" width="320" alt="Paper prototype B">
+<br><b>Prototype B: Double Steal</b>
+<br>Action platformer · Navigate floors → Avoid hazards
+</td>
+</tr>
+</table>
+
+Prototype A demonstrated a tower defense loop where players place defenses and react to incoming waves. Prototype B explored action-platformer traversal with timing-sensitive hazards.
+
+#### Why Defend London?
+
+We selected Prototype A for three reasons:
+
+1. **System boundaries were clear** — tower, enemy, wave, and UI components mapped naturally to individual team members.
+2. **Parallel development was feasible** — each subsystem could be built and tested independently.
+3. **Integration risk was lower** — the action platformer’s tightly coupled mechanics would have required more coordination.
 
 ---
 
@@ -67,74 +115,65 @@ Build towers, manage resources, and survive increasingly challenging waves acros
 We used a GitHub Kanban board to track requirement progress and development tasks:  
 https://github.com/orgs/UoB-COMSM0166/projects/168
 
-### Ideation: Why Tower Defense?
+#### Stakeholders
 
-At the early stage, our team evaluated multiple game genres based on three criteria: uniqueness compared to past projects, strategic depth for players, and clarity of implementation scope.
+We identified stakeholders using an onion model approach, organizing them by proximity to the project:
 
-| Genre | Key Challenge | Decision |
-|---|---|---|
-| Action | Complex real-time enemy AI | ❌ |
-| Puzzle | Time-consuming narrative design | ❌ |
-| Shooting | Overdone by past teams | ❌ |
-| **Tower Defense** | — | ✅ Selected |
+<img src="./images/onion_model.png" alt="Stakeholder onion model" width="480">
 
-We chose tower defense because few past teams had explored this genre, enemy behavior is predictable and rule-based, and the modular structure supports both strategic player choice and clear team task division.
+| Layer | Stakeholder | Role |
+|:---:|:---|:---|
+| Core | Development Team | Design, code, test, deploy |
+| 2nd | Course Instructor | Evaluate outcomes, provide guidance |
+| 3rd | Classmates | Playtest and offer usability feedback |
+| Outer | End Players | Target audience influencing design decisions |
 
----
+The development team sits at the core as direct builders. Course instructors evaluate whether the project meets learning objectives—programming skills, collaboration, and structured process. Classmates serve as early playtesters, while end players represent the ultimate audience whose needs drive feature prioritization.
 
-### Stakeholders
-
-We identified stakeholders using an onion model approach. The primary stakeholders are players, including casual players seeking relaxed play and strategic players looking for optimization depth. Secondary stakeholders include developers maintaining the codebase and designers balancing gameplay systems.
-
-<img src="./images/onion_model.png" alt="Onion Model" width="520">
-
----
-
-### Use Case Diagram
-
-The Use Case Diagram captures system requirements from the player's perspective, with the player acting as the primary actor across the core game loop.
+#### Use Case Diagram
 
 <img src="./images/use_case.png" alt="Use Case Diagram" width="520">
 
-In the main flow, the player starts a session, enemy waves begin, and towers are selected and placed to defend the landmark. An alternative flow allows the player to open settings and adjust volume or background music.
+The player starts a session, enemy waves begin, and towers are placed to defend the landmark. An alternative flow allows access to settings for volume and music adjustment.
 
----
+#### User Stories
 
-### User Stories
+User stories capture requirements from the player’s perspective, using the standard form: **“As a [role], I want [feature], so that [benefit].”** We defined **six** stories: **five functional** (core systems and feedback) and **one non-functional** (performance), with **role diversity**—**casual player**, **strategic player**, **new player**, and **all players**—so analysis reflects different needs, not a single “average” user. A longer backlog and alternative **Given / When / Then** criteria appear in [`docs/design/stakeholders_and_user_stories.md`](./design/stakeholders_and_user_stories.md).
 
-To keep development user-centered, we prioritized three core player stories:
+| User Story | Analysis |
+|------------|----------|
+| “As a **casual player**, I want resources to be **auto-collected**, so that I can focus on tower placement rather than clicking every dropped coin.” | **Functional requirement:** **Economy system** — gold is added automatically when enemies are defeated (no manual coin pickup). |
+| “As a **strategic player**, I want to **see tower attack range before placing**, so that I can optimize my defense layout without memorizing every radius.” | **Functional requirement:** **Tower system** — range preview / placement feedback on the build grid. |
+| “As a **strategic player**, I want a **next-wave preview** showing upcoming enemy types, so that I can prepare appropriate defenses.” | **Functional requirement:** **Wave system** — HUD or panel surfaces upcoming wave composition. |
+| “As a **new player**, I want an **interactive tutorial** that guides me through game mechanics, so that I can learn without frustration.” | **Functional requirement:** **UI / game flow** — stepwise tutorial (`TUTORIAL_STEPS` in `constants.js`, driven by `GameManager` + `UIHUD`) introducing landmark, path, build area, and gold. |
+| “As a **player**, I want the game to **respond smoothly without lag** during intense waves, so that my strategic decisions are not hindered by performance issues.” | **Non-functional requirement:** **Performance** — stable frame rate under load; supported by a modular per-frame `update()` chain and **wave-based spawning** (not all enemies active at once). |
+| “As a **player**, I want **clear visual and audio feedback** when I win or lose, so that the game outcome feels satisfying and unambiguous.” | **Functional requirement:** **UI system** — dedicated win/lose (and level-complete) screens plus sound feedback. |
 
-- **Casual Player:** "I want auto-collected resources so I can focus on strategy rather than clicking every dropped coin."
-- **Strategic Player:** "I want to see tower attack range before placing, so I can optimize my layout without memorizing every radius."
-- **Strategic Player:** "I want a next-wave preview showing upcoming enemy types, so I can prepare rather than be surprised."
+Each **functional** story maps to a **subsystem** in the architecture (economy, tower placement, waves, tutorial UI, end-game UI). The **non-functional** story supported choices such as **centralized config tables** (`TOWER_TYPES`, `ENEMY_STATS`) for fast tuning without extra runtime work, and a **clear update order** in the game loop so work stays localized per frame.
 
-These stories guided feature prioritization and kept design decisions anchored to player experience.
+Following course material on requirements, we classified every story as either a **functional requirement** (what the system must *do*) or a **non-functional requirement** (how well it must *behave*). **Functional** stories mainly drove **class boundaries and UI flows**; the **performance** story reinforced **data-driven balance** and an efficient update path instead of ad hoc calculations every frame.
 
----
-
-### Development Epics
-
-We defined five core epics that map to the essential systems of Defend London:
+#### Development Epics
 
 | Epic | Description | Key Acceptance Criteria |
 |---|---|---|
-| Enemy Wave System | Spawning, pathfinding, and difficulty scaling | 3+ enemy types; navigation from start to landmark |
-| Tower System | Building, upgrades, and modular tower types | Placement validation; automatic targeting in range |
-| Game Interface | Real-time HUD and in-game navigation | Live updates for health, coins, and wave number |
-| Audio System | Background music and gameplay sound effects | Distinct sounds for placement, damage, and enemy death |
-| Map & Environment | Grid logic and visual theming | Clear path/buildable separation across levels |
+| Enemy Wave System | Spawning, pathfinding, scaling | 3+ enemy types; path from start to landmark |
+| Tower System | Building, upgrading, modular types | Valid placement; auto-targeting |
+| Game Interface | Real-time HUD | Live health, coins, wave display |
+| Audio System | BGM and sound effects | Distinct placement/damage/death sounds |
+| Map & Environment | Grid logic and visual theme | Clear path vs buildable separation |
+
+#### Reflection
+
+This phase clarified that **epics** are product-level outcomes, while **user stories** break those outcomes into testable, player-facing statements. The table above makes the link explicit: each story has a **requirement type** (functional vs non-functional) and a **target component**, which is how we checked coverage before implementation. **Instructor user stories** from the stakeholder model (workflow, testing, code quality) are revisited in the **Conclusion**; **acceptance criteria** on the Kanban board and in the design doc kept “done” unambiguous for both features and process.
 
 ---
 
-### Reflection
-
-This requirements phase taught us that epics represent product-level value, while user stories translate that value into actionable and testable tasks. The "As a... I want... so that..." format kept us focused on player outcomes, and clear acceptance criteria aligned the team on what counted as done before implementation.
-
 ### Design
 
-### Architecture Overview
+#### Architecture Overview
 
-Defend London follows a modular architecture where each subsystem handles one responsibility: towers handle targeting and attacks, enemies handle movement and abilities, and UI renders game state. `GameManager` coordinates these systems through frame updates and state transitions between menu, gameplay, and end states.
+Defend London uses a modular architecture where each subsystem handles one responsibility. `GameManager` coordinates frame updates and state transitions between menu, gameplay, and end screens.
 
 ```mermaid
 flowchart TD
@@ -155,231 +194,296 @@ flowchart TD
     EC --> UI
 ```
 
-This separation lets team members work in parallel and makes debugging more efficient because issues can be isolated to a specific subsystem.
+This separation enables parallel development and localized debugging—issues can be traced to specific modules without full-game investigation.
 
----
+#### Level Design: The Maps of London
 
-### Paper Prototypes
-
-Before coding, we explored two concepts through paper prototyping to compare gameplay loops and team-fit complexity.
+Each level is themed around an iconic London location, with increasing complexity in path design and buildable space.
 
 <table>
 <tr>
-<td align="center" width="50%">
-<img src="./images/paper-prototype-ezgif.com-video-to-gif-converter.gif" width="320" alt="Prototype A Defend London">
-<br><b>Prototype A: Defend London</b>
+<td align="center" width="33%">
+<img src="./images/maps/level1.png" width="280" alt="Level 1 — Big Ben">
+<br><b>Level 1: Big Ben</b>
+<br>Single path · Generous space
+<br>🟢 Introductory
 </td>
-<td align="center" width="50%">
-<img src="./images/paper-prototype2-ezgif.com-video-to-gif-converter.gif" width="320" alt="Prototype B Double Steal">
-<br><b>Prototype B: Double Steal</b>
+<td align="center" width="33%">
+<img src="./images/maps/level2.png" width="280" alt="Level 2 — Tower Bridge">
+<br><b>Level 2: Tower Bridge</b>
+<br>Split path · Bridge chokepoints
+<br>🟡 Intermediate
+</td>
+<td align="center" width="33%">
+<img src="./images/maps/level3.png" width="280" alt="Level 3 — Buckingham Palace">
+<br><b>Level 3: Buckingham Palace</b>
+<br>Multi-lane · Tight placement
+<br>🔴 Advanced
 </td>
 </tr>
 </table>
 
-Prototype A focused on a tower defense loop where players place defenses and react to incoming waves. Prototype B focused on action-platform traversal across floors with timing-sensitive hazards.
+The progression follows a deliberate learning curve: Level 1 teaches fundamentals, Level 2 introduces resource trade-offs, and Level 3 demands strategic mastery against the Gentleman Bug boss.
 
-We selected Defend London because tower, enemy, wave, and UI boundaries mapped naturally to team responsibilities, reducing integration risk during development.
+#### Tower System
 
----
+Tower parameters are defined in centralized config tables (`TOWER_TYPES`), enabling balance adjustments without modifying core logic.
 
-### Core Systems Design
+| | Tower | Cost | Damage | Special ability |
+|:--:|---|--:|--:|---|
+| <img src="../game/assets/tower_basic.png" width="40" alt="Basic tower"> | Basic Tower | 60 | 15 | Balanced baseline |
+| <img src="../game/assets/tower_slow.png" width="40" alt="Slow tower"> | Slow Tower | 85 | 12 | 45% slow effect |
+| <img src="../game/assets/tower_area.png" width="40" alt="Area tower"> | Area Tower | 130 | 13 | Pulsing AoE damage |
+| <img src="../game/assets/tower_crystal.png" width="40" alt="Crystal tower"> | Crystal Tower | 120 | 15 | +25% damage to nearby towers |
+| <img src="../game/assets/tower_steam.png" width="40" alt="Steam cannon"> | Steam Cannon | 180 | 55 | Piercing (up to 3 targets) |
+| <img src="../game/assets/tower_alchemist.png" width="40" alt="Alchemist tower"> | Alchemist Tower | 150 | 20 | Random potion effects |
 
-### 🗼 Tower System
+The Crystal Tower exemplifies our trade-off philosophy: its attack is slow, but it **boosts** nearby towers (+25% damage in range), so players choose between stacking direct firepower and long-term synergy.
 
-Tower behavior is defined in centralized config tables (`TOWER_TYPES`), allowing balance changes without modifying core loop logic.
+#### Enemy System
 
-| Tower | Cost | Damage | Special Ability |
-|---|---:|---:|---|
-| Basic Tower | 60 | 15 | Balanced baseline |
-| Frost Tower | 85 | 12 | 45% slow effect |
-| Area Tower | 130 | 13 | Pulsing AoE damage |
-| Crystal Tower | 120 | 15 | +25% damage boost to nearby towers |
-| Steam Cannon | 180 | 55 | Piercing shots (up to 3 targets) |
-| Alchemist Tower | 150 | 20 | Random potion effects |
+Enemy behavior is data-driven through `ENEMY_STATS`. Each level introduces abilities that counter common player strategies.
 
-The Crystal Tower highlights our trade-off philosophy: support value grows in coordinated layouts, so players must choose between direct damage and long-term synergy.
+**Level 1: Fundamentals**
 
-### 👾 Enemy System
+| | Enemy | HP | Speed | Ability |
+|:--:|---|--:|--:|---|
+| <img src="../game/assets/enemy_guard.png" width="36" alt="Guard"> | Guard | 100 | 2.0 | None |
+| <img src="../game/assets/enemy_pigeon.png" width="36" alt="Pigeon"> | Pigeon | 60 | 3.0 | High speed |
+| <img src="../game/assets/enemy_hedgehog.png" width="36" alt="Hedgehog"> | Hedgehog | 300 | 1.0 | High HP tank |
 
-Enemy behavior is data-driven through `ENEMY_STATS`, with level progression introducing new counters to common player strategies.
+**Level 2: Ability pressure**
 
-| Level | Enemies | Key Abilities |
-|---|---|---|
-| Level 1 | Guard, Pigeon, Hedgehog | Basic speed/HP variation |
-| Level 2 | Knight, Archer, Giant | Charge, dodge, leap |
-| Level 3 | Bomber, Lizard, Mage, Boss | Explosion, dive, heal, multi-phase |
+| | Enemy | HP | Speed | Ability |
+|:--:|---|--:|--:|---|
+| <img src="../game/assets/monster1.png" width="36" alt="Knight"> | Knight | 180 | 1.6 | Charges when wounded |
+| <img src="../game/assets/monster2.png" width="36" alt="Archer"> | Archer | 90 | 2.2 | 25% dodge chance |
+| <img src="../game/assets/monster3.png" width="36" alt="Giant"> | Giant | 500 | 0.9 | Leaps forward |
 
-Treant Mage forces target prioritization by healing nearby enemies, while Goblin Bomber punishes tower clustering by disabling nearby defenses on death. These patterns turn enemies into tactical puzzles rather than pure stat checks.
+**Level 3: Counter-strategy**
 
----
+| | Enemy | HP | Speed | Ability |
+|:--:|---|--:|--:|---|
+| <img src="../game/assets/goblin_bomber.png" width="36" alt="Goblin Bomber"> | Goblin Bomber | 120 | 2.2 | Explodes; disables towers |
+| <img src="../game/assets/diving_lizard.png" width="36" alt="Diving Lizard"> | Diving Lizard | 150 | 3.3 | Untargetable dive phase |
+| <img src="../game/assets/treant_mage.png" width="36" alt="Treant Mage"> | Treant Mage | 200 | 1.2 | Area healing |
+| <img src="../game/assets/gentleman_bug.png" width="36" alt="Gentleman Bug"> | Gentleman Bug | 2500 | 0.8 | 3-phase boss |
 
-### UML Diagrams
+The Treant Mage forces target prioritization; the Goblin Bomber punishes tower clustering. These abilities turn enemies into tactical puzzles rather than stat increases alone.
 
-### Class Diagram
+#### UML diagrams
 
-![Class Diagram](./images/class-diagram.png)
+##### Class diagram
 
-The class model shows how `Game`/`GameManager` orchestrates `Level`, while `Level` manages tower lists, enemy lists, and wave progression services. Combat behavior emerges from `Tower` and `Enemy` interactions, with configuration-driven variation for unit types.
+![Class diagram](./images/class-diagram.png)
 
-### Sequence Diagram
+`Game` / `GameManager` orchestrates `Level`, which manages tower and enemy collections. Wave logic handles spawning; factories and presets instantiate specific types. `Tower` and `Enemy` share common update interfaces.
 
-![Sequence Diagram](./images/sequence-diagram.png)
+##### Sequence diagram
 
-Each frame follows the same sequence: update level state, process wave spawning, update enemy movement, run tower targeting/attacks, resolve effects, then refresh UI and evaluate win/lose conditions. This keeps combat behavior deterministic and easier to test.
+![Sequence diagram](./images/sequence-diagram.png)
 
----
+Each frame: the game calls `update()` → wave manager spawns enemies → enemies move → towers attack → combat resolves damage → UI refreshes → win/lose check.
 
-### Key Design Decisions
+#### Key design decisions
 
-**Centralized Configuration Tables.** Tower and enemy parameters are stored in dedicated config objects, which enables fast balancing without changing core update logic. This reduces regression risk during playtest-driven iteration.
-
-**Modular Subsystem Boundaries.** Towers, enemies, waves, economy, and UI are separated into focused modules with clear interfaces. This supports parallel development and keeps debugging localized.
-
-**Progressive Ability Introduction.** Enemy complexity increases across levels rather than being front-loaded. This pacing improves onboarding while preserving challenge in later stages.
+- **Centralized configuration.** Tower and enemy parameters live in config objects, enabling rapid balance iteration without touching core game logic.
+- **Modular boundaries.** Clear interfaces between subsystems support parallel development and isolated debugging.
+- **Progressive complexity.** Enemy abilities are introduced gradually across levels, building player skill before demanding mastery.
 
 ### Implementation
 
-#### Implementation Journey
+#### Development timeline
 
-Development moved through four natural phases:
+Our development followed a **12-week** iterative process in **four** phases. Each stage below is **outcome-oriented**: what we set out to do, and what we delivered.
 
 ---
 
+##### Phase 1: Foundation (Weeks 1–3)
+
 <table>
 <tr>
+<td width="40%">
 
-<td align="center" width="25%" valign="top">
-
-##### Phase 1 · Prototype
-
-**Core game loop**
-
-- Tile-based grid map
-- Single enemy type following a fixed waypoint path
-- One basic tower with projectile shooting
-- Enemies spawn → move → take damage → die or reach landmark
-
-<br>
-
-![Early prototype: plain grid with Lv1 towers](images/early-prototype.png)
-*Early engine: green grid, placeholder towers, no art*
+<img src="./images/dev/phase1.png" width="300" alt="Phase 1 — early prototype with grid and towers">
 
 </td>
+<td width="60%">
 
-<td align="center" valign="middle" width="2%">➜</td>
+**Focus:** Core architecture and basic systems
 
-<td align="center" width="25%" valign="top">
-
-##### Phase 2 · Foundation
-
-**Levels, economy & systems**
-
-- Three distinct map layouts with per-level grid configs
-- `WaveManager` wave-state machine (waiting → spawning → active)
-- `Economy` gold system and `Landmark` HP tracking
-- Win / lose conditions wired into `GameManager`
-- Path edit and map paint debug tooling built
-
-<br>
-
-![Path edit mode with numbered waypoints overlay](images/path-edit-debug.png)
-*Path edit mode: numbered waypoints, green/red tile overlay, live console export*
+**Deliverables**
+- **Game loop** and **state hand-offs** through `GameManager`
+- **Grid-based map** with per-cell types (`TILE_TYPES` in `MapData.js`); default **30×30 px** logical cells (`constants.js`)
+- **Basic tower placement** and projectiles; enemies follow a **waypoint path**
+- **Placeholder HUD** to prove the loop end-to-end
 
 </td>
-
-<td align="center" valign="middle" width="2%">➜</td>
-
-<td align="center" width="25%" valign="top">
-
-##### Phase 3 · Content & Balance
-
-**Enemies, towers & tuning**
-
-- 10 enemy types with distinct abilities (charge, leap, heal, taunt…)
-- 6 tower types including support (Crystal) and AoE (Steam, Area)
-- 3-phase final boss — Gentleman Bug
-- Balance formula applied across all three levels
-- Repeated playtesting cycles; stats adjusted via `TOWER_TYPES` / `ENEMY_STATS`
-
-<br>
-
-![Monster encyclopaedia showing all 10 enemy types with stats](images/enemy-encyclopedia.png)
-*In-game encyclopaedia: all 10 enemy types with HP, speed, reward and ability summary*
-
-</td>
-
-<td align="center" valign="middle" width="2%">➜</td>
-
-<td align="center" width="25%" valign="top">
-
-##### Phase 4 · Polish
-
-**Feel & accessibility**
-
-- Main menu, level-select screen, pause and settings panels
-- In-game tutorial with step-by-step highlights
-- Background music and per-event sound effects (`SoundManager`)
-- Monster encyclopaedia with flavour text
-- HUD refinements: wave bonus display, placement error feedback
-
-<br>
-
-![Level select screen with illustrated London map](images/level-select.png)
-*Level select: illustrated London map with three landmarks and star ratings*
-
-</td>
-
 </tr>
 </table>
 
 ---
 
-#### Technical Challenge 1: Balancing Difficulty for Engaging Combat
+##### Phase 2: Expansion (Weeks 4–6)
 
-**Challenge.** The experience we wanted was specific: players should feel they *nearly* lost but just barely won. Early playtests revealed wild swings — some waves trivially easy, others immediately unwinnable. Worse, the team had no shared language for diagnosing why a wave felt unfair.
+<table>
+<tr>
+<td width="40%">
 
-**Technical Difficulty.** Without a principled framework, tuning becomes guesswork. A value that feels fair in wave 1 can cascade into an unwinnable state by wave 3. We needed a diagnostic tool that could express difficulty as a comparable quantity.
+<img src="./images/dev/phase2.png" width="300" alt="Phase 2 — path edit mode with grid overlay and waypoint export">
 
-**Solution.** We derived a working balance formula:
+</td>
+<td width="60%">
 
-> **Player Firepower** = towers × damage × attack duration  
-> **Enemy Pressure** = enemies per wave × individual HP
+**Focus:** Feature development and system variety
 
-The target was rough parity, tilting slightly toward enemies to maintain tension. This formula gave us a common language — when someone proposed buffing an enemy, we could immediately estimate how much additional firepower players would need.
+**Deliverables**
+- **Six tower types** with distinct roles (support, AoE, piercing, potions, etc.), driven by `TOWER_TYPES`
+- **Wave pipeline** and **economy** (gold, sell, upgrade hooks)
+- **Path / map debug tooling** (e.g. path export to `Path.js`, map paint mode) to speed level integration
+- **Audio** wired through a central sound path for BGM and SFX
 
-Concretely, Level 1 opens with 400 gold, enough for five or six basic towers before the first wave. The 60-gold wave bonus was calibrated so players always feel one tower short of comfortable. By wave 3, slow but durable Hedgehogs arrive, forcing players to have already scaled their defences. Each leaked enemy deals significant landmark damage — five uncontested breaches end a run — making every placement decision feel consequential.
+</td>
+</tr>
+</table>
 
-Verification required real playtesting. When Level 2's boss wave proved consistently overwhelming, we reduced the boss count and extended the preparation window. These cycles — always returning to the formula as a diagnostic anchor — produced a difficulty curve that testers described as challenging but fair.
+---
 
-**Design Value.** The formula transformed subjective debates ("this feels too hard") into tractable discussions ("enemy pressure exceeds firepower by 40% — where should we adjust?").
+##### Phase 3: Challenge (Weeks 7–9)
 
-#### Technical Challenge 2: Diverse Abilities That Reward Adaptive Strategy
+<table>
+<tr>
+<td width="40%">
 
-**Challenge.** Tower defence risks monotony if each level simply sends more enemies. We wanted every level to introduce mechanics requiring genuinely new strategies, not just more towers.
+<img src="./images/dev/phase3.png" width="300" alt="Phase 3 — enemy encyclopaedia with stats and abilities">
 
-**Technical Difficulty.** With six tower types and ten enemy types, interactions multiply rapidly. An ability balanced in isolation might break the game in combination. We needed a system where any stat could be adjusted in one place without touching unrelated logic.
+</td>
+<td width="60%">
 
-**Solution.** We centralised all statistics in configuration tables, making iterative tuning fast and safe. More importantly, we designed abilities around strategic trade-offs rather than raw difficulty increases.
+**Focus:** Content depth and balance
 
-Level 1 introduces only basic enemies and towers, letting players master fundamentals. Level 2 unlocks the Crystal Tower — a support unit that boosts nearby towers rather than attacking directly. This forces a genuine decision: does boosting existing towers outperform simply adding more firepower? The level also introduces enemies with active abilities: Knights that charge when wounded, Archers that evade projectiles, Giants that leap past defensive lines.
+**Deliverables**
+- **Three London-themed levels** with hand-drawn maps and tuned paths
+- **Ten enemy types** and a **multi-phase boss** (Gentleman Bug) using shared behaviour building blocks
+- **Enemy abilities** (e.g. charge, dodge, dive, heal, explode) tuned via **`ENEMY_STATS`**
+- **Monster info** panel and repeated **playtest → config** iteration
 
-Level 3 escalates further with abilities designed to counter established strategies. The Treant Mage heals nearby enemies, threatening to undo damage already dealt — forcing players to prioritise targets. The Goblin Bomber explodes on death, disabling nearby towers and punishing overly clustered defences. The final boss, Gentleman Bug, progresses through three phases: summoning minions, taunting towers to reduce their damage, and gaining resistance as it weakens.
+</td>
+</tr>
+</table>
 
-When playtesting revealed the Treant Mage's healing outpaced realistic player damage, a single configuration change resolved the issue instantly — demonstrating how centralised tuning enabled rapid iteration.
+---
 
-**Design Value.** Each ability was designed as a puzzle rewarding adaptive thinking, not an arbitrary difficulty spike.
+##### Phase 4: Polish (Weeks 10–12)
 
-#### Technical Challenge 3: Grid Alignment and Debug Tooling
+<table>
+<tr>
+<td width="40%">
 
-**Challenge.** Each level's invisible tile grid must align precisely with its visual background. A boundary offset by even a few pixels could block a visually open area from building, or allow towers to clip into enemy paths — both confusing to players and nearly impossible to diagnose by eye.
+<img src="./images/dev/phase4.png" width="300" alt="Phase 4 — level select and navigation">
 
-**Solution.** We built a debug mode that overlays the tile grid directly on screen, colour-coding buildable versus blocked cells, and printing coordinates to the console. Arrow keys adjust grid offsets in real time; a path visualisation confirms that enemy waypoints trace the intended route exactly.
+</td>
+<td width="60%">
 
-This tooling transformed hours of guesswork into minutes of precise adjustment. If we were to start over, we would build it in the first week rather than the third.
+**Focus:** Testing, onboarding, and UX
 
-#### Conclusion
+**Deliverables**
+- **Eight-step interactive tutorial** (`TUTORIAL_STEPS` in `constants.js`, driven by `GameManager` + `UIHUD`)
+- **Settings** (e.g. volume, brightness) and **win/loss** flow with clear feedback
+- **Bug fixes** from heuristic review and playtests; **performance** pass on the per-frame `update()` chain
 
-Implementing *Defend Britain* taught us that building mechanics is only part of the work — making them *feel right* demands equal attention. The balance formula gave us a shared diagnostic language; centralised configuration made iteration safe; visual debug tooling made precise alignment tractable. More broadly, this project showed that "feel" is not a vague quality but something that can be diagnosed systematically. These practices — principled frameworks, single-source configuration, purpose-built tooling — will transfer directly to future projects.
+</td>
+</tr>
+</table>
+
+---
+
+#### Technical highlights
+
+##### Grid system and tile mapping
+
+The world is divided into a **logical grid**: each cell has a **type** (grass / path / obstacle) that governs **building** and **enemy movement**. `LEVEL_GRID_CONFIG` stores **per-level offsets and cell size** so the grid lines up with painted backgrounds.
+
+| Tile / role | Function | Typical look |
+|-------------|----------|--------------|
+| **Grass** | **Build** towers (where rules allow) | Park / open ground |
+| **Path** | Enemy **route** | Road |
+| **Obstacle** | **Blocks** build and walk | Trees, walls, off-map |
+
+A **debug overlay** (**D** in-game) shows **tile colours and coordinates**; **path edit mode** (**N**) lets us **place waypoints** and **export** arrays for `getLevel…Waypoints()` in `Path.js`—the screenshot below is **Level 3 (Buckingham Palace)** with grid, path, and **console export**.
+
+```javascript
+// Per-level grid alignment (excerpt from constants.js)
+const LEVEL_GRID_CONFIG = {
+  1: { offsetX: 0, offsetY: -15, gridSize: 30 },
+  2: { offsetX: 0, offsetY: 0, gridSize: 30 },
+  3: { offsetX: 0, offsetY: 0, gridSize: 30 }
+};
+```
+
+![Path editor: grid overlay, waypoints, and devtools export for Path.js](./images/dev/grid-debug.png)
+*Path edit on Level 3: numbered route, build grid, and copied waypoint list for `Path.js`.*
+
+##### Interactive tutorial system
+
+New players are **paused** in-game while an **8-step** walkthrough **spotlights** one UI area at a time (darkened backdrop + `highlightArea` windows).
+
+| Step | Highlight / area | Lesson |
+|------|------------------|--------|
+| 1 | Welcome dialog | **Tower defense** — how the session is structured |
+| 2 | **Landmark** | **Objective** — keep the landmark alive |
+| 3 | **Path** | **Enemy route** — they follow the road to the landmark |
+| 4 | **Tower panel** | **Selection** — choose a tower type and cost |
+| 5 | **Buildable grass** | **Placement** — click **green** cells to build |
+| 6 | **Gold** | **Economy** — spend and earn from kills |
+| 7 | **Lives (HUD)** | **Failure** — **lives** reach **0** → **game over** |
+| 8 | Ready / dismiss | **Play** — apply what you learned |
+
+A dark **overlay** keeps **attention** on the **current** step. In-game, the tutorial uses **Level 1**; the figure below shows that **play space** in context.
+
+![Level 1 — where the guided tutorial runs](./images/dev/tutorial.png)
+*Level 1 (Big Ben): the tutorial runs on this map.*
+
+---
+
+#### Technical challenges
+
+##### Challenge 1: Game state management
+
+**Problem.** Many **screens** (menu, login, level select, **playing**, paused, settings, win, lose, monster info) need **clean transitions** without **leaving listeners** or **half-initialised** subsystems.
+
+**Solution.** A single **`GameState` enum** and a **`setState` path** in `GameManager` so each transition runs the right **draw** / **input** branch. States are **strings** for easy logging and `switch` dispatch.
+
+```javascript
+const GameState = {
+  MENU: 'menu',
+  LOGIN: 'login',
+  LEVEL_SELECT: 'level_select',
+  PLAYING: 'playing',
+  PAUSED: 'paused',
+  WIN: 'win',
+  LOSE: 'lose',
+  // … settings, in-game settings, monster info, instructions
+};
+```
+
+**Result.** In **heuristic and playtest** runs we saw **no crashes** from **menu ↔ play ↔ end-screen** navigation; **pause** and **resume** stay **safe** for fast toggling.
+
+##### Challenge 2: Enemy ability system
+
+**Problem.** **Ten** enemy **archetypes** and **active abilities** risked **giant if-chains** and **copy-paste** stat edits.
+
+**Solution.** **Data-first** design: **stats and behaviour** live in **`ENEMY_STATS`**, with **shared** logic for movement, skills, and boss **phases**. Tuning is mostly **table edits** plus **localised** code paths.
+
+| Ability (examples) | Trigger (concept) | Player-facing effect |
+|--------------------|-------------------|----------------------|
+| **Charge** | Low health | **Speed** surge |
+| **Dodge** | On hit | **Chance** to ignore a hit |
+| **Dive** | Timed | Short **untargetable** window |
+| **Heal** (aura) | While alive | Allies **regen** in range |
+| **Explode** | On death | **Tower** disable or **AoE** damage |
+
+**Result.** New or adjusted enemies mostly require **config** and **asset** hooks; the **Gentleman Bug** **boss** **phases** re-use the same **pattern** instead of a **one-off** spaghetti file.
 
 ### Evaluation
 
@@ -649,7 +753,7 @@ Overall, Defend London started as a simple London-themed tower defense idea and 
 
 One important lesson we learned was the value of iterative and agile development. Our plan changed as the game developed. Some ideas seemed straightforward at the beginning, but became more complicated during implementation, especially grid alignment, enemy pathing, wave balance, and UI readability. Instead of following one fixed plan, we improved the game through repeated testing, discussion, feedback, and small adjustments. The GitHub project board and regular team communication helped us keep track of progress and decide what needed to be improved next.
 
-Epics and user stories were also useful because they helped us turn a broad idea into clearer development tasks. They made us think from the player’s perspective, such as whether tower placement was clear, whether waves felt fair, and whether the interface gave enough feedback. This helped the team divide the work more clearly and focus on the gameplay experience rather than only technical implementation.
+Epics and user stories were also useful because they helped us turn a broad idea into clearer development tasks. The **end-player stories** in the Requirements section (six **As a… I want…** statements covering economy, range preview, wave preview, tutorial, performance, and win/loss feedback) framed the visible game experience and **functional vs non-functional** trade-offs, while a parallel set of **instructor (course) user stories**—for example *Follow a Defined Development Workflow* (Git, Kanban, incremental delivery) and *Conduct Testing and Iteration* (playtests, heuristic review, NASA-TLX)—gave us a checklist against software-engineering and module learning goals. The full wording of the instructor stories appears in [`docs/design/stakeholders_and_user_stories.md`](./design/stakeholders_and_user_stories.md) under *Epics for Course Instructors*. Tying the **Process** and **Evaluation** sections of this report to those stories is how we show alignment with the course, not only with what players would want in a commercial product.
 
 The class diagram and sequence diagram helped us understand the structure and behaviour of the game before and during implementation. They made the relationships between enemies, towers, waves, the economy system, paths, map data, UI, and game state easier to discuss. In practice, this supported our modular structure and made the project easier to debug and extend.
 
