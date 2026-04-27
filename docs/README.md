@@ -13,42 +13,81 @@ You will be developing your game using [P5.js](https://p5js.org) a javascript li
 - [P5.js tutorials](https://p5js.org/tutorials/) 
 - [Coding Train P5.js](https://thecodingtrain.com/tracks/code-programming-with-p5-js) course - go here for enthusiastic video tutorials from Dan Shiffman (recommended!)
 
-## Your Game (change to title of your game)
+## Defend London
 
-STRAPLINE. Add an exciting one sentence description of your game here.
+Build clever defenses across London as ten unpredictable enemy types force you to rethink every wave.
 
-IMAGE. Add an image of your game here, keep this updated with a snapshot of your latest development.
+<p align="center">
+  <a href="./index.html">
+    <img src="./images/defend-london-cover.png" alt="Defend London cover" width="680">
+  </a>
+</p>
 
-LINK. Add a link here to your deployed game, you can also make the image above link to your game if you wish. Your game lives in the [/docs](/docs) folder, and is published using Github pages. 
+[Play Defend London](./index.html)
 
-VIDEO. Include a demo video of your game here (you don't have to wait until the end, you can insert a work in progress video)
+[Watch Demo Video](./demo/demo.mp4)
+
+<video controls width="640" src="./demo/demo.mp4">
+  Your browser does not support the video tag.
+</video>
 
 ## Your Group
 
-![Group photo](./images/group-photo.png)
+<img src="./images/group-photo.png" alt="Group photo" width="520">
 
 
 ## Team Members
 
-| Name          | Email | GithubID | Role | Completed Work |
-|---------------|-------|----------|------|----------------|
-| Jiaxi You     | <fl25387@bristol.ac.uk> | TBD | Project Manager / Tester | Project management / Testing |
-| Shasha Tang   | <wj25162@bristol.ac.uk> | TBD | Gameplay Developer | Requirements / Gameplay design |
-| Junjie Wang   | <da25293@bristol.ac.uk> | TBD | Combat Developer | Tower system / Combat mechanics |
-| Jingjing Liu  | <bd25907@bristol.ac.uk> | TBD | Level Designer | Level design / Visual assets |
-| Zejun Zhang   | <tc25992@bristol.ac.uk> | TBD | UI Developer | UI / Menu interface |
-| Mingshu Zhang | <so25258@bristol.ac.uk> | TBD | Systems Developer | Grid system / Gameplay systems / Integration |
+| Name          | Email | Role | Completed Work |
+|---------------|-------|------|----------------|
+| Jiaxi You     | <fl25387@bristol.ac.uk> | Project Manager / Tester | Project management / Testing / Game engine setup |
+| Shasha Tang   | <wj25162@bristol.ac.uk> | Gameplay Developer | Requirements / Gameplay design |
+| Junjie Wang   | <da25293@bristol.ac.uk> | Combat Developer | Tower system / Combat mechanics |
+| Jingjing Liu  | <bd25907@bristol.ac.uk> | Level Designer | Level design / Visual assets |
+| Zejun Zhang   | <tc25992@bristol.ac.uk> | UI Developer | UI / Menu interface |
+| Mingshu Zhang | <so25258@bristol.ac.uk> | Systems Developer | Grid system / Gameplay systems / Integration |
 
 
 ## Project Report
 
 ### Introduction
 
-Defend London is a London-themed tower defense game that challenges players to protect some of the city’s most iconic landmarks from continuous waves of invading enemies. The game is based on the core mechanics of traditional tower defense games, where players must strategically place and upgrade defensive structures to stop enemies from reaching key objectives. However, rather than using a generic fantasy or medieval setting, Defend London reimagines the genre through a stylized version of London, turning familiar routes, rivers, and landmarks into the foundation of its gameplay and identity.
+#### Quick Facts
 
-The game takes inspiration from well-known tower defense design principles such as wave-based progression, resource management, and tactical placement, but introduces a distinctive twist through its setting, visual style, and enemy variety. Each level is framed around recognizable London-inspired locations, such as outer city defenses, the River Thames, and the Tower of London, allowing the environment itself to become part of the player’s experience. This gives the game a stronger sense of place than many conventional tower defense titles.
+| Category | Details |
+|---|---|
+| Genre | Tower Defense |
+| Theme | Defend iconic London landmarks from enemy waves |
+| Engine | p5.js + JavaScript |
+| Levels | 3 (Outer City Defenses, River Thames, Tower of London) |
+| Enemy System | 10 enemy types with special abilities |
+| Core Features | Multiple tower classes, interactive tutorial, monster info panel, complete UI system |
 
-What makes Defend London novel is its combination of local cultural identity with a mixed roster of unusual enemies, ranging from fantasy-inspired creatures to other hostile forces, all threatening a modern, recognizable city. This contrast between classic tower defense mechanics and a uniquely London-centered theme creates a memorable experience that feels both familiar and original. By combining strategic gameplay, illustrated visuals, and landmark-based level design, Defend London offers a creative reinterpretation of the tower defense genre.
+---
+
+#### What is Defend London?
+
+Defend London is a strategy-focused tower defense game where players protect well-known London landmarks from escalating enemy waves.  
+Players place and upgrade different tower types to counter enemies with diverse abilities, from dodging and charging units to healing specialists and a multi-phase boss.  
+The result is a game that is easy to start, but rewards planning, adaptation, and long-term tactical thinking.
+
+---
+
+#### What Makes It Special?
+
+| Feature | Standard Tower Defense Pattern | Defend London Approach |
+|---|---|---|
+| Setting and Identity | Generic fantasy or abstract maps | London-themed levels built around recognizable landmarks |
+| Enemy Design | Stat variations only | 10 enemy archetypes with gameplay-changing abilities |
+| Player Guidance | Minimal onboarding | Interactive tutorial + monster info panel + full UI feedback |
+
+---
+
+#### Project Overview
+
+This report explains how the game moved from concept to implementation through requirements analysis, system design, development, and evaluation.  
+It presents our architecture decisions, balancing strategy, testing results, and reflections on sustainability, ethics, and accessibility.  
+Together, these sections show both the creative vision and the software engineering practices behind Defend London.
 
 ### Requirements 
 We use a GitHub Kanban board to track our progress; you can access it via the link here.
