@@ -1,26 +1,33 @@
 # 2026-group-14
 
+Folder layout for this repo: [`STRUCTURE.md`](./STRUCTURE.md).
+
 ## Defend London
 > Protect the landmarks. Outsmart the invaders. Defend your city.
 
-<table>
-  <tr>
-    <td align="center" width="50%">
-      <a href="https://uob-comsm0166.github.io/2026-group-14/game/index.html" target="_blank">
-        <img src="./images/defend-london-cover.png" alt="Defend London cover" width="520">
-      </a>
-      <br>
-      <a href="https://uob-comsm0166.github.io/2026-group-14/game/index.html" target="_blank">Play Now</a>
-    </td>
-    <td align="center" width="50%">
-      <a href="./demo/demo.mp4" target="_blank">
-        <img src="./images/defend-london-cover.png" alt="Defend London video cover" width="520">
-      </a>
-      <br>
-      <a href="./demo/demo.mp4" target="_blank">Watch Video</a>
-    </td>
-  </tr>
-</table>
+<div align="center">
+
+<p>
+  <a href="https://uob-comsm0166.github.io/2026-group-14/game/index.html" target="_blank">
+    <img src="./images/defend-london-cover.png" alt="Defend London — open the game in the browser" width="720">
+  </a>
+</p>
+<p>
+  <a href="https://uob-comsm0166.github.io/2026-group-14/game/index.html" target="_blank">Play Now</a>
+</p>
+
+<br>
+
+<p>
+  <a href="./demo/demo.mp4" target="_blank">
+    <img src="./images/demo-video-poster.jpg" alt="Demo video — thumbnail frame from demo.mp4" width="720">
+  </a>
+</p>
+<p>
+  <a href="./demo/demo.mp4" target="_blank">Watch Video</a>
+</p>
+
+</div>
 
 
 ## Your Group
@@ -128,9 +135,6 @@ We selected Prototype A because it gave us clearer subsystem boundaries and lowe
 ---
 
 ### Requirements
-
-We used a GitHub Kanban board to track requirement progress and development tasks:  
-https://github.com/orgs/UoB-COMSM0166/projects/168
 
 #### Stakeholders
 
@@ -287,13 +291,13 @@ Each frame: the game calls `update()` → wave manager spawns enemies → enemie
 
 #### Development workflow
 
-We agreed **team responsibilities** and a **Git workflow** (branch strategy, integration rules) **at the outset**, wrote them into a living document, and **revised and followed that guide** for the rest of the module so practice and documentation stayed aligned.
+We agreed team responsibilities and a **Git workflow** (branch strategy, integration rules) at the outset, wrote them into a living document, and revised and followed that guide for the rest of the module so practice and documentation stayed aligned.
 
-[**Git workflow guide (full text)**](./workflow.md)
+[**Git workflow guide (full text)**](./process/workflow.md)
 
 <img src="./images/process/git-workflow-guide.png" width="400" alt="Excerpt: Git workflow guide in the repo docs">
 
-In day-to-day work we used a **feature-branch** model: scoped work on `feature/*` and personal lines such as `*_dev`, fixes on `gamefix*`, and integration through **Pull Requests** (e.g. **#23**, **#24**) with review and CI before merge.
+In day-to-day work we used a feature-branch model: scoped work on `feature/*` and personal lines such as `*_dev`, fixes on `gamefix*`, and integration through pull requests (e.g. #23, #24) with review and CI before merge.
 
 <img src="./images/process/git-branches.png" width="400" alt="Example: repository branches on GitHub">
 
@@ -389,7 +393,7 @@ Our development followed a **12-week** iterative process in **four** phases.
 **Deliverables**
 - **Six tower types** with distinct abilities (Basic / Slow / Area / Crystal / Steam / Alchemist)
 - **Multi-phase boss** (Gentleman Bug) with staged mechanics
-- **Enemy ability expansion**: **charge**, **dodge**, **dive**, **heal**, **explode**
+- **Enemy ability expansion**: charge, dodge, dive, heal, explode
 - **Initial balancing pass** using spreadsheet-style reasoning plus playtest feedback
 
 </td>
@@ -425,7 +429,7 @@ Our development followed a **12-week** iterative process in **four** phases.
 
 #### Technical highlight: state management
 
-Switching between **menu**, **level select**, **playing**, **paused**, **win**, **lose**, and other modes risks **orphaned UI** or **input handlers** if every screen is bolted on ad hoc.
+Switching between menu, level select, playing, paused, win, lose, and other modes risks orphaned UI or input handlers if every screen is bolted on ad hoc.
 
 We centralised transitions in `GameManager.setState`, backed by a single `GameState` string enum in `constants.js`. There is no separate `GameStateManager` class in this codebase.
 
@@ -615,7 +619,7 @@ We should also be clear about technical debt. We relied on manual and black-box 
 
 ### Course concepts in practice
 
-Course concepts mattered most when they shaped day-to-day decisions. Requirements work (stakeholders, user stories, epics) helped us hold scope boundaries early ([stakeholders & user stories](./design/stakeholders_and_user_stories.md)). Class and sequence diagrams reduced interface ambiguity before integration. Iterative delivery over twelve weeks, together with GitHub Project tracking and [`workflow.md`](./workflow.md), helped us break larger risks into reviewable steps. Evaluation methods (think-aloud, heuristics, NASA-TLX, SUS) also changed priorities: we started treating gameplay difficulty and interface usability as different problems that need different fixes. SusAF then widened our quality lens to include accessibility, privacy clarity, maintainability, and runtime cost.
+Course concepts mattered most when they shaped day-to-day decisions. Requirements work (stakeholders, user stories, epics) helped us hold scope boundaries early ([stakeholders & user stories](./design/stakeholders_and_user_stories.md)). Class and sequence diagrams reduced interface ambiguity before integration. Iterative delivery over twelve weeks, together with GitHub Project tracking and [`workflow.md`](./process/workflow.md), helped us break larger risks into reviewable steps. Evaluation methods (think-aloud, heuristics, NASA-TLX, SUS) also changed priorities: we started treating gameplay difficulty and interface usability as different problems that need different fixes. SusAF then widened our quality lens to include accessibility, privacy clarity, maintainability, and runtime cost.
 
 ### Learning gains and mindset shifts
 

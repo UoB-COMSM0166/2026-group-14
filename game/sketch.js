@@ -2,7 +2,7 @@ let game;
 let _bgImage, _settingsBgImg;
 let gameImages = {};
 let canvas;
-/** p5.Image — custom axe cursor for dismantle mode (set in setup). */
+// p5.Image custom axe cursor for dismantle mode (set in setup).
 let dismantleCursorImg;
 
 function createDismantleAxeCursor() {

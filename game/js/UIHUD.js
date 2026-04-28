@@ -633,9 +633,7 @@ class UIHUD {
     pop();
   }
 
-  /**
-   * Handle main menu click, return true if handled
-   */
+  // Handle main menu click; return true if handled.
 
   handleMenuClick(mx, my) {
     const rects = this.getMenuButtonRects();
@@ -748,9 +746,7 @@ class UIHUD {
     return false;
   }
 
-  /**
-   * Settings page - called when GameState.SETTINGS
-   */
+  // Settings page renderer for GameState.SETTINGS.
   drawSettings() {
     this.hideMenuButtons();
     this.hideLoginUI();
@@ -772,10 +768,7 @@ class UIHUD {
     pop();
   }
 
-  /**
-   * Draw top HUD bar (45px)
-   * @param {boolean} showPaused - Show PAUSED in centre
-   */
+  // Draw top HUD bar (45px); showPaused toggles PAUSED label in the center.
   // UIHUD.js
   drawTopHUDBar(showPaused = false) {
     const H = HUD_HEIGHT;
@@ -984,15 +977,13 @@ class UIHUD {
     this.waveBonusTimer = 180;
   }
 
-  /** Show a "Can't build here!" style placement error for ~1.5 s. */
+  // Show a placement error message for about 1.5 seconds.
   showPlacementError(message, durationFrames = 90) {
     this.placementMessage = message;
     this.placementMessageUntilFrame = frameCount + durationFrames;
   }
 
-  /**
-   * Win screen - called when GameState.WIN
-   */
+  // Win screen renderer for GameState.WIN.
   drawWinScreen() {
     this.hideAll();
     this.endScreenButtons = [];

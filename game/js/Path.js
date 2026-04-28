@@ -1,9 +1,7 @@
 // Path — Enemy movement path
 
 class Path {
-  /**
-   * @param {Array<{x: number, y: number}>} waypoints - Ordered list of points
-   */
+  // waypoints: ordered list of points { x, y }
   constructor(waypoints) {
     this.waypoints = waypoints.map(wp => createVector(wp.x, wp.y));
   }

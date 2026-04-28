@@ -24,7 +24,7 @@ class SoundManager {
         }
     }
 
-    /** Reserved for menu / level music routing (p5.sound uses separate tracks). */
+    // Reserved for menu/level music routing (p5.sound uses separate tracks).
     playTrack(_name) {
         // No-op: background music is driven by UIHUD / p5.sound where configured.
     }

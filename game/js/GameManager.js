@@ -1140,14 +1140,8 @@ class GameManager {
     pop();
   }
 
-  /**
-   * Single source of truth for "can the player build a tower on this grid cell?".
-   * Used by: debug grid overlay, tower-placement logic, hover preview.
-   *
-   * @param {number} col  grid column (integer)
-   * @param {number} row  grid row    (integer)
-   * @returns {boolean}
-   */
+  // Single source of truth for whether a tower can be built on this grid cell.
+  // Used by debug grid overlay, tower placement logic, and hover preview.
 
   getTowerCenterXFromAnchor(col) {
     return colToCenterX(col) + CURRENT_GRID_SIZE / 2;
@@ -1224,11 +1218,8 @@ class GameManager {
     return true;
   }
 
-  /**
-   * Debug overlay (D key). Does not affect gameplay.
-   * If debugBuildGrid exists (after first M this level), colours follow the M-draft;
-   * otherwise they follow mapGrid (GRASS vs other).
-   */
+  // Debug overlay (D key). Does not affect gameplay.
+  // If debugBuildGrid exists, colours follow the M-draft; otherwise use mapGrid.
   drawDebugGrid() {
     if (!this.debugMode) return;
 

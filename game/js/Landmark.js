@@ -1,13 +1,10 @@
 // Landmark - Protected objective building
 
 class Landmark {
-  /**
-   * @param {string} name - Landmark name (e.g. "Big Ben", "Tower Bridge", "Buckingham Palace")
-   * @param {number} maxHp - Max HP
-   * @param {number} x - X coordinate on canvas
-   * @param {number} y - Y coordinate on canvas
-   * @param {SoundManager} sound - Sound manager instance
-   */
+  // name: landmark name (e.g. Big Ben, Tower Bridge, Buckingham Palace)
+  // maxHp: landmark max HP
+  // x, y: canvas position
+  // sound: optional sound manager instance
   constructor(name, maxHp, x, y, sound = null) {
     this.name = name;
     this.maxHp = maxHp;
@@ -17,10 +14,7 @@ class Landmark {
     this.sound = sound;
   }
 
-  /**
-   * Landmark takes damage
-   * @param {number} amount - Damage amount
-   */
+  // Apply damage to this landmark.
   takeDamage(amount) {
     this.hp -= amount;
     if (this.hp < 0) this.hp = 0;
@@ -28,18 +22,12 @@ class Landmark {
     console.log(`[Combat] ${this.name} took ${amount} damage. HP: ${this.hp}/${this.maxHp}`);
   }
 
-  /**
-   * Check if landmark is destroyed
-   * @returns {boolean}
-   */
+  // Return true if the landmark is destroyed.
   isDestroyed() {
     return this.hp <= 0;
   }
 
-  /**
-   * Get current HP as fraction (0-1) for bar display
-   * @returns {number}
-   */
+  // Return HP ratio (0-1) for UI display.
   getHpPercent() {
     return this.hp / this.maxHp;
   }
@@ -76,9 +64,7 @@ class Landmark {
     pop();
   }
 
-  /**
-   * Reset HP (when restarting level)
-   */
+  // Reset HP when restarting level.
   reset() {
     this.hp = this.maxHp;
   }

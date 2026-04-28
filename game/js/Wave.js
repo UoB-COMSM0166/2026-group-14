@@ -42,13 +42,13 @@ function _scaleWaveGroups(groups, waveIndex, totalWaves) {
 
   let countOffset = 0;
 
-  // 前期减少数量
+  // Reduce early-wave enemy count.
   if (progress <= 0.20) {
     countOffset = -3;
   } else if (progress <= 0.40) {
     countOffset = -1;
   }
-  // 后期稍微增强
+  // Slightly increase count in later waves.
   else if (progress >= 0.70) {
     countOffset = 3;
   }

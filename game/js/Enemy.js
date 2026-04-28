@@ -2,11 +2,8 @@
 
 
 class Enemy {
-  /**
-   * @param {Path}   path   - The path this enemy will follow
-   * @param {Object} config - { type, hp, speed }
-   *                          Any missing field falls back to ENEMY_STATS preset.
-   */
+  // path: path this enemy will follow
+  // config: { type, hp, speed }, missing fields use ENEMY_STATS defaults
   constructor(path, config = {}, sound = null) {
     this.path = path;
     this.sound = sound;
@@ -84,10 +81,8 @@ class Enemy {
     this._reachedEnd = false;
   }
 
-  /**
-   * Whether towers/player can currently target/select this enemy.
-   * "Diving" is an untargetable (invisible) phase.
-   */
+  // Return whether this enemy can be targeted/selected right now.
+  // "Diving" is an untargetable (invisible) phase.
   isTargetable() {
     return this._alive && !this._reachedEnd && !this.isDiving;
   }

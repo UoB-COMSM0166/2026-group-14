@@ -1,34 +1,22 @@
 // Economy - Gold economy system
 
 class Economy {
-    /**
-     * @param {number} initialGold - Initial gold amount
-     */
+    // initialGold: initial gold amount
     constructor(initialGold) {
       this.gold = initialGold;
     }
   
-    /**
-     * Get current gold amount
-     */
+    // Get current gold amount.
     getGold() {
       return this.gold;
     }
   
-    /**
-     * Check if can afford cost
-     * @param {number} cost - Gold required
-     * @returns {boolean}
-     */
+    // Return true if current gold covers cost.
     canAfford(cost) {
       return this.gold >= cost;
     }
   
-    /**
-     * Spend gold (tower purchase, upgrade)
-     * @param {number} cost - Amount to spend
-     * @returns {boolean}
-     */
+    // Spend gold for purchase/upgrade if affordable.
     spendGold(cost) {
       if (this.canAfford(cost)) {
         this.gold -= cost;
@@ -40,18 +28,13 @@ class Economy {
       }
     }
   
-    /**
-     * Add gold (enemy kill reward)
-     * @param {number} amount - Amount to add
-     */
+    // Add reward gold.
     addGold(amount) {
       this.gold += amount;
       console.log(`[Game] Gained ${amount} gold, total: ${this.gold}`);
     }
   
-    /**
-     * Reset gold (when restarting level)
-     */
+    // Reset gold when restarting level.
     reset(initialGold) {
       this.gold = initialGold;
     }
