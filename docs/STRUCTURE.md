@@ -19,11 +19,10 @@ Top-level layout for **2026-group-14** (Defend London).
 | [`design/`](design/) | Game/design specs: enemies, towers, stakeholders, diagrams, meeting log, paper-prototype notes, inspiration. |
 | [`demo/`](demo/) | Demo and prototype **videos** (`demo.mp4`, `paper-prototype*.mp4`). |
 | [`images/`](images/) | Figures for the report: maps, diagrams, dev phases, evaluation charts, cover art. |
-| [`feedback/`](feedback/) | Consolidated prototype feedback. |
 | [`meeting_notes/`](meeting_notes/) | Pointer to the shared meeting log in `design/`. |
 | [`weekly_progress/`](weekly_progress/) | Per-week submission folders; each may contain a `README.md` linking to canonical artifacts elsewhere. |
 
 ## Conventions
 
-- **Single source of truth:** Stakeholder stories, class/sequence diagrams, group photo, and paper-prototype markdown live under `design/` or `images/` (or `demo/` for video). Weekly folders link there instead of copying.
+- **Single source of truth:** Stakeholder stories, class/sequence diagrams, and group photo live under `design/` or `images/` (or `demo/` for video). Some weekly folders also keep a local copy of submission files; the design archive remains the main reference where noted.
 - **Asset licences:** Third-party art/audio credits are in [`game/assets/license.txt`](../game/assets/license.txt).
