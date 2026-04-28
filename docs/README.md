@@ -567,45 +567,33 @@ Targeted **inspection** and **manual** execution of sensitive logic (no claimed 
 
 ### Process
 
-#### Team collaboration
+#### Development workflow
 
-Our game development process was organised around regular team coordination, shared documentation, and a common project board.
+We used a **feature-branch** model: scoped work on `feature/*` and personal lines such as `*_dev`, fixes on `gamefix*`, and integration through **Pull Requests** (e.g. **#23**, **#24**) with review and CI before merge.
 
-- We used the GitHub project board as our primary task tracker. The board captured feature progress, bug fixes, and design tasks, which helped the team keep a shared sense of priority.
-- Design work and decisions were documented in the `/docs` folder, including the use case model, class diagrams, and sequence diagrams.
-- We held frequent group discussions to decide the game direction, with an early focus on choosing a genre that was both playable and technically achievable.
+<img src="./images/process/git-branches.png" width="400" alt="Example: repository branches on GitHub">
 
-#### Role distribution and workflow
+| Branch type | Examples | Purpose |
+|-------------|----------|--------|
+| `feature/*` | `feature/tower-system`, `feature/enemy-wave-system` | New functionality |
+| `*_dev` | `zejun_dev`, `sound_dev` | Subsystem / personal line |
+| `gamefix*`, `develop`, `design` | `gamefix`, `gamefix2`, `develop`, `design` | Fixes, integration, design experiments |
 
-The team divided the work into major subsystems:
+#### Task management
 
-- **Game mechanics and balance**: wave manager, enemy statistics, tower effects, and the balance formula that guided difficulty tuning.
-- **UI and interaction**: menu flow, HUD, settings, and feedback for tower placement.
-- **Level design and assets**: map layouts, enemy paths, and London-themed environment details.
-- **Quality and debugging**: buildable-grid alignment, rendering stability, and playable prototype testing.
+Work was tracked on a **GitHub Project** board; [open the project](https://github.com/orgs/UoB-COMSM0166/projects/168) for the live board.
 
-Although individual roles were flexible, this structure helped each member focus on a specific area while still collaborating across the whole game.
+<img src="./images/process/kanban.png" width="400" alt="Example: GitHub Project board">
 
-#### Process timeline
+#### Communication
 
-We followed a four-phase development path:
+Meeting outcomes and ad-hoc plans were written up in a shared log so the group had a record of decisions. [Meeting notes →](./meeting_notes/)
 
-1. **Prototype**: built the core loop with a single enemy type, one basic tower, and a playable grid map.
-2. **Foundation**: added level progression, the economy system, and basic win/lose conditions.
-3. **Content and balance**: introduced multiple enemy types, additional towers, and enemy abilities, while tuning difficulty across levels.
-4. **Polish**: improved menus, added sound and music, implemented tutorial guidance, and refined HUD feedback.
+<img src="./images/process/meeting-notes.png" width="400" alt="Example: shared meeting notes">
 
-#### Challenges and adaptation
+#### Contribution summary
 
-- At first, the team needed a stronger shared language for balancing the game. We solved this by defining a simple firepower-versus-pressure formula that made tuning discussions more objective.
-- Communication and task handoff were not perfect early on; some features overlapped and required repeated integration checks. Using the project board and more frequent mini-demos helped the team stay aligned.
-- The map grid alignment issue was a technical bottleneck. We adapted by building a debug overlay tool, which reduced uncertainty and made level adjustments much faster.
-
-#### Reflection
-
-Overall, our process combined creative design with practical engineering. We learned that good collaboration requires both a clear roadmap and flexible iteration. The team improved most when we turned vague problems into concrete tasks: a UI bug became a settings refinement task, and an unfair level became a balance formula adjustment.
-
-The process also taught us that documentation matters. Writing user stories, epics, and diagrams helped the team agree on what to build, while evaluation notes gave us a better basis for prioritising improvements.
+**GitHub Insights → Contributors** reflects activity across the **six** team members over the module. **Roles and responsibilities** are in **Team Members** / the **Introduction**; we do not repeat per-person breakdowns here.
 
 ## Sustainability, Ethics and Accessibility
 
