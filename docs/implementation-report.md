@@ -97,46 +97,42 @@ Development moved through four natural phases:
 
 ## Technical Challenge 1: Balancing Difficulty for Engaging Combat
 
-**Challenge.** The experience we wanted was specific: players should feel they *nearly* lost but just barely won. Early playtests revealed wild swings — some waves trivially easy, others immediately unwinnable. Worse, the team had no shared language for diagnosing why a wave felt unfair.
+**Problem.** We wanted battles to feel tense but fair: players should feel under pressure, not helpless. Early playtests swung between easy waves and sudden difficulty spikes, and the team had no shared way to explain why a wave felt wrong.
 
-**Technical Difficulty.** Without a principled framework, tuning becomes guesswork. A value that feels fair in wave 1 can cascade into an unwinnable state by wave 3. We needed a diagnostic tool that could express difficulty as a comparable quantity.
+**Technical difficulty.** Balance decisions were tightly coupled: a small change in one wave could break later waves. Without a common metric, tuning relied too much on intuition.
 
-**Solution.** We derived a working balance formula:
+**Solution.** We introduced a simple balancing model as a design-time diagnostic:
 
 > **Player Firepower** = towers × damage × attack duration  
 > **Enemy Pressure** = enemies per wave × individual HP
 
-The target was rough parity, tilting slightly toward enemies to maintain tension. This formula gave us a common language — when someone proposed buffing an enemy, we could immediately estimate how much additional firepower players would need.
+The target was rough parity, with a slight enemy advantage to preserve tension. This gave the team a shared language: when enemy stats changed, we could estimate the corresponding player firepower needed.
 
-Concretely, Level 1 opens with 400 gold, enough for five or six basic towers before the first wave. The 60-gold wave bonus was calibrated so players always feel one tower short of comfortable. By wave 3, slow but durable Hedgehogs arrive, forcing players to have already scaled their defences. Each leaked enemy deals significant landmark damage — five uncontested breaches end a run — making every placement decision feel consequential.
+Concretely, Level 1 opens with 400 gold, enough for five or six basic towers. The 60-gold wave bonus keeps players slightly resource-constrained, so placement choices still matter. Later waves add durable enemies (for example, Hedgehogs) that require players to scale damage in advance.  
 
-Verification required real playtesting. When Level 3’s final boss wave proved consistently overwhelming, we reduced the boss count and extended the preparation window. These cycles — always returning to the formula as a diagnostic anchor — produced a difficulty curve that testers described as challenging but fair.
+We validated every pass with playtesting. When Level 3 boss waves were consistently overwhelming, we reduced boss count and increased preparation time. Repeating this loop with the same model produced a curve testers described as challenging but fair.
 
-**Design Value.** The formula transformed subjective debates ("this feels too hard") into tractable discussions ("enemy pressure exceeds firepower by 40% — where should we adjust?").
+**Result.** Balance reviews became specific and actionable: instead of "too hard," the team could discuss where pressure exceeded expected firepower and tune the exact source.
 
 ## Technical Challenge 2: Diverse Abilities That Reward Adaptive Strategy
 
-**Challenge.** Tower defence risks monotony if each level simply sends more enemies. We wanted every level to introduce mechanics requiring genuinely new strategies, not just more towers.
+By Week 5, testers told us Level 2 felt "too easy, then suddenly impossible." That feedback exposed a pacing problem rather than a single overpowered unit.
 
-**Technical Difficulty.** With six tower types and ten enemy types, interactions multiply rapidly. An ability balanced in isolation might break the game in combination. We needed a system where any stat could be adjusted in one place without touching unrelated logic.
+In Week 6, we created a balancing spreadsheet to estimate whether HP growth, gold rewards, and tower costs were scaling together. The formulas were simple, but they gave the team a shared reference point when discussions became subjective.
 
-**Solution.** We centralised all statistics in configuration tables, making iterative tuning fast and safe. More importantly, we designed abilities around strategic trade-offs rather than raw difficulty increases.
+In Week 7, we shipped tuned values based on that pass and reran playtests. Feedback shifted from broad frustration to specific comments such as "Wave 4 is hard but fair," which made iteration much faster.
 
-Level 1 introduces only basic enemies and towers, letting players master fundamentals. Level 2 unlocks the Crystal Tower — a support unit that boosts nearby towers rather than attacking directly. This forces a genuine decision: does boosting existing towers outperform simply adding more firepower? The level also introduces enemies with active abilities: Knights that charge when wounded, Archers that evade projectiles, Giants that leap past defensive lines.
-
-Level 3 escalates further with abilities designed to counter established strategies. The Treant Mage heals nearby enemies, threatening to undo damage already dealt — forcing players to prioritise targets. The Goblin Bomber explodes on death, disabling nearby towers and punishing overly clustered defences. The final boss, Gentleman Bug, progresses through three phases: summoning minions, taunting towers to reduce their damage, and gaining resistance as it weakens.
-
-When playtesting revealed the Treant Mage's healing outpaced realistic player damage, a single configuration change resolved the issue instantly — demonstrating how centralised tuning enabled rapid iteration.
-
-**Design Value.** Each ability was designed as a puzzle rewarding adaptive thinking, not an arbitrary difficulty spike.
+These formulas were never perfect, but they gave us a common language for balance decisions and reduced argument by intuition alone.
 
 ## Technical Challenge 3: Grid Alignment and Debug Tooling
 
-**Challenge.** Each level's invisible tile grid must align precisely with its visual background. A boundary offset by even a few pixels could block a visually open area from building, or allow towers to clip into enemy paths — both confusing to players and nearly impossible to diagnose by eye.
+**Problem.** The logical tile grid must match hand-drawn map art exactly. Even a small offset can make buildable areas look blocked, or let towers overlap enemy routes.
 
-**Solution.** We built a debug mode that overlays the tile grid directly on screen, colour-coding buildable versus blocked cells, and printing coordinates to the console. Arrow keys adjust grid offsets in real time; a path visualisation confirms that enemy waypoints trace the intended route exactly.
+**Technical difficulty.** Misalignment issues are hard to diagnose by eye, especially when pathing, placement, and UI boundaries interact.
 
-This tooling transformed hours of guesswork into minutes of precise adjustment. If we were to start over, we would build it in the first week rather than the third.
+**Solution.** We added a debug mode that overlays buildable/blocked cells, prints coordinates, and visualizes enemy waypoints. Offsets can be adjusted in real time, so map alignment and path correction are immediately visible.
+
+**Result.** A process that previously took hours of trial and error dropped to minutes. This tooling became part of our normal iteration workflow and reduced late-stage map bugs.
 
 ## Conclusion
 

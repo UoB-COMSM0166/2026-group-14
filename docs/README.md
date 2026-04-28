@@ -10,15 +10,14 @@
         <img src="./images/defend-london-cover.png" alt="Defend London cover" width="520">
       </a>
       <br>
-      🎮 <a href="../index.html" target="_blank">Play Now</a>
+      <a href="../index.html" target="_blank">Play Now</a>
     </td>
     <td align="center" width="50%">
-      <video controls width="520" poster="./images/defend-london-cover.png">
-        <source src="./demo/demo.mp4" type="video/mp4">
-        Your browser does not support the video tag.
-      </video>
+      <a href="./demo/demo.mp4" target="_blank">
+        <img src="./images/defend-london-cover.png" alt="Defend London video cover" width="520">
+      </a>
       <br>
-      📺 <a href="./demo/demo.mp4" target="_blank">Watch Video</a>
+      <a href="./demo/demo.mp4" target="_blank">Watch Video</a>
     </td>
   </tr>
 </table>
@@ -89,7 +88,7 @@ Build towers, manage resources, and survive increasingly challenging waves acros
 
 ---
 
-#### What Makes It Special ✨
+#### What Makes It Special
 
 Defend London combines authentic London landmark settings, a diverse enemy roster with distinct behaviors, and a guided onboarding flow that helps new players learn core mechanics quickly.
 
@@ -158,7 +157,7 @@ The player starts a session, enemy waves begin, and towers are placed to defend 
 
 #### User Stories
 
-User stories capture requirements from the player’s perspective, using the standard form: **“As a [role], I want [feature], so that [benefit].”** We defined **six** stories: **five functional** (core systems and feedback) and **one non-functional** (performance), with **role diversity**—**casual player**, **strategic player**, **new player**, and **all players**—so analysis reflects different needs, not a single “average” user. A longer backlog and alternative **Given / When / Then** criteria appear in [`docs/design/stakeholders_and_user_stories.md`](./design/stakeholders_and_user_stories.md).
+User stories capture requirements from the player perspective, using the standard form: "As a [role], I want [feature], so that [benefit]." We defined six stories: five functional (core systems and feedback) and one non-functional (performance), with role diversity across casual players, strategic players, new players, and all players. This avoids designing for a single "average" user. A longer backlog and alternative Given/When/Then criteria appear in [`docs/design/stakeholders_and_user_stories.md`](./design/stakeholders_and_user_stories.md).
 
 | User Story | Analysis |
 |------------|----------|
@@ -183,10 +182,6 @@ Following course material on requirements, we classified every story as either a
 | Audio System | BGM and sound effects | Distinct placement/damage/death sounds |
 | Map & Environment | Grid logic and visual theme | Clear path vs buildable separation |
 
-#### Reflection
-
-This phase helped us separate scope levels: epics tracked product outcomes, while user stories stayed concrete and testable. We used requirement type and target component as a quick coverage check before implementation. Acceptance criteria on the Kanban board and in the design doc also made "done" clearer across both features and process work.
-
 ---
 
 ### Design
@@ -196,6 +191,7 @@ This phase helped us separate scope levels: epics tracked product outcomes, whil
 Defend London uses a modular architecture where each subsystem handles one responsibility. `GameManager` coordinates frame updates and state transitions between menu, gameplay, and end screens.
 
 ```mermaid
+%%{init: {"flowchart": {"nodeSpacing": 20, "rankSpacing": 22}, "themeVariables": {"fontSize": "12px"}} }%%
 flowchart TD
     GM[GameManager]
     LV[Level]
@@ -213,8 +209,6 @@ flowchart TD
     LV --> UI
     EC --> UI
 ```
-
-This separation enables parallel development and localized debugging—issues can be traced to specific modules without full-game investigation.
 
 #### Level Design: The Maps of London
 
@@ -244,7 +238,7 @@ The progression follows a deliberate learning curve: Level 1 teaches fundamental
 
 #### Tower System
 
-Tower parameters are defined in centralized config tables (`TOWER_TYPES`), enabling balance adjustments without modifying core logic.
+The tower roster is designed as a role-based system rather than six isolated units: basic towers provide stable single-target damage, slow and area towers control enemy tempo and spacing, support-oriented towers amplify surrounding output, and high-cost towers provide burst or situational effects; we keep these parameters in `TOWER_TYPES` so balance changes can be made consistently without rewriting core combat logic, and this setup naturally encourages mixed compositions instead of one repetitive build path.
 
 | | Tower | Cost | Damage | Special ability |
 |:--:|---|--:|--:|---|
@@ -255,11 +249,9 @@ Tower parameters are defined in centralized config tables (`TOWER_TYPES`), enabl
 | <img src="../game/assets/tower_steam.png" width="40" alt="Steam cannon"> | Steam Cannon | 180 | 55 | Piercing (up to 3 targets) |
 | <img src="../game/assets/tower_alchemist.png" width="40" alt="Alchemist tower"> | Alchemist Tower | 150 | 20 | Random potion effects |
 
-The Crystal Tower exemplifies our trade-off philosophy: its attack is slow, but it **boosts** nearby towers (+25% damage in range), so players choose between stacking direct firepower and long-term synergy.
-
 #### Enemy System
 
-Enemy behavior is data-driven through `ENEMY_STATS`. Each level introduces abilities that counter common player strategies.
+Enemy design follows escalating counter-play across levels: early enemies teach movement-speed and durability basics, mid-tier enemies introduce pressure abilities such as charging and dodging, and late-game enemies force adaptation through disruption, temporary untargetability, healing, and boss-phase mechanics; with behaviours configured through `ENEMY_STATS`, each wave tests player decisions on placement, targeting, and resource timing rather than only raw DPS.
 
 **Level 1: Fundamentals**
 
@@ -285,8 +277,6 @@ Enemy behavior is data-driven through `ENEMY_STATS`. Each level introduces abili
 | <img src="../game/assets/diving_lizard.png" width="36" alt="Diving Lizard"> | Diving Lizard | 150 | 3.3 | Untargetable dive phase |
 | <img src="../game/assets/treant_mage.png" width="36" alt="Treant Mage"> | Treant Mage | 200 | 1.2 | Area healing |
 | <img src="../game/assets/gentleman_bug.png" width="36" alt="Gentleman Bug"> | Gentleman Bug | 2500 | 0.8 | 3-phase boss |
-
-The Treant Mage forces target prioritization; the Goblin Bomber punishes tower clustering. These abilities turn enemies into tactical puzzles rather than stat increases alone.
 
 #### UML diagrams
 
@@ -324,13 +314,13 @@ In day-to-day work we used a **feature-branch** model: scoped work on `feature/*
 
 #### Task management
 
-Work was tracked on a **GitHub Project** board; [open the project](https://github.com/orgs/UoB-COMSM0166/projects/168) for the live board.
+We tracked work on a **GitHub Project** board; [open the project](https://github.com/orgs/UoB-COMSM0166/projects/168) for the live board.
 
 <img src="./images/process/kanban.png" width="400" alt="Example: GitHub Project board">
 
 #### Communication
 
-Meeting outcomes and ad-hoc plans were written up in a shared log so the group had a record of decisions. [Meeting notes →](./meeting_notes/)
+We wrote meeting outcomes and ad-hoc plans into a shared log so the group had a record of decisions. [Meeting notes →](./meeting_notes/)
 
 <img src="./images/process/meeting-notes.png" width="400" alt="Example: shared meeting notes">
 
@@ -489,9 +479,13 @@ This change made map alignment and path export much quicker to iterate on, and m
 
 ##### Challenge 2: Balance formula
 
-**Problem.** Early playtests swung between **too much gold** (trivial waves) and **over-tuned enemies** (unfair spikes). **Pure gut-feel** tuning was slow and **hard to justify** in team review.
+**Problem.** In early playtests, balance was unstable. Sometimes players earned so much gold that waves felt too easy; in other runs, enemies were too strong and difficulty spiked suddenly. Tuning only by intuition took a long time and was difficult to explain clearly in team review.
 
-**Solution.** We combined **(A)** **authoritative tables in code** — `TOWER_TYPES`, `ENEMY_STATS`, `LEVEL_*_WAVE_CONFIGS`, per-kill **`reward`**, and **`WAVE_CLEAR_BONUS_GOLD`** (`constants.js` / `GameManager.js`) — with **(B)** simple **design-time formulas** to reason about scaling. The expressions below are **design-time** checks used **with** playtesting. **Shipped** tower costs are **authored** in `TOWER_TYPES`; the cost line below shapes tier spacing before those values are locked in.
+**Solution.** We used two layers together:
+- **Code truth (what the game actually uses):** `TOWER_TYPES`, `ENEMY_STATS`, `LEVEL_*_WAVE_CONFIGS`, per-kill `reward`, and `WAVE_CLEAR_BONUS_GOLD` in `constants.js` / `GameManager.js`.
+- **Design checks (for planning):** simple formulas to estimate how costs, HP, and rewards should scale before final values are locked.
+
+The formulas below are planning guides used alongside playtesting. Final tower costs are still defined in `TOWER_TYPES`; the cost formula is mainly used to keep tier spacing reasonable during balancing.
 
 ```text
 Cost ≈ BaseCost × (1 + 0.15 × TowerTier)          // design-time only
@@ -499,16 +493,18 @@ HP ≈ BaseHP × (1 + 0.2 × WaveNumber) × L_mult     // design-time only
 Reward ≈ EnemyHP × 0.1 + BaseReward                 // design-time only
 ```
 
-**Principle (team rule of thumb):** after clearing a wave, income from **kills + wave bonus** should usually allow **roughly a few** new **mid-tier** placements if the player defends well — tight enough to force choices, not a gold flood.
+**Team rule of thumb.** After clearing a wave, gold from kills plus wave bonus should usually be enough for a few new mid-tier tower placements (if the player defends well). The goal is meaningful choices, not unlimited spending.
 
 | Parameter | Level 1 | Level 2 | Level 3 | Source in code |
 |-----------|--------:|--------:|--------:|----------------|
 | **Starting gold** | **300** | **550** | **600** | `INITIAL_GOLD` (300) + per-level offsets in `GameManager` **level configs** (+0 / +250 / +300) |
 | **Wave count** | **3** | **6** | **6** | Length of `LEVEL_1_WAVE_CONFIGS` … `LEVEL_3_WAVE_CONFIGS` in `constants.js` |
 
-**Design.** Difficulty scales through **wave composition**, **enemy HP and count** in the per-level configs, and **per-level starting gold** (table above). That approach gave **finer control over pacing** on each map and made **which wave or group to adjust** easy to see in design review. The **L_mult** term in the HP line is a **planning** hook for spreadsheets and early estimates; the **authoritative** numbers live in the same config tables as the shipped waves.
+**Design impact.** Difficulty is controlled through wave composition, enemy HP/count in each level config, and per-level starting gold (table above). This made pacing easier to tune map by map, and made design discussions more concrete because we could point to a specific wave or enemy group to adjust.
 
-After this pass, feedback became more specific: testers pointed to particular waves and enemy groups instead of only saying "too easy" or "too hard."
+`L_mult` in the HP formula is a planning variable for spreadsheets and early estimates. The final shipped values are still the config-table values in code.
+
+After this pass, playtest feedback became more actionable: instead of only saying "too easy" or "too hard," testers could identify the exact wave or enemy group that felt off.
 
 ### Evaluation
 
@@ -528,17 +524,11 @@ After each session, participants completed:
 - NASA-TLX (weighted): Mental, Physical, Temporal demand, Performance, Effort, and Frustration, then pairwise weighting per participant to compute one workload score.
 - SUS (10 items): perceived usability on a 0-100 scale; industry benchmark = 68.
 
-Environment: Chrome, Edge, Firefox (current versions); `p5.js` game; desktop Windows/macOS. We also logged task completion, visible interaction errors, and frame behaviour during heavy waves (see Software testing).
-
-For qualitative support, we ran two think-aloud sessions (external participants) and one team heuristic pass. These sessions shaped the issue list and UI priorities. The details align with the severity table used during iteration (see [`docs/weekly_progress/week9_evaluation_quality_and_testing/week9_evaluation_quality_and_testing.md`](./weekly_progress/week9_evaluation_quality_and_testing/week9_evaluation_quality_and_testing.md)).
-
 ---
 
 #### User testing: NASA-TLX
 
 <img src="./images/eval/nasa-tlx-aggregate.png" alt="Aggregate NASA-TLX workload: Simple vs Hard mode" width="520">
-*Figure (NASA-TLX aggregate): weighted overall workload score (weighted sum of Mental, Physical, Temporal, Performance, Effort, Frustration); within-subject sample size **n = 10**; significance marker: Hard > Simple, Wilcoxon signed-rank **W = 0, p < 0.05** (*). Source chart: [`NASA_TLX_Final_Comparison.png`](./weekly_progress/week8_quantitative_evaluations/NASA_TLX_Final_Comparison.png).*
-
 | Condition | Mean workload | Interpretation |
 |-----------|---------------|----------------|
 | **Simple (Level 1)** | **31.3** | Low–moderate cognitive load |
@@ -551,8 +541,6 @@ From Simple to Hard, perceived workload more than doubled (about +128% on the ag
 #### User testing: SUS
 
 <img src="./images/eval/sus-aggregate.png" alt="Aggregate SUS: Simple vs Hard vs benchmark 68" width="520">
-**Figure (SUS aggregate).** System Usability Scale mean score (0-100) for Simple vs Hard with benchmark = 68; within-subject sample size **n = 10**; paired Simple vs Hard difference is significant (Wilcoxon signed-rank **W = 0, p < 0.05**). Source chart: [`SUS_Final_Comparison.png`](./weekly_progress/week8_quantitative_evaluations/SUS_Final_Comparison.png).
-
 | Condition | Mean SUS | Adjective rating (Bangor) |
 |-----------|----------|-----------------------------|
 | **Simple (Level 1)** | **88.0** | Excellent (“A”) |
@@ -562,7 +550,6 @@ From Simple to Hard, perceived workload more than doubled (about +128% on the ag
 Both conditions stayed above 68, so players still considered the interface usable even when the game was hard. The ~13.7 point drop from Simple to Hard reflects challenge rather than broken menus, consistent with [`SUS_evaluations.md`](./weekly_progress/week8_quantitative_evaluations/SUS_evaluations.md).
 
 <img src="./images/eval/sus-per-user.png" alt="SUS per user: all 10 participants vs benchmark" width="520">
-**Figure (SUS per participant).** Individual SUS scores (0-100) for all participants against benchmark = 68; sample size **n = 10**; paired Simple vs Hard difference is significant (Wilcoxon signed-rank **W = 0, p < 0.05**). Source chart: [`SUS_User_Comparison.png`](./weekly_progress/week8_quantitative_evaluations/SUS_User_Comparison.png).
 
 NASA-TLX and SUS point to the same conclusion: challenge rises with difficulty, while interface usability stays in a good range. Our qualitative and heuristic findings then translate this into concrete fixes for HUD, settings, and wave information.
 
@@ -622,7 +609,7 @@ Running in the browser avoids a dedicated save server for the single-player loop
 
 ### Economic Sustainability
 
-Defend London ships as static `p5.js` and JavaScript, so there is no paid hosting or custom API requirement for the current design—appropriate for a module budget. Splitting enemies, towers, economy, waves, and map data across files keeps maintenance scoped, provided balance numbers are gradually centralised so tuning does not sprawl.
+Defend London runs as static `p5.js` and JavaScript files, so the current version does not require paid hosting or a backend. Splitting enemies, towers, economy, waves, and map data across files keeps maintenance scoped, provided balance numbers are gradually centralised so tuning does not sprawl.
 
 ### Technical Sustainability
 
@@ -652,14 +639,11 @@ Course concepts mattered most when they shaped day-to-day decisions. Requirement
 
 Several useful lessons came from friction points. We began by prioritising feature completeness, then realised integration quality and feedback clarity had a bigger effect on player experience. We also expected balancing to be mostly intuition-driven; in practice, lightweight formulas plus structured playtest evidence gave faster decisions and clearer team agreement. Finally, once ownership, branch discipline, and review expectations were explicit, merge conflicts dropped and debugging became more local.
 
-Our biggest mindset shift was moving from defending initial ideas to treating user feedback as design data. When players struggled with wave information, menu flow, or readability, we changed the HUD, tutorial, and settings cues instead of blaming user error. That improved both the game and our engineering judgement: internal correctness is not enough if players cannot read the system under pressure.
+Our biggest mindset shift took longer than we expected. When early testers said wave information was confusing, we spent time explaining why our design was "reasonable." By Week 8, we stopped doing that: if players could not understand something, we treated it as a design problem and changed the HUD, tutorial, and settings cues.
 
 ### Future directions
 
-- **Player experience:** keyboard and display options, clearer in-game explanation of local saves and privacy
-- **Performance and assets:** compress and prune media; measure load under heavy waves
-- **Content:** more London-themed set-pieces, enemy and level variety, if the core loop were extended
-- **Maintainability:** centralise balance and config, short maintainer notes, more regression checks on placement and wave handover (see Software testing in Evaluation)
+Looking ahead, we would improve player experience with more keyboard and display options, and with clearer in-game explanations of local saves and privacy. On performance and resources, we would compress and trim media assets and measure system load more systematically during heavy waves. If the core loop were extended, we would add more London-themed scenarios, alongside greater enemy and level variety. For maintainability, we would centralise balance and configuration further, provide short maintainer-facing notes, and add more regression checks for placement logic and wave handover (see Software testing in Evaluation).
 
 ## Contribution Statement
 
