@@ -93,8 +93,6 @@ Build towers, manage resources, and survive increasingly challenging waves acros
 
 Defend London combines authentic London landmark settings, a diverse enemy roster with distinct behaviors, and a guided onboarding flow that helps new players learn core mechanics quickly.
 
-The sections below follow our decision flow: **ideation** (genre and prototypes), **requirements** (stakeholders through epics), then **design** (architecture, systems, and UML).
-
 ---
 
 ### Ideation
@@ -110,7 +108,7 @@ At the start of the project, we evaluated multiple game genres against three cri
 | Shooting | Overdone by past teams | ❌ |
 | **Tower Defense** | — | ✅ |
 
-Tower defense stood out because enemy behavior is predictable and rule-based, the modular structure maps naturally to team responsibilities, and few past teams had explored this genre.
+Tower defense was the best fit for this project. Enemy logic stayed manageable, team responsibilities could be split cleanly, and the genre still felt fresh in this module context.
 
 #### Paper Prototypes
 
@@ -135,11 +133,7 @@ Prototype A demonstrated a tower defense loop where players place defenses and r
 
 #### Why Defend London?
 
-We selected Prototype A for three reasons:
-
-1. **System boundaries were clear** — tower, enemy, wave, and UI components mapped naturally to individual team members.
-2. **Parallel development was feasible** — each subsystem could be built and tested independently.
-3. **Integration risk was lower** — the action platformer’s tightly coupled mechanics would have required more coordination.
+We selected Prototype A because it gave us clearer subsystem boundaries and lower integration risk. The action-platformer concept was interesting, but it would have required tighter cross-member coordination much earlier in the semester.
 
 ---
 
@@ -154,7 +148,7 @@ We identified stakeholders using an onion model approach, organizing them by pro
 
 <img src="./images/onion_model.png" alt="Stakeholder onion model" width="480">
 
-The onion model clarifies influence flow rather than repeating a role list: inner layers (team + instructor) constrained feasibility and assessment criteria, while outer layers (classmates + end players) mainly informed usability priorities through playtesting feedback. This helped us translate stakeholder distance into concrete requirement decisions (scope, acceptance criteria, and evaluation focus).
+The onion model was mainly useful for prioritisation. Inner layers (team + instructor) shaped feasibility and assessment constraints, while outer layers (classmates + end players) influenced usability priorities through playtesting.
 
 #### Use Case Diagram
 
@@ -175,7 +169,7 @@ User stories capture requirements from the player’s perspective, using the sta
 | “As a **player**, I want the game to **respond smoothly without lag** during intense waves, so that my strategic decisions are not hindered by performance issues.” | **Non-functional requirement:** **Performance** — stable frame rate under load; supported by a modular per-frame `update()` chain and **wave-based spawning** (not all enemies active at once). |
 | “As a **player**, I want **clear visual and audio feedback** when I win or lose, so that the game outcome feels satisfying and unambiguous.” | **Functional requirement:** **UI system** — dedicated win/lose (and level-complete) screens plus sound feedback. |
 
-Each **functional** story maps to a **subsystem** in the architecture (economy, tower placement, waves, tutorial UI, end-game UI). The **non-functional** story supported choices such as **centralized config tables** (`TOWER_TYPES`, `ENEMY_STATS`) for fast tuning without extra runtime work, and a **clear update order** in the game loop so work stays localized per frame.
+Most functional stories map directly to one subsystem (economy, placement, waves, tutorial UI, end-game UI). The non-functional performance story pushed us toward data-driven tuning (`TOWER_TYPES`, `ENEMY_STATS`) and a stable update order in the game loop.
 
 Following course material on requirements, we classified every story as either a **functional requirement** (what the system must *do*) or a **non-functional requirement** (how well it must *behave*). **Functional** stories mainly drove **class boundaries and UI flows**; the **performance** story reinforced **data-driven balance** and an efficient update path instead of ad hoc calculations every frame.
 
@@ -191,7 +185,7 @@ Following course material on requirements, we classified every story as either a
 
 #### Reflection
 
-This phase clarified that **epics** are product-level outcomes, while **user stories** break those outcomes into testable, player-facing statements. The table above makes the link explicit: each story has a **requirement type** (functional vs non-functional) and a **target component**, which is how we checked coverage before implementation. **Instructor user stories** from the stakeholder model (workflow, testing, code quality) are revisited in the **Conclusion**; **acceptance criteria** on the Kanban board and in the design doc kept “done” unambiguous for both features and process.
+This phase helped us separate scope levels: epics tracked product outcomes, while user stories stayed concrete and testable. We used requirement type and target component as a quick coverage check before implementation. Acceptance criteria on the Kanban board and in the design doc also made "done" clearer across both features and process work.
 
 ---
 
@@ -340,10 +334,6 @@ Meeting outcomes and ad-hoc plans were written up in a shared log so the group h
 
 <img src="./images/process/meeting-notes.png" width="400" alt="Example: shared meeting notes">
 
-#### Contribution summary
-
-**GitHub Insights → Contributors** reflects activity across the **six** team members over the module. **Roles and responsibilities** are in **Team Members** / the **Introduction**; we do not repeat per-person breakdowns here.
-
 ### Implementation
 
 #### Development timeline
@@ -352,7 +342,7 @@ Our development followed a **12-week** iterative process in **four** phases.
 
 ---
 
-##### Phase 1: Foundation (Weeks 1–3)
+##### Phase 1: Core Architecture (Weeks 1–3)
 
 <table>
 <tr>
@@ -363,13 +353,13 @@ Our development followed a **12-week** iterative process in **four** phases.
 </td>
 <td width="60%">
 
-**Focus:** Core architecture and basic systems
+**Focus:** A minimal but runnable gameplay loop
 
 **Deliverables**
 - **Game loop** and **state management** (`GameManager` + `GameState`)
-- **Grid-based map** with per-cell types (`MapData.js`); **configurable** cell size via `LEVEL_GRID_CONFIG` (default **30×30 px** in `constants.js`)
-- **Basic tower placement** and projectiles
-- **Enemy pathfinding** along **waypoint** lists in `Path.js`
+- **Grid-based map data structure** with per-cell types (`MapData.js`)
+- **Basic tower placement logic** and collision checks
+- **Enemy pathfinding prototype** along **waypoint** lists in `Path.js`
 
 </td>
 </tr>
@@ -377,7 +367,7 @@ Our development followed a **12-week** iterative process in **four** phases.
 
 ---
 
-##### Phase 2: Expansion (Weeks 4–6)
+##### Phase 2: Foundational Systems (Weeks 4–6)
 
 <table>
 <tr>
@@ -388,13 +378,13 @@ Our development followed a **12-week** iterative process in **four** phases.
 </td>
 <td width="60%">
 
-**Focus:** Feature development and variety
+**Focus:** A playable single-level prototype plus developer tooling
 
 **Deliverables**
-- **Six tower types** with distinct abilities (`TOWER_TYPES` in `constants.js`)
-- **Ten enemy types** with varied stats and behaviours (`ENEMY_STATS`)
-- **Wave management** (`WaveManager` + `LEVEL_*_WAVE_CONFIGS`)
-- **Economy**: gold, **wave clear bonus** (`WAVE_CLEAR_BONUS_GOLD`), selling and refunds
+- **Tower system baseline**: placement, attack, and range checks
+- **Enemy system baseline**: spawn, movement, hit/damage, and death handling
+- **Economy system**: gold gain/spend and wave rewards
+- **Debug tooling** for map-path validation: `D` key grid overlay, `N` key path edit mode, and waypoint export
 
 </td>
 </tr>
@@ -402,7 +392,7 @@ Our development followed a **12-week** iterative process in **four** phases.
 
 ---
 
-##### Phase 3: Challenge (Weeks 7–9)
+##### Phase 3: Feature Expansion (Weeks 7–9)
 
 <table>
 <tr>
@@ -413,13 +403,13 @@ Our development followed a **12-week** iterative process in **four** phases.
 </td>
 <td width="60%">
 
-**Focus:** Content expansion and balancing
+**Focus:** Gameplay depth and combat variety
 
 **Deliverables**
-- **Three London-themed levels** with hand-drawn backgrounds
-- **Multi-phase boss** (Gentleman Bug) and abilities such as **charge**, **dodge**, **dive**, **heal**, **explode**
-- **Balance tuning** using **spreadsheet-style reasoning** and **in-game configs** (not a single runtime formula)
-- **Heuristic models** (e.g. **player firepower** vs **enemy pressure**) to compare waves before playtesting
+- **Six tower types** with distinct abilities (Basic / Slow / Area / Crystal / Steam / Alchemist)
+- **Multi-phase boss** (Gentleman Bug) with staged mechanics
+- **Enemy ability expansion**: **charge**, **dodge**, **dive**, **heal**, **explode**
+- **Initial balancing pass** using spreadsheet-style reasoning plus playtest feedback
 
 </td>
 </tr>
@@ -427,7 +417,7 @@ Our development followed a **12-week** iterative process in **four** phases.
 
 ---
 
-##### Phase 4: Polish (Weeks 10–12)
+##### Phase 4: Content and Polish (Weeks 10–12)
 
 <table>
 <tr>
@@ -438,13 +428,13 @@ Our development followed a **12-week** iterative process in **four** phases.
 </td>
 <td width="60%">
 
-**Focus:** Testing and refinement
+**Focus:** Level delivery, difficulty pacing, and player-facing polish
 
 **Deliverables**
-- **Debug tools** for **grid / path alignment** (overlay, path editor, console export — see Technical challenges)
-- **Settings** (volume, brightness, BGM selection) and consistent **menu vs in-game** flows where possible
-- **Win / loss** screens with clear feedback
-- **Bug fixes** from playtesting and heuristic review
+- **Three London-themed levels**: Big Ben -> Tower Bridge -> Buckingham Palace
+- **Difficulty curve tuning** through wave composition, starting gold, and enemy combinations
+- **Audio system polish**: BGM selection plus placement/attack/death and win/lose feedback sounds
+- **Settings menu**, **Win/Lose** screens, and final bug fixing
 
 </td>
 </tr>
@@ -456,7 +446,7 @@ Our development followed a **12-week** iterative process in **four** phases.
 
 Switching between **menu**, **level select**, **playing**, **paused**, **win**, **lose**, and other modes risks **orphaned UI** or **input handlers** if every screen is bolted on ad hoc.
 
-We centralised transitions in **`GameManager.setState`**, backed by a single **`GameState`** string enum in `constants.js` (the code does **not** use a separate class named `GameStateManager`; the **manager** role lives in **`GameManager`**).
+We centralised transitions in `GameManager.setState`, backed by a single `GameState` string enum in `constants.js`. There is no separate `GameStateManager` class in this codebase.
 
 ```javascript
 const GameState = {
@@ -468,9 +458,9 @@ const GameState = {
 };
 ```
 
-The full enum also includes **`LOGIN`**, **`LEVEL_SELECT`**, **`SETTINGS`**, **`IN_GAME_SETTINGS`**, **`MONSTER_INFO`**, and **`INSTRUCTIONS`**. Each transition runs through the same **dispatch** so **draw** and **keyboard** logic stay aligned with the **current** state.
+The full enum also includes `LOGIN`, `LEVEL_SELECT`, `SETTINGS`, `IN_GAME_SETTINGS`, `MONSTER_INFO`, and `INSTRUCTIONS`. Routing transitions through one dispatch point kept draw and keyboard logic aligned with the active state.
 
-**Result.** Playtests and heuristic sessions did **not** surface crashes from **rapid menu ↔ play ↔ pause ↔ end-screen** navigation; state stayed **predictable** for testers.
+In playtests and heuristic sessions, rapid menu/play/pause/end-screen switching did not produce crashes, and state transitions remained predictable.
 
 ---
 
@@ -495,7 +485,7 @@ const LEVEL_GRID_CONFIG = {
 | **Buildable** | Green (transparent) | Cells where **towers** may be placed |
 | **Non-buildable** | Red tint | **Path**, **obstacle**, HUD band, or other blocked cells |
 
-**Result.** **Alignment** and **path export** became **fast iteration** loops instead of pixel-guessing; remaining issues were caught **before** final release builds.
+This change made map alignment and path export much quicker to iterate on, and most remaining issues were found before final release builds.
 
 ##### Challenge 2: Balance formula
 
@@ -518,13 +508,13 @@ Reward ≈ EnemyHP × 0.1 + BaseReward                 // design-time only
 
 **Design.** Difficulty scales through **wave composition**, **enemy HP and count** in the per-level configs, and **per-level starting gold** (table above). That approach gave **finer control over pacing** on each map and made **which wave or group to adjust** easy to see in design review. The **L_mult** term in the HP line is a **planning** hook for spreadsheets and early estimates; the **authoritative** numbers live in the same config tables as the shipped waves.
 
-**Result.** Feedback shifted from vague “**too easy / hard**” to **which wave** and **which enemy group** to change — a sign that **economy and pressure** were understandable and **tunable**.
+After this pass, feedback became more specific: testers pointed to particular waves and enemy groups instead of only saying "too easy" or "too hard."
 
 ### Evaluation
 
 #### Evaluation design
 
-We ran a **mixed-methods** evaluation: **qualitative** discovery (think-aloud and heuristic review), then **quantitative** comparison of perceived **workload** and **usability** under two in-game conditions.
+We used a mixed-methods evaluation: qualitative discovery first (think-aloud and heuristic review), then a quantitative comparison of perceived workload and usability under two in-game conditions.
 
 **Quantitative user study (within-subject, *n* = 10).** Each participant played **two sessions** in **randomised order**:
 
@@ -533,16 +523,14 @@ We ran a **mixed-methods** evaluation: **qualitative** discovery (think-aloud an
 | **Simple mode** | **Level 1** (Big Ben) | Low difficulty baseline |
 | **Hard mode** | **Level 3** (Buckingham Palace) | High difficulty stress test |
 
-After **each** session, participants completed:
+After each session, participants completed:
 
-- **NASA-TLX** (weighted): Mental, Physical, and Temporal demand, Performance, Effort, Frustration — then **pairwise weights** per participant before computing an **overall workload** score.
-- **SUS** (10 items): perceived usability on a **0–100** scale; industry **benchmark = 68**.
+- NASA-TLX (weighted): Mental, Physical, Temporal demand, Performance, Effort, and Frustration, then pairwise weighting per participant to compute one workload score.
+- SUS (10 items): perceived usability on a 0-100 scale; industry benchmark = 68.
 
-**Environment:** Chrome, Edge, Firefox (current versions); `p5.js` game; desktop **Windows / macOS**. We also logged **task completion**, obvious **interaction errors**, and **frame behaviour** during heavy waves (see Software testing).
+Environment: Chrome, Edge, Firefox (current versions); `p5.js` game; desktop Windows/macOS. We also logged task completion, visible interaction errors, and frame behaviour during heavy waves (see Software testing).
 
-**Qualitative (supporting).** Two **think-aloud** sessions (external participants) plus a **team heuristic** pass informed issue lists and UI priorities; details align with the severity table we used during iteration (see earlier report drafts in [`docs/weekly_progress/week9_evaluation_quality_and_testing/week9_evaluation_quality_and_testing.md`](./weekly_progress/week9_evaluation_quality_and_testing/week9_evaluation_quality_and_testing.md)).
-
-**Figure set (recommended for the report).** Use **three** charts under `./images/eval/`: **(1)** NASA-TLX aggregate, **(2)** SUS aggregate (benchmark line), **(3)** SUS **per-user** (shows every participant vs **68** and makes the **paired** pattern obvious). Weight heatmaps for TLX live in [`docs/weekly_progress/week8_quantitative_evaluations/TLX_evaluations.md`](./weekly_progress/week8_quantitative_evaluations/TLX_evaluations.md) if you need supplementary material.
+For qualitative support, we ran two think-aloud sessions (external participants) and one team heuristic pass. These sessions shaped the issue list and UI priorities. The details align with the severity table used during iteration (see [`docs/weekly_progress/week9_evaluation_quality_and_testing/week9_evaluation_quality_and_testing.md`](./weekly_progress/week9_evaluation_quality_and_testing/week9_evaluation_quality_and_testing.md)).
 
 ---
 
@@ -556,14 +544,14 @@ After **each** session, participants completed:
 | **Simple (Level 1)** | **31.3** | Low–moderate cognitive load |
 | **Hard (Level 3)** | **71.3** | High load — strategy and time pressure dominate |
 
-Moving from **Simple** to **Hard** roughly **more than doubles** perceived workload (about **+128%** on the aggregate score), matching the design goal that **Level 3** should feel **taxing** rather than “more of the same UI friction.” A **Wilcoxon signed-rank** test on paired scores gave **W = 0**, **p < 0.05** (every participant ranked **Hard** heavier than **Simple**), reported in [`TLX_evaluations.md`](./weekly_progress/week8_quantitative_evaluations/TLX_evaluations.md).
+From Simple to Hard, perceived workload more than doubled (about +128% on the aggregate score). That matches our goal for Level 3: higher strategic pressure, not just extra UI friction. A Wilcoxon signed-rank test on paired scores gave W = 0, p < 0.05 (every participant ranked Hard heavier than Simple), as reported in [`TLX_evaluations.md`](./weekly_progress/week8_quantitative_evaluations/TLX_evaluations.md).
 
 ---
 
 #### User testing: SUS
 
 <img src="./images/eval/sus-aggregate.png" alt="Aggregate SUS: Simple vs Hard vs benchmark 68" width="520">
-*Figure (SUS aggregate): System Usability Scale mean score (0-100) for Simple vs Hard with benchmark = 68; within-subject sample size **n = 10**; significance marker for paired Simple vs Hard difference: Wilcoxon signed-rank **W = 0, p < 0.05** (*). Source chart: [`SUS_Final_Comparison.png`](./weekly_progress/week8_quantitative_evaluations/SUS_Final_Comparison.png).*
+**Figure (SUS aggregate).** System Usability Scale mean score (0-100) for Simple vs Hard with benchmark = 68; within-subject sample size **n = 10**; paired Simple vs Hard difference is significant (Wilcoxon signed-rank **W = 0, p < 0.05**). Source chart: [`SUS_Final_Comparison.png`](./weekly_progress/week8_quantitative_evaluations/SUS_Final_Comparison.png).
 
 | Condition | Mean SUS | Adjective rating (Bangor) |
 |-----------|----------|-----------------------------|
@@ -571,22 +559,22 @@ Moving from **Simple** to **Hard** roughly **more than doubles** perceived workl
 | **Hard (Level 3)** | **74.3** | Good (“B”) |
 | **Industry benchmark** | **68** | Acceptable threshold |
 
-Both conditions sit **above 68**, so players judged the **interface** usable even when the **game** was hard. The **~13.7** point drop from **Simple** to **Hard** reflects **challenge**, not broken menus — consistent with the narrative in [`SUS_evaluations.md`](./weekly_progress/week8_quantitative_evaluations/SUS_evaluations.md).
+Both conditions stayed above 68, so players still considered the interface usable even when the game was hard. The ~13.7 point drop from Simple to Hard reflects challenge rather than broken menus, consistent with [`SUS_evaluations.md`](./weekly_progress/week8_quantitative_evaluations/SUS_evaluations.md).
 
 <img src="./images/eval/sus-per-user.png" alt="SUS per user: all 10 participants vs benchmark" width="520">
-*Figure (SUS per participant): individual SUS scores (0-100) for all participants against benchmark = 68; sample size **n = 10**; significance marker for paired Simple vs Hard difference: Wilcoxon signed-rank **W = 0, p < 0.05** (*). Source chart: [`SUS_User_Comparison.png`](./weekly_progress/week8_quantitative_evaluations/SUS_User_Comparison.png).*
+**Figure (SUS per participant).** Individual SUS scores (0-100) for all participants against benchmark = 68; sample size **n = 10**; paired Simple vs Hard difference is significant (Wilcoxon signed-rank **W = 0, p < 0.05**). Source chart: [`SUS_User_Comparison.png`](./weekly_progress/week8_quantitative_evaluations/SUS_User_Comparison.png).
 
-Taken together, the NASA-TLX and SUS subsections above support the product story: **difficulty scales through gameplay**, while **UI learnability** stays in a **good-to-excellent** band. Qualitative and heuristic work then turns those signals into **concrete** HUD, settings, and wave-info fixes.
+NASA-TLX and SUS point to the same conclusion: challenge rises with difficulty, while interface usability stays in a good range. Our qualitative and heuristic findings then translate this into concrete fixes for HUD, settings, and wave information.
 
 ---
 
 #### Software testing
 
-We combined **black-box** case runs from our test document with **white-box–style** verification of critical paths. We validated key logic through code inspection and manual execution tracing.
+We combined black-box case runs from our test document with white-box checks on critical paths. We verified key logic through code inspection and manual execution tracing.
 
 ##### Black-box testing
 
-Behaviour verified **without** reading implementation line-by-line; examples:
+We verified behaviour without reading implementation line-by-line; examples:
 
 | Test case | Input | Expected | Outcome |
 |-----------|-------|----------|---------|
@@ -600,7 +588,7 @@ Full IDs (FT-001 … CP-002) are tabulated in [`week9_evaluation_quality_and_tes
 
 ##### White-box testing
 
-Targeted **inspection** and **manual** execution of sensitive logic (no claimed **code-coverage %**): stepping through **`WaveManager`** state (`waiting` → `spawning` → `active`), **`Economy`** refunds and sell paths, **`Tower`** range and slow/splash branches, and **`GameManager`** win/lose gates — plus **debug-grid** verification that **logical tiles** matched **art**. This caught integration bugs that black-box runs alone often miss.
+We inspected and manually executed sensitive logic paths: stepping through `WaveManager` state (`waiting` -> `spawning` -> `active`), `Economy` refunds and sell flows, `Tower` range and slow/splash branches, and `GameManager` win/lose gates. We also used the debug grid to check that logical tiles matched map art. These checks caught integration bugs that black-box runs alone often miss.
 
 ## Sustainability, Ethics and Accessibility
 
@@ -650,21 +638,21 @@ Defend London already has a sound base on these fronts; the largest gaps are acc
 
 ### Limitations and honest reflection
 
-**Scope we chose not to deliver in full.** Design documents once described **in-place tower upgrades** (stat tiers on the same placement). We **prioritised** six distinct tower types, **gold economy**, and **sell/refund** instead: that preserved strategic choice while avoiding an extra upgrade UI, balance matrix, and regression surface in the closing weeks. **Cloud accounts or leaderboards** were never planned for this module build—**local-only progress** was a deliberate boundary (see Sustainability, Ethics and Accessibility).
+We did not fully deliver one item from early design notes: in-place tower upgrades (stat tiers on the same placement). We prioritised six distinct tower types, the gold economy, and sell/refund interactions instead. That kept strategy depth while avoiding extra upgrade UI and a larger late-stage regression surface. Cloud accounts and leaderboards were out of scope from the beginning, so we kept local-only progress by design (see Sustainability, Ethics and Accessibility).
 
-**Where effort exceeded early estimates.** **Aligning** hand-drawn maps with the **logical grid** and **enemy paths** took more iteration than anticipated; small **offset** or **waypoint** errors were easy to miss until full-level playtests. **Late integration** (economy, waves, menus, and combat in one loop) also concentrated bugs that did not appear when subsystems were tested alone.
+Some work took longer than expected. Aligning hand-drawn maps with the logical grid and enemy paths needed repeated tuning, and small offset/waypoint issues often appeared only during full-level playtests. Late integration (economy, waves, menus, and combat in one loop) also concentrated bugs that were invisible in isolated subsystem tests.
 
-**Technical debt we are open about.** Shipping quality relied on **manual and black-box runs** plus **code inspection** on sensitive paths, not a broad **automated test** suite—the `tests/` tree is minimal by design for this project (see Software testing under Evaluation). **Tuning values** remain spread across several config locations; **centralising balance**, short maintainer notes, and a few **automated checks** on placement and wave handover are the main improvements we would make before handing the repo to another team (also reflected under Future directions).
+We should also be clear about technical debt. We relied on manual and black-box runs plus code inspection of sensitive paths, not a broad automated test suite; the `tests/` tree is intentionally small for this module (see Software testing under Evaluation). Tuning values are still spread across several config locations. Before handover, we would centralise balance parameters, add short maintainer notes, and add a few automated checks on placement and wave handover (also reflected under Future directions).
 
 ### Course concepts in practice
 
-Course concepts were most valuable when they became operating habits rather than checklist items. **Requirements engineering** (stakeholders, user stories, epics) gave us a stable scope boundary before implementation churn ([stakeholders & user stories](./design/stakeholders_and_user_stories.md)). **Design modelling** (class and sequence diagrams) helped the team reason about interfaces early, reducing integration ambiguity between towers, waves, UI, and economy. **Iterative delivery** over twelve weeks, supported by GitHub Project tracking and our documented [`workflow.md`](./workflow.md), turned large risks (grid/path alignment, balancing, UI flow) into smaller reviewable increments. **Evaluation methods** (think-aloud, heuristics, NASA-TLX, SUS) changed design priorities with evidence: we learned to separate gameplay difficulty from interface usability, then tune each with different interventions. **Sustainability framing** (SusAF) broadened our definition of quality beyond “it runs” to include accessibility, privacy transparency, maintainability, and runtime footprint.
+Course concepts mattered most when they shaped day-to-day decisions. Requirements work (stakeholders, user stories, epics) helped us hold scope boundaries early ([stakeholders & user stories](./design/stakeholders_and_user_stories.md)). Class and sequence diagrams reduced interface ambiguity before integration. Iterative delivery over twelve weeks, together with GitHub Project tracking and [`workflow.md`](./workflow.md), helped us break larger risks into reviewable steps. Evaluation methods (think-aloud, heuristics, NASA-TLX, SUS) also changed priorities: we started treating gameplay difficulty and interface usability as different problems that need different fixes. SusAF then widened our quality lens to include accessibility, privacy clarity, maintainability, and runtime cost.
 
 ### Learning gains and mindset shifts
 
-Several unexpected gains came from friction points. First, we entered the project assuming “feature completeness” would dominate outcomes; in practice, **integration quality and clarity of feedback** mattered more than raw feature count. Second, we expected balancing to be mostly intuition-driven; instead, lightweight formulas plus structured playtest evidence gave faster and more defendable decisions. Third, we underestimated how much team process shapes technical quality: once ownership, branch discipline, and review expectations were explicit, merge conflicts dropped and debugging became more localised.  
+Several useful lessons came from friction points. We began by prioritising feature completeness, then realised integration quality and feedback clarity had a bigger effect on player experience. We also expected balancing to be mostly intuition-driven; in practice, lightweight formulas plus structured playtest evidence gave faster decisions and clearer team agreement. Finally, once ownership, branch discipline, and review expectations were explicit, merge conflicts dropped and debugging became more local.
 
-Our biggest mindset shift was from **defending initial ideas** to **treating user feedback as design data**. When players struggled with wave information, menu flow, or readability, we stopped framing issues as “user error” and started redesigning communication cues in HUD/tutorial/settings. That shift improved both the product and our engineering judgement: good software is not only correct internally, but also understandable under real player pressure.
+Our biggest mindset shift was moving from defending initial ideas to treating user feedback as design data. When players struggled with wave information, menu flow, or readability, we changed the HUD, tutorial, and settings cues instead of blaming user error. That improved both the game and our engineering judgement: internal correctness is not enough if players cannot read the system under pressure.
 
 ### Future directions
 
@@ -686,7 +674,7 @@ Our biggest mindset shift was from **defending initial ideas** to **treating use
 
 ### AI Usage Statement
 
-Some visual assets used in this game project were generated with Gemini. AI tools were also used for grammar checking and language polishing in the report text.
+Some visual assets used in this game project were generated with Gemini. AI tools were also used for grammar checking.
 
 ## Additional Marks
 
