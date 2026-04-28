@@ -6,11 +6,11 @@
 <table>
   <tr>
     <td align="center" width="50%">
-      <a href="../index.html" target="_blank">
+      <a href="https://uob-comsm0166.github.io/2026-group-14/game/index.html" target="_blank">
         <img src="./images/defend-london-cover.png" alt="Defend London cover" width="520">
       </a>
       <br>
-      <a href="../index.html" target="_blank">Play Now</a>
+      <a href="https://uob-comsm0166.github.io/2026-group-14/game/index.html" target="_blank">Play Now</a>
     </td>
     <td align="center" width="50%">
       <a href="./demo/demo.mp4" target="_blank">
