@@ -112,11 +112,11 @@ Concretely, Level 1 opens with 400 gold, enough for five or six basic towers. Th
 
 We validated every pass with playtesting. When Level 3 boss waves were consistently overwhelming, we reduced boss count and increased preparation time. Repeating this loop with the same model produced a curve testers described as challenging but fair.
 
-**Result.** Balance reviews became specific and actionable: instead of "too hard," the team could discuss where pressure exceeded expected firepower and tune the exact source.
+**Result.** Balance reviews became specific and actionable: the team could discuss where pressure exceeded expected firepower and tune the exact source.
 
 ## Technical Challenge 2: Diverse Abilities That Reward Adaptive Strategy
 
-By Week 5, testers told us Level 2 felt "too easy, then suddenly impossible." That feedback exposed a pacing problem rather than a single overpowered unit.
+By Week 5, testers told us Level 2 felt "too easy, then suddenly impossible." That feedback exposed a pacing problem across the level.
 
 In Week 6, we created a balancing spreadsheet to estimate whether HP growth, gold rewards, and tower costs were scaling together. The formulas were simple, but they gave the team a shared reference point when discussions became subjective.
 
@@ -136,4 +136,4 @@ These formulas were never perfect, but they gave us a common language for balanc
 
 ## Conclusion
 
-Implementing *Defend Britain* taught us that building mechanics is only part of the work — making them *feel right* demands equal attention. The balance formula gave us a shared diagnostic language; centralised configuration made iteration safe; visual debug tooling made precise alignment tractable. More broadly, this project showed that "feel" is not a vague quality but something that can be diagnosed systematically. These practices — principled frameworks, single-source configuration, purpose-built tooling — will transfer directly to future projects.
+Implementing *Defend London* taught us that building mechanics and making them *feel right* both demand equal attention. The balance formula gave us a shared diagnostic language; centralised configuration made iteration safe; visual debug tooling made precise alignment tractable. More broadly, this project showed that "feel" is a quality we can diagnose systematically. These practices — principled frameworks, single-source configuration, purpose-built tooling — will transfer directly to future projects.

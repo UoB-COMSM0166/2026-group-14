@@ -81,16 +81,7 @@
 
 ### Introduction
 
-#### What is Defend London?
-
-A tower defense game where players protect iconic London landmarks from waves of invading enemies.  
-Build towers, manage resources, and survive increasingly challenging waves across three beautifully illustrated levels.
-
----
-
-#### What Makes It Special
-
-Defend London combines authentic London landmark settings, a diverse enemy roster with distinct behaviors, and a guided onboarding flow that helps new players learn core mechanics quickly.
+Defend London is a tower defense game where players protect iconic London landmarks from waves of invading enemies by building towers, managing resources, and surviving increasingly challenging waves across three beautifully illustrated levels; what makes it stand out is its authentic London setting, diverse enemy roster with distinct behaviors, and a guided onboarding flow that helps new players learn core mechanics quickly.
 
 ---
 
@@ -161,7 +152,7 @@ User stories capture requirements from the player perspective, using the standar
 
 | User Story | Analysis |
 |------------|----------|
-| “As a **casual player**, I want resources to be **auto-collected**, so that I can focus on tower placement rather than clicking every dropped coin.” | **Functional requirement:** **Economy system** — gold is added automatically when enemies are defeated (no manual coin pickup). |
+| “As a **casual player**, I want resources to be **auto-collected**, so that I can focus on tower placement and strategic decisions during each wave.” | **Functional requirement:** **Economy system** — gold is added automatically when enemies are defeated (no manual coin pickup). |
 | “As a **strategic player**, I want to **see tower attack range before placing**, so that I can optimize my defense layout without memorizing every radius.” | **Functional requirement:** **Tower system** — range preview / placement feedback on the build grid. |
 | “As a **strategic player**, I want a **next-wave preview** showing upcoming enemy types, so that I can prepare appropriate defenses.” | **Functional requirement:** **Wave system** — HUD or panel surfaces upcoming wave composition. |
 | “As a **new player**, I want an **interactive tutorial** that guides me through game mechanics, so that I can learn without frustration.” | **Functional requirement:** **UI / game flow** — stepwise tutorial (`TUTORIAL_STEPS` in `constants.js`, driven by `GameManager` + `UIHUD`) introducing landmark, path, build area, and gold. |
@@ -170,7 +161,7 @@ User stories capture requirements from the player perspective, using the standar
 
 Most functional stories map directly to one subsystem (economy, placement, waves, tutorial UI, end-game UI). The non-functional performance story pushed us toward data-driven tuning (`TOWER_TYPES`, `ENEMY_STATS`) and a stable update order in the game loop.
 
-Following course material on requirements, we classified every story as either a **functional requirement** (what the system must *do*) or a **non-functional requirement** (how well it must *behave*). **Functional** stories mainly drove **class boundaries and UI flows**; the **performance** story reinforced **data-driven balance** and an efficient update path instead of ad hoc calculations every frame.
+Following course material on requirements, we classified every story as either a **functional requirement** (what the system must *do*) or a **non-functional requirement** (how well it must *behave*). **Functional** stories mainly drove **class boundaries and UI flows**; the **performance** story reinforced **data-driven balance** and an efficient, predictable update path.
 
 #### Development Epics
 
@@ -238,7 +229,7 @@ The progression follows a deliberate learning curve: Level 1 teaches fundamental
 
 #### Tower System
 
-The tower roster is designed as a role-based system rather than six isolated units: basic towers provide stable single-target damage, slow and area towers control enemy tempo and spacing, support-oriented towers amplify surrounding output, and high-cost towers provide burst or situational effects; we keep these parameters in `TOWER_TYPES` so balance changes can be made consistently without rewriting core combat logic, and this setup naturally encourages mixed compositions instead of one repetitive build path.
+The tower roster is a role-based system: basic towers provide stable single-target damage, slow and area towers control enemy tempo and spacing, support-oriented towers amplify surrounding output, and high-cost towers provide burst or situational effects; we keep these parameters in `TOWER_TYPES` so balance changes can be made consistently without rewriting core combat logic, and this setup encourages mixed compositions.
 
 | | Tower | Cost | Damage | Special ability |
 |:--:|---|--:|--:|---|
@@ -251,7 +242,7 @@ The tower roster is designed as a role-based system rather than six isolated uni
 
 #### Enemy System
 
-Enemy design follows escalating counter-play across levels: early enemies teach movement-speed and durability basics, mid-tier enemies introduce pressure abilities such as charging and dodging, and late-game enemies force adaptation through disruption, temporary untargetability, healing, and boss-phase mechanics; with behaviours configured through `ENEMY_STATS`, each wave tests player decisions on placement, targeting, and resource timing rather than only raw DPS.
+Enemy design follows escalating counter-play across levels: early enemies teach movement-speed and durability basics, mid-tier enemies introduce pressure abilities such as charging and dodging, and late-game enemies force adaptation through disruption, temporary untargetability, healing, and boss-phase mechanics; with behaviours configured through `ENEMY_STATS`, each wave tests player decisions on placement, targeting, and resource timing.
 
 **Level 1: Fundamentals**
 
@@ -458,9 +449,9 @@ In playtests and heuristic sessions, rapid menu/play/pause/end-screen switching 
 
 ##### Challenge 1: Debug grid system
 
-**Problem.** **Hand-drawn** backgrounds did not always match the **logical grid**: towers could look “off” the art, or **pathing** could disagree with the painted road unless **offsets** and **cell size** were tuned.
+**Problem.** Hand-drawn backgrounds did not always match the logical grid: towers could look “off” the art, or pathing could disagree with the painted road unless offsets and cell size were tuned.
 
-**Solution.** We added **developer overlays**: **`D`** toggles **`drawDebugGrid()`** in `GameManager.js` (green tint = **tower-buildable** in the current view, red tint = **not buildable**; cell indices drawn for alignment). **`LEVEL_GRID_CONFIG`** holds **`offsetX`**, **`offsetY`**, and **`gridSize`** per level. **`N`** toggles **path edit mode** with **waypoint** placement and **console export** for `Path.js` (see `./images/dev/grid-debug.png`).
+**Solution.** We added developer overlays: `D` toggles `drawDebugGrid()` in `GameManager.js` (green tint = tower-buildable in the current view, red tint = not buildable; cell indices drawn for alignment). `LEVEL_GRID_CONFIG` holds `offsetX`, `offsetY`, and `gridSize` per level. `N` toggles path edit mode with waypoint placement and console export for `Path.js` (see `./images/dev/grid-debug.png`).
 
 ```javascript
 const LEVEL_GRID_CONFIG = {
@@ -504,7 +495,7 @@ Reward ≈ EnemyHP × 0.1 + BaseReward                 // design-time only
 
 `L_mult` in the HP formula is a planning variable for spreadsheets and early estimates. The final shipped values are still the config-table values in code.
 
-After this pass, playtest feedback became more actionable: instead of only saying "too easy" or "too hard," testers could identify the exact wave or enemy group that felt off.
+After this pass, playtest feedback became more actionable: testers could identify the exact wave or enemy group that felt off.
 
 ### Evaluation
 
@@ -512,12 +503,12 @@ After this pass, playtest feedback became more actionable: instead of only sayin
 
 We used a mixed-methods evaluation: qualitative discovery first (think-aloud and heuristic review), then a quantitative comparison of perceived workload and usability under two in-game conditions.
 
-**Quantitative user study (within-subject, *n* = 10).** Each participant played **two sessions** in **randomised order**:
+Quantitative user study (within-subject, *n* = 10). Each participant played two sessions in randomised order:
 
 | Condition | Map | Role in analysis |
 |-----------|-----|------------------|
-| **Simple mode** | **Level 1** (Big Ben) | Low difficulty baseline |
-| **Hard mode** | **Level 3** (Buckingham Palace) | High difficulty stress test |
+| Simple mode | Level 1 (Big Ben) | Low difficulty baseline |
+| Hard mode | Level 3 (Buckingham Palace) | High difficulty stress test |
 
 After each session, participants completed:
 
@@ -529,25 +520,16 @@ After each session, participants completed:
 #### User testing: NASA-TLX
 
 <img src="./images/eval/nasa-tlx-aggregate.png" alt="Aggregate NASA-TLX workload: Simple vs Hard mode" width="520">
-| Condition | Mean workload | Interpretation |
-|-----------|---------------|----------------|
-| **Simple (Level 1)** | **31.3** | Low–moderate cognitive load |
-| **Hard (Level 3)** | **71.3** | High load — strategy and time pressure dominate |
 
-From Simple to Hard, perceived workload more than doubled (about +128% on the aggregate score). That matches our goal for Level 3: higher strategic pressure, not just extra UI friction. A Wilcoxon signed-rank test on paired scores gave W = 0, p < 0.05 (every participant ranked Hard heavier than Simple), as reported in [`TLX_evaluations.md`](./weekly_progress/week8_quantitative_evaluations/TLX_evaluations.md).
+From Simple to Hard, perceived workload more than doubled (about +128% on the aggregate score). That matches our goal for Level 3: higher strategic pressure. A Wilcoxon signed-rank test on paired scores gave W = 0, p < 0.05 (every participant ranked Hard heavier than Simple), as reported in [`TLX_evaluations.md`](./weekly_progress/week8_quantitative_evaluations/TLX_evaluations.md).
 
 ---
 
 #### User testing: SUS
 
 <img src="./images/eval/sus-aggregate.png" alt="Aggregate SUS: Simple vs Hard vs benchmark 68" width="520">
-| Condition | Mean SUS | Adjective rating (Bangor) |
-|-----------|----------|-----------------------------|
-| **Simple (Level 1)** | **88.0** | Excellent (“A”) |
-| **Hard (Level 3)** | **74.3** | Good (“B”) |
-| **Industry benchmark** | **68** | Acceptable threshold |
 
-Both conditions stayed above 68, so players still considered the interface usable even when the game was hard. The ~13.7 point drop from Simple to Hard reflects challenge rather than broken menus, consistent with [`SUS_evaluations.md`](./weekly_progress/week8_quantitative_evaluations/SUS_evaluations.md).
+Both conditions stayed above 68, so players still considered the interface usable even when the game was hard. The ~13.7 point drop from Simple to Hard reflects the additional challenge, consistent with [`SUS_evaluations.md`](./weekly_progress/week8_quantitative_evaluations/SUS_evaluations.md).
 
 <img src="./images/eval/sus-per-user.png" alt="SUS per user: all 10 participants vs benchmark" width="520">
 
@@ -565,11 +547,11 @@ We verified behaviour without reading implementation line-by-line; examples:
 
 | Test case | Input | Expected | Outcome |
 |-----------|-------|----------|---------|
-| Valid tower placement | Click **grass** build cell with enough gold | Tower appears; gold deducted | Pass |
-| Invalid placement | Click **path** / **obstacle** | Blocked + feedback | Pass |
-| Wave flow | Clear wave | Countdown / next wave or **victory** | Pass |
+| Valid tower placement | Click grass build cell with enough gold | Tower appears; gold deducted | Pass |
+| Invalid placement | Click path / obstacle | Blocked + feedback | Pass |
+| Wave flow | Clear wave | Countdown / next wave or victory | Pass |
 | Insufficient gold | Pick expensive tower | Cannot place; no charge | Pass |
-| Defeat | Landmark **HP → 0** | **Lose** screen / retry path | Pass |
+| Defeat | Landmark HP → 0 | Lose screen / retry path | Pass |
 
 Full IDs (FT-001 … CP-002) are tabulated in [`week9_evaluation_quality_and_testing.md`](./weekly_progress/week9_evaluation_quality_and_testing/week9_evaluation_quality_and_testing.md).
 
@@ -605,7 +587,7 @@ Progress uses a nickname only (no accounts) and `localStorage` in the browser fo
 
 ### Environmental Sustainability
 
-Running in the browser avoids a dedicated save server for the single-player loop. Waves spawn enemies incrementally rather than instantiating whole rosters at once, which limits peak object count during heavy fights. Image and audio for towers, enemies, and maps remain the main footprint—compressing files, pruning unused assets, and measuring load and frame time under max waves are the main levers left.
+Running in the browser supports a single-player loop without a dedicated save server. Waves spawn enemies incrementally, which limits peak object count during heavy fights. Image and audio for towers, enemies, and maps remain the main footprint—compressing files, pruning unused assets, and measuring load and frame time under max waves are the main levers left.
 
 ### Economic Sustainability
 
@@ -625,7 +607,7 @@ Defend London already has a sound base on these fronts; the largest gaps are acc
 
 ### Limitations and honest reflection
 
-We did not fully deliver one item from early design notes: in-place tower upgrades (stat tiers on the same placement). We prioritised six distinct tower types, the gold economy, and sell/refund interactions instead. That kept strategy depth while avoiding extra upgrade UI and a larger late-stage regression surface. Cloud accounts and leaderboards were out of scope from the beginning, so we kept local-only progress by design (see Sustainability, Ethics and Accessibility).
+We did not fully deliver one item from early design notes: in-place tower upgrades (stat tiers on the same placement). We focused on six distinct tower types, the gold economy, and sell/refund interactions. This scope kept strategy depth and controlled late-stage regression risk. Cloud accounts and leaderboards were out of scope from the beginning, so we kept local-only progress by design (see Sustainability, Ethics and Accessibility).
 
 Some work took longer than expected. Aligning hand-drawn maps with the logical grid and enemy paths needed repeated tuning, and small offset/waypoint issues often appeared only during full-level playtests. Late integration (economy, waves, menus, and combat in one loop) also concentrated bugs that were invisible in isolated subsystem tests.
 
