@@ -569,7 +569,13 @@ Targeted **inspection** and **manual** execution of sensitive logic (no claimed 
 
 #### Development workflow
 
-We used a **feature-branch** model: scoped work on `feature/*` and personal lines such as `*_dev`, fixes on `gamefix*`, and integration through **Pull Requests** (e.g. **#23**, **#24**) with review and CI before merge.
+We agreed **team responsibilities** and a **Git workflow** (branch strategy, integration rules) **at the outset**, wrote them into a living document, and **revised and followed that guide** for the rest of the module so practice and documentation stayed aligned.
+
+[**Git workflow guide (full text)**](./workflow.md)
+
+<img src="./images/process/git-workflow-guide.png" width="400" alt="Excerpt: Git workflow guide in the repo docs">
+
+In day-to-day work we used a **feature-branch** model: scoped work on `feature/*` and personal lines such as `*_dev`, fixes on `gamefix*`, and integration through **Pull Requests** (e.g. **#23**, **#24**) with review and CI before merge.
 
 <img src="./images/process/git-branches.png" width="400" alt="Example: repository branches on GitHub">
 
@@ -599,77 +605,100 @@ Meeting outcomes and ad-hoc plans were written up in a shared log so the group h
 
 ### Overall Approach
 
-In this project, we understood sustainability as the ability of the game system to retain its value, stability and adaptability throughout long-term use, maintenance and future extension. Because Defend London is a browser-based tower defense game, the most relevant sustainability issues include resource loading, local data storage, player experience, code structure and future extensibility. Based on the Sustainability Awareness Framework (SusAF), our group considered sustainability across five dimensions: social, individual, environmental, economic and technical sustainability.
+Sustainability in **Defend London** focuses on long-term maintainability, player experience, and responsible resource use. As a browser-based game, key considerations include local data storage, asset optimisation, accessibility, and code extensibility.
 
-| Sustainability Dimension | Relevant Topics for Defend London |
-|---|---|
+We applied the **Sustainability Awareness Framework (SusAF)** across five dimensions:
+
+| Dimension | Relevant topics |
+|-----------|-----------------|
 | Social | London-themed representation, player trust, fair gameplay |
-| Individual | Player comfort, learning support, privacy, accessibility |
+| Individual | Player comfort, learning support, accessibility |
 | Environmental | Resource loading, browser performance, energy use |
-| Economic | Low-cost development, no server cost, future maintenance |
-| Technical | Modular code, maintainability, extensibility |
+| Economic | Low-cost development, no server dependency, maintainability |
+| Technical | Modular architecture, extensibility, documentation |
 
 ### SusAD Diagram
 
-We used a SusAD diagram to show both positive opportunities and negative risks across the five sustainability dimensions. The diagram helps show how small design decisions can create wider effects. For example, local browser saving can reduce server infrastructure, nickname-only saving can reduce privacy risk, and modular code can lower future maintenance cost. It also highlights possible risks, such as large image/audio assets increasing resource use, mouse or colour-based interaction reducing accessibility, and repeated configuration values increasing maintenance cost.
-![SusAD](./images/SusAD.png)
-**Figure: SusAD diagram showing positive opportunities and negative risks across the five sustainability dimensions for Defend London.**
+![SusAD diagram: opportunities and risks across five sustainability dimensions](./images/SusAD.png)
 
----
+*Figure: SusAD diagram — positive opportunities (green) and negative risks (red) across sustainability dimensions.*
 
-## Social
+The diagram maps main **opportunities** and **risks** at a glance:
 
-Our group designed Defend London with a clear London-themed identity, including recognisable landmarks and city-inspired levels. This gives the game a stronger identity than a generic fantasy tower defense game and adds some cultural value. However, because we use a real city as the theme, we also need to avoid careless or stereotypical representations of London, its people or its culture.
+| Opportunity | Risk |
+|-------------|------|
+| Local storage reduces server infrastructure | Large assets increase loading time and memory |
+| Nickname-only saving minimises privacy risk | Mouse / colour-dependent interaction limits accessibility |
+| Modular code lowers maintenance cost | Repeated config values add technical debt |
 
-We also think social sustainability is connected to player trust. Players should be able to understand the game rules clearly, including enemy paths, tower functions and why they win or lose. In future development, we could improve tower descriptions, enemy ability explanations and level guidance so that players can understand the game more fairly.
+### Social Sustainability
 
----
+**Defend London** uses recognisable London landmarks and city-inspired levels, giving a stronger cultural identity than a generic tower defence. Using a real city as the theme requires care to avoid stereotypes in how London, its people, or its culture are represented.
 
-## Individual
+Player trust matters socially: rules for **enemy paths**, **towers**, and **win/lose** should be easy to understand. A potential improvement is clearer **tower and enemy-ability** descriptions and **level guidance** so players can judge outcomes fairly.
 
-From an individual perspective, our group supports players through the tutorial, pause screen, level selection, continue option, try again button and win/lose screens. These features reduce confusion and make the game easier for first-time players to learn.
+### Individual Sustainability
 
-We also included music volume, music selection and brightness settings, allowing players to adjust the experience according to their comfort. However, our current accessibility is still limited because the game mainly relies on mouse input and visual judgement. This may make the game harder to use for players who have difficulty with mouse control or colour-based information. In future development, we could add keyboard controls, clearer text labels, high-contrast UI options, colour-blind friendly visual indicators and text feedback for important sound events.
+We support players with comfort and learning features:
 
-Ethically, our group tried to avoid unnecessary personal data collection. Players only need to enter a nickname, with no email address, password, real name or external account required. This supports data minimisation. However, we should explain more clearly that progress is stored locally in the browser and add a “delete save data” option, so players have more control over their information.
+| Feature | Purpose |
+|---------|---------|
+| Interactive tutorial | Reduces first-session confusion |
+| Pause, level selection, continue, try again, win/lose flow | Predictable, low-friction sessions |
+| Volume, music selection, brightness | Comfort and preference |
 
----
+**Accessibility (current):** The build relies mainly on **mouse** input and **visual** feedback, which can exclude players with motor or severe visual impairments.
 
-## Environmental
+**Future work includes** keyboard-based placement, high-contrast UI, colour-blind–friendly indicators, and text alternatives for important audio cues.
 
-We designed Defend London as a browser-based game that can run locally. Player progress is saved using `localStorage`, so the basic progression system does not need a remote account server or database. This reduces unnecessary infrastructure and network communication.
+### Ethics
 
-The game also uses wave-based enemy spawning instead of creating all enemies at once. This reduces the number of active objects the browser needs to update at the same time, which helps reduce browser workload. However, the game uses many image and audio assets, so large files may increase loading time, memory use and CPU usage. Future work should include compressing assets, removing unused files, and measuring loading time, memory use and CPU usage.
+| Practice | Implementation |
+|----------|----------------|
+| **Data minimisation** | **Nickname only** — no e-mail, password, real name, or external account |
+| **Local storage** | Progress in browser `localStorage` — not sent to a custom backend in this project |
+| **No behavioural tracking** | No analytics or profiling layer in the shipped game |
 
----
+**Future improvements:** Explain **local saving** in plain language and add a **“delete save data”** control so users can reset stored progress.
 
-## Economic
+### Environmental Sustainability
 
-Our group used accessible web technologies to develop Defend London. The project does not require paid infrastructure, a custom backend or platform-specific deployment. This makes it suitable for a student group project and avoids unnecessary cost.
+**Defend London** runs in the **browser** without a dedicated **game server** for single-player progress; `localStorage` removes network use for **save/load** of the core loop.
 
-The modular code structure also helps reduce future maintenance cost. Since enemies, towers, economy, waves, map data and paths are handled separately, future developers can update one part of the game without rewriting the whole system. However, repeated configuration values could make future updates harder, so they should be reduced or centralised.
+| Mitigation | Effect |
+|------------|--------|
+| Wave-based spawning | Fewer active entities per frame than spawning everything at once |
+| Modular code / assets | Easier to load and tune subsets of content |
 
----
+Larger **image and audio** files can still increase load time, memory, and **CPU** use. Future work: **compress** media, **drop unused** assets, and **measure** load, memory, and frame cost under stress.
 
-## Technical
+### Economic Sustainability
 
-We divided the game into multiple modules instead of writing it as one large file. `GameManager.js` coordinates the overall game state and level flow, while other files manage enemies, towers, economy, waves, map data and paths. This makes the project easier to understand, debug and extend.
+The stack is **p5.js**-based, **vanilla JavaScript**, and deployable as **static** content — no paid **hosting** tier or custom **backend** is required for the current design, which fits a **student** budget.
 
-The separation between `MapData.js` and `Path.js` also improves maintainability because buildable areas and enemy movement paths can be changed independently. In future development, we could further centralise repeated configuration values, document important functions and add tests for tower placement, enemy movement and wave progression.
+Enemies, towers, economy, waves, maps, and paths live in **separate modules**, so a future team can **patch** one area without a full rewrite. The trade-off is that **repeated** numeric or tuning values should be **centralised** over time to keep updates cheap.
 
----
+### Technical Sustainability
 
-## Future Actions
+| Design choice | Benefit |
+|---------------|---------|
+| `GameManager.js` as coordinator | Clear game state and level flow |
+| `MapData.js` vs `Path.js` | Buildable tiles and enemy routes editable independently |
+| Spread of logic across `Tower`, `Enemy`, `WaveManager`, etc. | Easier debug and extension |
 
-| Area | Future Improvement |
-|---|---|
-| Privacy | Explain local saving and add a “delete save data” option |
-| Accessibility | Add keyboard controls, high-contrast mode and clearer text labels |
-| Environmental | Compress image/audio assets and measure performance |
-| Technical | Improve documentation and reduce repeated configuration |
-| Social | Make tower rules, enemy abilities and level guidance clearer |
+**Future work includes** tightening **shared config**, documenting key entry points, and **tests** for placement, movement, and **wave** transitions (see also **Software testing** in **Evaluation**).
 
-Overall, we think Defend London already has a reasonable foundation for sustainability, ethics and accessibility, but it is not fully complete yet. The main future improvements are clearer privacy communication, better accessibility support, asset optimisation, stronger documentation and more measurable performance testing.
+### Future Actions Summary
+
+| Area | Improvement |
+|------|-------------|
+| Privacy | Clearer local-save explanation; “delete save data” |
+| Accessibility | Keyboard, high-contrast, clearer labels |
+| Environmental | Compression; performance measurement |
+| Technical | Documentation; fewer duplicated config values; more automated tests |
+| Social | Clearer **tower** rules, **enemy** ability copy, and **level** hints |
+
+**Defend London** already rests on a **credible** sustainability, ethics, and accessibility base; the largest gains ahead are in **accessibility**, **transparent privacy messaging**, and **leaner assets / measurable performance**.
 
 ### Conclusion
 
