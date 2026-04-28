@@ -605,17 +605,7 @@ Meeting outcomes and ad-hoc plans were written up in a shared log so the group h
 
 ### Overall Approach
 
-Sustainability in **Defend London** focuses on long-term maintainability, player experience, and responsible resource use. As a browser-based game, key considerations include local data storage, asset optimisation, accessibility, and code extensibility.
-
-We applied the **Sustainability Awareness Framework (SusAF)** across five dimensions:
-
-| Dimension | Relevant topics |
-|-----------|-----------------|
-| Social | London-themed representation, player trust, fair gameplay |
-| Individual | Player comfort, learning support, accessibility |
-| Environmental | Resource loading, browser performance, energy use |
-| Economic | Low-cost development, no server dependency, maintainability |
-| Technical | Modular architecture, extensibility, documentation |
+Sustainability in Defend London is about keeping the tower-defence loop fair and maintainable as levels and systems grow. In practice that covers how London is represented, how players learn the rules and adjust audio and display, how browser load scales with sprites and sound, whether the p5.js build needs paid infrastructure, and how `GameManager`, wave logic, map data, and combat code stay separable. We used SusAF to organise those angles.
 
 ### SusAD Diagram
 
@@ -623,102 +613,67 @@ We applied the **Sustainability Awareness Framework (SusAF)** across five dimens
 
 *Figure: SusAD diagram — positive opportunities (green) and negative risks (red) across sustainability dimensions.*
 
-The diagram maps main **opportunities** and **risks** at a glance:
-
-| Opportunity | Risk |
-|-------------|------|
-| Local storage reduces server infrastructure | Large assets increase loading time and memory |
-| Nickname-only saving minimises privacy risk | Mouse / colour-dependent interaction limits accessibility |
-| Modular code lowers maintenance cost | Repeated config values add technical debt |
+The figure summarises trade-offs for this build: local `localStorage` and nickname-only progress cut server and account surface, while large sprite and audio sets still stress load and memory. Splitting `GameManager`, map data, and wave logic eases change, but a mouse-first HUD and tuning values spread across files still matter for accessibility and maintenance.
 
 ### Social Sustainability
 
-**Defend London** uses recognisable London landmarks and city-inspired levels, giving a stronger cultural identity than a generic tower defence. Using a real city as the theme requires care to avoid stereotypes in how London, its people, or its culture are represented.
-
-Player trust matters socially: rules for **enemy paths**, **towers**, and **win/lose** should be easy to understand. A potential improvement is clearer **tower and enemy-ability** descriptions and **level guidance** so players can judge outcomes fairly.
+Landmark-based levels (Big Ben, Tower Bridge, Buckingham Palace) give Defend London a clear identity; a real-city theme still needs careful representation. Player trust depends on readable paths, tower effects, and win/lose feedback—clearer copy for abilities and waves would strengthen that.
 
 ### Individual Sustainability
 
-We support players with comfort and learning features:
-
-| Feature | Purpose |
-|---------|---------|
-| Interactive tutorial | Reduces first-session confusion |
-| Pause, level selection, continue, try again, win/lose flow | Predictable, low-friction sessions |
-| Volume, music selection, brightness | Comfort and preference |
-
-**Accessibility (current):** The build relies mainly on **mouse** input and **visual** feedback, which can exclude players with motor or severe visual impairments.
-
-**Future work includes** keyboard-based placement, high-contrast UI, colour-blind–friendly indicators, and text alternatives for important audio cues.
+The tutorial, pause, level select, continue/try again, and win/lose flow aim to flatten the learning curve; volume, music, and brightness support comfort. Placement and combat still lean on mouse and colour; keyboard controls, a high-contrast mode, and non-colour cues for key states would widen who can play fairly.
 
 ### Ethics
 
-| Practice | Implementation |
-|----------|----------------|
-| **Data minimisation** | **Nickname only** — no e-mail, password, real name, or external account |
-| **Local storage** | Progress in browser `localStorage` — not sent to a custom backend in this project |
-| **No behavioural tracking** | No analytics or profiling layer in the shipped game |
-
-**Future improvements:** Explain **local saving** in plain language and add a **“delete save data”** control so users can reset stored progress.
+Progress uses a nickname only (no accounts) and `localStorage` in the browser for this build, with no analytics layer in the shipped game. Next steps would be a short in-game explanation of local saving and a “delete save data” action so users control what stays on the device.
 
 ### Environmental Sustainability
 
-**Defend London** runs in the **browser** without a dedicated **game server** for single-player progress; `localStorage` removes network use for **save/load** of the core loop.
-
-| Mitigation | Effect |
-|------------|--------|
-| Wave-based spawning | Fewer active entities per frame than spawning everything at once |
-| Modular code / assets | Easier to load and tune subsets of content |
-
-Larger **image and audio** files can still increase load time, memory, and **CPU** use. Future work: **compress** media, **drop unused** assets, and **measure** load, memory, and frame cost under stress.
+Running in the browser avoids a dedicated save server for the single-player loop. Waves spawn enemies incrementally rather than instantiating whole rosters at once, which limits peak object count during heavy fights. Image and audio for towers, enemies, and maps remain the main footprint—compressing files, pruning unused assets, and measuring load and frame time under max waves are the main levers left.
 
 ### Economic Sustainability
 
-The stack is **p5.js**-based, **vanilla JavaScript**, and deployable as **static** content — no paid **hosting** tier or custom **backend** is required for the current design, which fits a **student** budget.
-
-Enemies, towers, economy, waves, maps, and paths live in **separate modules**, so a future team can **patch** one area without a full rewrite. The trade-off is that **repeated** numeric or tuning values should be **centralised** over time to keep updates cheap.
+Defend London ships as static p5.js and JavaScript, so there is no paid hosting or custom API requirement for the current design—appropriate for a module budget. Splitting enemies, towers, economy, waves, and map data across files keeps maintenance scoped, provided balance numbers are gradually centralised so tuning does not sprawl.
 
 ### Technical Sustainability
 
-| Design choice | Benefit |
-|---------------|---------|
-| `GameManager.js` as coordinator | Clear game state and level flow |
-| `MapData.js` vs `Path.js` | Buildable tiles and enemy routes editable independently |
-| Spread of logic across `Tower`, `Enemy`, `WaveManager`, etc. | Easier debug and extension |
-
-**Future work includes** tightening **shared config**, documenting key entry points, and **tests** for placement, movement, and **wave** transitions (see also **Software testing** in **Evaluation**).
+`GameManager.js` coordinates level flow and state; `MapData.js` and `Path.js` separate build tiles from enemy routes; `Tower`, `Enemy`, and `WaveManager` isolate combat and wave timing. That layout matches how we debugged placement, pathing, and wave edges. Further work is tighter shared config, short entry-point docs, and more automated checks for placement and wave handover (see Software testing under Evaluation).
 
 ### Future Actions Summary
 
-| Area | Improvement |
-|------|-------------|
-| Privacy | Clearer local-save explanation; “delete save data” |
-| Accessibility | Keyboard, high-contrast, clearer labels |
-| Environmental | Compression; performance measurement |
-| Technical | Documentation; fewer duplicated config values; more automated tests |
-| Social | Clearer **tower** rules, **enemy** ability copy, and **level** hints |
+If we extended the current build, the highest-value work would track the risks above: clearer tower and enemy-ability copy and wave intent; keyboard and display options for players who cannot rely on mouse or default contrast; plain-language privacy text and a delete-save control; leaner media and measured performance under heavy waves; and centralised tuning values with a few automated checks on placement and wave progression.
 
-**Defend London** already rests on a **credible** sustainability, ethics, and accessibility base; the largest gains ahead are in **accessibility**, **transparent privacy messaging**, and **leaner assets / measurable performance**.
+Defend London already has a sound base on these fronts; the largest gaps are accessibility, transparent handling of local saves, and asset/runtime efficiency.
 
-### Conclusion
+## Conclusion
 
-Overall, Defend London started as a simple London-themed tower defense idea and developed into a playable browser game with multiple levels, enemy waves, towers, economy, UI, sound feedback, local saving, and a clear visual style. This project showed us that game development is not just about adding features; the harder part is making different systems work together so that the player experience feels clear, fair, and enjoyable, while creating a useful, usable, maintainable, and responsible system for real users.
+### Project Summary
 
-One important lesson we learned was the value of iterative and agile development. Our plan changed as the game developed. Some ideas seemed straightforward at the beginning, but became more complicated during implementation, especially grid alignment, enemy pathing, wave balance, and UI readability. Instead of following one fixed plan, we improved the game through repeated testing, discussion, feedback, and small adjustments. The GitHub project board and regular team communication helped us keep track of progress and decide what needed to be improved next.
+Defend London grew from a London-themed concept into a playable browser tower-defence with three levels, multiple enemy and tower types, wave-based progression, economy and UI, sound, and local progress. The hardest work was not adding features in isolation, but integrating combat, paths, waves, and feedback into one coherent experience.
 
-Epics and user stories were also useful because they helped us turn a broad idea into clearer development tasks. The **end-player stories** in the Requirements section (six **As a… I want…** statements covering economy, range preview, wave preview, tutorial, performance, and win/loss feedback) framed the visible game experience and **functional vs non-functional** trade-offs, while a parallel set of **instructor (course) user stories**—for example *Follow a Defined Development Workflow* (Git, Kanban, incremental delivery) and *Conduct Testing and Iteration* (playtests, heuristic review, NASA-TLX)—gave us a checklist against software-engineering and module learning goals. The full wording of the instructor stories appears in [`docs/design/stakeholders_and_user_stories.md`](./design/stakeholders_and_user_stories.md) under *Epics for Course Instructors*. Tying the **Process** and **Evaluation** sections of this report to those stories is how we show alignment with the course, not only with what players would want in a commercial product.
+### Course concepts in practice
 
-The class diagram and sequence diagram helped us understand the structure and behaviour of the game before and during implementation. They made the relationships between enemies, towers, waves, the economy system, paths, map data, UI, and game state easier to discuss. In practice, this supported our modular structure and made the project easier to debug and extend.
+| Course concept | Application in the project | Takeaway |
+|----------------|----------------------------|----------|
+| **Requirements** | User stories and epics set scope; end-player and instructor stories (see [stakeholders & user stories](./design/stakeholders_and_user_stories.md)) aligned work with the module | Clear “who wants what” statements early reduced priority churn |
+| **Design (UML)** | Class and sequence diagrams in Design grounded discussion of towers, waves, economy, UI | Shared diagrams gave the whole team a common vocabulary |
+| **Iterative delivery** | 12 weeks of incremental builds; Process and GitHub boards tracked what actually happened when plans shifted | Grid alignment, pathing, and balance yielded to iteration, not a single fixed spec |
+| **Version control** | Feature branches, PRs, and [`workflow.md`](./workflow.md) (see Process) | Written conventions matter when six people merge in parallel |
+| **Evaluation** | Think-aloud, heuristics, NASA-TLX, SUS (see Evaluation—not repeated here) | Code can work for developers yet feel wrong to players; structured testing made that visible |
+| **Sustainability (SusAF)** | Privacy, accessibility, and technical footprint in Sustainability, Ethics and Accessibility | Covered in that section; this conclusion does not restate SusAD detail |
 
-Testing changed how we looked at the game because it showed us the difference between a game that works from a developer’s perspective and a game that feels clear and comfortable from a player’s perspective. Think Aloud testing and heuristic evaluation showed problems that we had started to ignore as developers, such as small text, unclear feedback, limited settings, and missing wave information. NASA-TLX also gave us another way to check whether the game felt too demanding or frustrating for players. These evaluations made us realise that a game can be technically working, but still need improvement in usability, accessibility, feedback, and player comfort.
+### Team reflection
 
-We also used SusAF to reflect on sustainability, ethics, and accessibility. This helped us think beyond immediate gameplay and consider wider effects such as privacy, resource use, maintainability, and inclusiveness. Our current design has some good foundations, including local browser saving, nickname-only progress storage, modular code, and lightweight web deployment. However, there are still risks, such as large image and audio assets, mouse or colour-based interaction, and repeated configuration values.
+Working as a six-person team, we found that communication and clear ownership mattered as much as code. Hand-offs that were left implicit led to duplicated work and merge friction; adopting a shared Git guide (see Process), a visible GitHub board, and regular syncs reduced that. Playtesting was a collaboration skill in its own right: when feedback showed that a feature we liked confused new players, treating that as data—not defending the first design—led to better HUD, tutorial, and wave presentation.
 
-If we continued developing the current game, we would focus on improving accessibility, polishing the interface, compressing assets, adding clearer wave previews, and explaining local saving more clearly. We would also improve documentation so that future developers could understand the code structure, configuration files, and debugging tools more easily. If we had the chance to make a sequel, we would expand the London theme with more landmarks, more enemy routes, richer enemy abilities, and a deeper progression system.
+### Future directions
 
-Overall, this project taught us that game development depends on much more than coding. Iteration, teamwork, requirements, design, testing, sustainability, and privacy all affected whether our final game became playable, understandable, and maintainable.
+- **Player experience:** keyboard and display options, clearer in-game explanation of local saves and privacy
+- **Performance and assets:** compress and prune media; measure load under heavy waves
+- **Content:** more London-themed set-pieces, enemy and level variety, if the core loop were extended
+- **Maintainability:** centralise balance and config, short maintainer notes, more regression checks on placement and wave handover (see Software testing in Evaluation)
 
-### Contribution Statement
+## Contribution Statement
 
 | Contributor | Contribution |
 |---|---|
@@ -729,7 +684,7 @@ Overall, this project taught us that game development depends on much more than 
 | Zejun Zhang | 1 |
 | Mingshu Zhang | 1 |
 
-### Additional Marks
+## Additional Marks
 
 You can delete this section in your own repo, it's just here for information. in addition to the marks above, we will be marking you on the following two points:
 
