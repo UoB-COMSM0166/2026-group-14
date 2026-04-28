@@ -6,20 +6,19 @@
 <table>
   <tr>
     <td align="center" width="50%">
-      <a href="./index.html">
-        <img src="./images/defend-london-cover.png" alt="Defend London cover" width="420">
+      <a href="../index.html" target="_blank">
+        <img src="./images/defend-london-cover.png" alt="Defend London cover" width="520">
       </a>
       <br>
-      🎮 <a href="./index.html">Play Now</a>
+      🎮 <a href="../index.html" target="_blank">Play Now</a>
     </td>
     <td align="center" width="50%">
-      <a href="./demo/demo.mp4">
-        <video controls width="420" src="./demo/demo.mp4">
-          Your browser does not support the video tag.
-        </video>
-      </a>
+      <video controls width="520" poster="./images/defend-london-cover.png">
+        <source src="./demo/demo.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
       <br>
-      📺 <a href="./demo/demo.mp4">Watch Demo</a>
+      📺 <a href="./demo/demo.mp4" target="_blank">Watch Video</a>
     </td>
   </tr>
 </table>
@@ -92,9 +91,7 @@ Build towers, manage resources, and survive increasingly challenging waves acros
 
 #### What Makes It Special ✨
 
-| 🏛️ London Identity | 👾 Diverse Enemies | 🎓 Guided Experience |
-|---|---|---|
-| Levels based on real landmarks: **Big Ben**, **Tower Bridge**, and **Buckingham Palace**. | 10 unique enemy types with abilities like charging, dodging, diving, and healing. | An interactive tutorial helps new players learn core mechanics step by step. |
+Defend London combines authentic London landmark settings, a diverse enemy roster with distinct behaviors, and a guided onboarding flow that helps new players learn core mechanics quickly.
 
 The sections below follow our decision flow: **ideation** (genre and prototypes), **requirements** (stakeholders through epics), then **design** (architecture, systems, and UML).
 
@@ -157,14 +154,7 @@ We identified stakeholders using an onion model approach, organizing them by pro
 
 <img src="./images/onion_model.png" alt="Stakeholder onion model" width="480">
 
-| Layer | Stakeholder | Role |
-|:---:|:---|:---|
-| Core | Development Team | Design, code, test, deploy |
-| 2nd | Course Instructor | Evaluate outcomes, provide guidance |
-| 3rd | Classmates | Playtest and offer usability feedback |
-| Outer | End Players | Target audience influencing design decisions |
-
-The development team sits at the core as direct builders. Course instructors evaluate whether the project meets learning objectives—programming skills, collaboration, and structured process. Classmates serve as early playtesters, while end players represent the ultimate audience whose needs drive feature prioritization.
+The onion model clarifies influence flow rather than repeating a role list: inner layers (team + instructor) constrained feasibility and assessment criteria, while outer layers (classmates + end players) mainly informed usability priorities through playtesting feedback. This helped us translate stakeholder distance into concrete requirement decisions (scope, acceptance criteria, and evaluation focus).
 
 #### Use Case Diagram
 
@@ -241,19 +231,16 @@ Each level is themed around an iconic London location, with increasing complexit
 <td align="center" width="33%">
 <img src="./images/maps/level1.png" width="280" alt="Level 1 — Big Ben">
 <br><b>Level 1: Big Ben</b>
-<br>Single path · Generous space
 <br>🟢 Introductory
 </td>
 <td align="center" width="33%">
 <img src="./images/maps/level2.png" width="280" alt="Level 2 — Tower Bridge">
 <br><b>Level 2: Tower Bridge</b>
-<br>Split path · Bridge chokepoints
 <br>🟡 Intermediate
 </td>
 <td align="center" width="33%">
 <img src="./images/maps/level3.png" width="280" alt="Level 3 — Buckingham Palace">
 <br><b>Level 3: Buckingham Palace</b>
-<br>Multi-lane · Tight placement
 <br>🔴 Advanced
 </td>
 </tr>
@@ -321,11 +308,41 @@ The Treant Mage forces target prioritization; the Goblin Bomber punishes tower c
 
 Each frame: the game calls `update()` → wave manager spawns enemies → enemies move → towers attack → combat resolves damage → UI refreshes → win/lose check.
 
-#### Key design decisions
+### Process
 
-- **Centralized configuration.** Tower and enemy parameters live in config objects, enabling rapid balance iteration without touching core game logic.
-- **Modular boundaries.** Clear interfaces between subsystems support parallel development and isolated debugging.
-- **Progressive complexity.** Enemy abilities are introduced gradually across levels, building player skill before demanding mastery.
+#### Development workflow
+
+We agreed **team responsibilities** and a **Git workflow** (branch strategy, integration rules) **at the outset**, wrote them into a living document, and **revised and followed that guide** for the rest of the module so practice and documentation stayed aligned.
+
+[**Git workflow guide (full text)**](./workflow.md)
+
+<img src="./images/process/git-workflow-guide.png" width="400" alt="Excerpt: Git workflow guide in the repo docs">
+
+In day-to-day work we used a **feature-branch** model: scoped work on `feature/*` and personal lines such as `*_dev`, fixes on `gamefix*`, and integration through **Pull Requests** (e.g. **#23**, **#24**) with review and CI before merge.
+
+<img src="./images/process/git-branches.png" width="400" alt="Example: repository branches on GitHub">
+
+| Branch type | Examples | Purpose |
+|-------------|----------|--------|
+| `feature/*` | `feature/tower-system`, `feature/enemy-wave-system` | New functionality |
+| `*_dev` | `zejun_dev`, `sound_dev` | Subsystem / personal line |
+| `gamefix*`, `develop`, `design` | `gamefix`, `gamefix2`, `develop`, `design` | Fixes, integration, design experiments |
+
+#### Task management
+
+Work was tracked on a **GitHub Project** board; [open the project](https://github.com/orgs/UoB-COMSM0166/projects/168) for the live board.
+
+<img src="./images/process/kanban.png" width="400" alt="Example: GitHub Project board">
+
+#### Communication
+
+Meeting outcomes and ad-hoc plans were written up in a shared log so the group had a record of decisions. [Meeting notes →](./meeting_notes/)
+
+<img src="./images/process/meeting-notes.png" width="400" alt="Example: shared meeting notes">
+
+#### Contribution summary
+
+**GitHub Insights → Contributors** reflects activity across the **six** team members over the module. **Roles and responsibilities** are in **Team Members** / the **Introduction**; we do not repeat per-person breakdowns here.
 
 ### Implementation
 
@@ -453,13 +470,6 @@ const GameState = {
 
 The full enum also includes **`LOGIN`**, **`LEVEL_SELECT`**, **`SETTINGS`**, **`IN_GAME_SETTINGS`**, **`MONSTER_INFO`**, and **`INSTRUCTIONS`**. Each transition runs through the same **dispatch** so **draw** and **keyboard** logic stay aligned with the **current** state.
 
-| State (core loop) | On entry (concept) | On exit (concept) |
-|-------------------|--------------------|-------------------|
-| **MENU** | Show main menu; accept navigation to settings / level flow | Hand off before loading a level |
-| **PLAYING** | Spawn **economy**, **waves**, **map**; run per-frame **update** | Pause or tear down level objects when leaving |
-| **PAUSED** | Freeze gameplay **update**; show pause UI | Resume **PLAYING** branch |
-| **WIN** / **LOSE** | Show outcome UI; record stats if needed | Return to **menu** or **retry** without leaking level state |
-
 **Result.** Playtests and heuristic sessions did **not** surface crashes from **rapid menu ↔ play ↔ pause ↔ end-screen** navigation; state stayed **predictable** for testers.
 
 ---
@@ -528,7 +538,7 @@ After **each** session, participants completed:
 - **NASA-TLX** (weighted): Mental, Physical, and Temporal demand, Performance, Effort, Frustration — then **pairwise weights** per participant before computing an **overall workload** score.
 - **SUS** (10 items): perceived usability on a **0–100** scale; industry **benchmark = 68**.
 
-**Environment:** Chrome, Edge, Firefox (current versions); **p5.js** game; desktop **Windows / macOS**. We also logged **task completion**, obvious **interaction errors**, and **frame behaviour** during heavy waves (see Software testing).
+**Environment:** Chrome, Edge, Firefox (current versions); `p5.js` game; desktop **Windows / macOS**. We also logged **task completion**, obvious **interaction errors**, and **frame behaviour** during heavy waves (see Software testing).
 
 **Qualitative (supporting).** Two **think-aloud** sessions (external participants) plus a **team heuristic** pass informed issue lists and UI priorities; details align with the severity table we used during iteration (see earlier report drafts in [`docs/weekly_progress/week9_evaluation_quality_and_testing/week9_evaluation_quality_and_testing.md`](./weekly_progress/week9_evaluation_quality_and_testing/week9_evaluation_quality_and_testing.md)).
 
@@ -539,7 +549,7 @@ After **each** session, participants completed:
 #### User testing: NASA-TLX
 
 <img src="./images/eval/nasa-tlx-aggregate.png" alt="Aggregate NASA-TLX workload: Simple vs Hard mode" width="520">
-*Aggregate NASA-TLX (weighted) workload. Source charts: [`NASA_TLX_Final_Comparison.png`](./weekly_progress/week8_quantitative_evaluations/NASA_TLX_Final_Comparison.png).*
+*Figure (NASA-TLX aggregate): weighted overall workload score (weighted sum of Mental, Physical, Temporal, Performance, Effort, Frustration); within-subject sample size **n = 10**; significance marker: Hard > Simple, Wilcoxon signed-rank **W = 0, p < 0.05** (*). Source chart: [`NASA_TLX_Final_Comparison.png`](./weekly_progress/week8_quantitative_evaluations/NASA_TLX_Final_Comparison.png).*
 
 | Condition | Mean workload | Interpretation |
 |-----------|---------------|----------------|
@@ -553,7 +563,7 @@ Moving from **Simple** to **Hard** roughly **more than doubles** perceived workl
 #### User testing: SUS
 
 <img src="./images/eval/sus-aggregate.png" alt="Aggregate SUS: Simple vs Hard vs benchmark 68" width="520">
-*Aggregate SUS. Source: [`SUS_Final_Comparison.png`](./weekly_progress/week8_quantitative_evaluations/SUS_Final_Comparison.png).*
+*Figure (SUS aggregate): System Usability Scale mean score (0-100) for Simple vs Hard with benchmark = 68; within-subject sample size **n = 10**; significance marker for paired Simple vs Hard difference: Wilcoxon signed-rank **W = 0, p < 0.05** (*). Source chart: [`SUS_Final_Comparison.png`](./weekly_progress/week8_quantitative_evaluations/SUS_Final_Comparison.png).*
 
 | Condition | Mean SUS | Adjective rating (Bangor) |
 |-----------|----------|-----------------------------|
@@ -564,7 +574,7 @@ Moving from **Simple** to **Hard** roughly **more than doubles** perceived workl
 Both conditions sit **above 68**, so players judged the **interface** usable even when the **game** was hard. The **~13.7** point drop from **Simple** to **Hard** reflects **challenge**, not broken menus — consistent with the narrative in [`SUS_evaluations.md`](./weekly_progress/week8_quantitative_evaluations/SUS_evaluations.md).
 
 <img src="./images/eval/sus-per-user.png" alt="SUS per user: all 10 participants vs benchmark" width="520">
-*Per-participant SUS: **every** user stayed **above 68** in **both** conditions, and **every** user rated **Simple** higher than **Hard** — strong evidence of **consistent** measurement rather than one outlier driving the mean.*
+*Figure (SUS per participant): individual SUS scores (0-100) for all participants against benchmark = 68; sample size **n = 10**; significance marker for paired Simple vs Hard difference: Wilcoxon signed-rank **W = 0, p < 0.05** (*). Source chart: [`SUS_User_Comparison.png`](./weekly_progress/week8_quantitative_evaluations/SUS_User_Comparison.png).*
 
 Taken together, the NASA-TLX and SUS subsections above support the product story: **difficulty scales through gameplay**, while **UI learnability** stays in a **good-to-excellent** band. Qualitative and heuristic work then turns those signals into **concrete** HUD, settings, and wave-info fixes.
 
@@ -572,7 +582,7 @@ Taken together, the NASA-TLX and SUS subsections above support the product story
 
 #### Software testing
 
-We did **not** rely on a large automated **unit-test** suite in this module (see `tests/`); instead we combined **black-box** case runs from our test document with **white-box–style** checks on critical paths.
+We combined **black-box** case runs from our test document with **white-box–style** verification of critical paths. We validated key logic through code inspection and manual execution tracing.
 
 ##### Black-box testing
 
@@ -592,47 +602,11 @@ Full IDs (FT-001 … CP-002) are tabulated in [`week9_evaluation_quality_and_tes
 
 Targeted **inspection** and **manual** execution of sensitive logic (no claimed **code-coverage %**): stepping through **`WaveManager`** state (`waiting` → `spawning` → `active`), **`Economy`** refunds and sell paths, **`Tower`** range and slow/splash branches, and **`GameManager`** win/lose gates — plus **debug-grid** verification that **logical tiles** matched **art**. This caught integration bugs that black-box runs alone often miss.
 
-### Process
-
-#### Development workflow
-
-We agreed **team responsibilities** and a **Git workflow** (branch strategy, integration rules) **at the outset**, wrote them into a living document, and **revised and followed that guide** for the rest of the module so practice and documentation stayed aligned.
-
-[**Git workflow guide (full text)**](./workflow.md)
-
-<img src="./images/process/git-workflow-guide.png" width="400" alt="Excerpt: Git workflow guide in the repo docs">
-
-In day-to-day work we used a **feature-branch** model: scoped work on `feature/*` and personal lines such as `*_dev`, fixes on `gamefix*`, and integration through **Pull Requests** (e.g. **#23**, **#24**) with review and CI before merge.
-
-<img src="./images/process/git-branches.png" width="400" alt="Example: repository branches on GitHub">
-
-| Branch type | Examples | Purpose |
-|-------------|----------|--------|
-| `feature/*` | `feature/tower-system`, `feature/enemy-wave-system` | New functionality |
-| `*_dev` | `zejun_dev`, `sound_dev` | Subsystem / personal line |
-| `gamefix*`, `develop`, `design` | `gamefix`, `gamefix2`, `develop`, `design` | Fixes, integration, design experiments |
-
-#### Task management
-
-Work was tracked on a **GitHub Project** board; [open the project](https://github.com/orgs/UoB-COMSM0166/projects/168) for the live board.
-
-<img src="./images/process/kanban.png" width="400" alt="Example: GitHub Project board">
-
-#### Communication
-
-Meeting outcomes and ad-hoc plans were written up in a shared log so the group had a record of decisions. [Meeting notes →](./meeting_notes/)
-
-<img src="./images/process/meeting-notes.png" width="400" alt="Example: shared meeting notes">
-
-#### Contribution summary
-
-**GitHub Insights → Contributors** reflects activity across the **six** team members over the module. **Roles and responsibilities** are in **Team Members** / the **Introduction**; we do not repeat per-person breakdowns here.
-
 ## Sustainability, Ethics and Accessibility
 
 ### Overall Approach
 
-Sustainability in Defend London is about keeping the tower-defence loop fair and maintainable as levels and systems grow. In practice that covers how London is represented, how players learn the rules and adjust audio and display, how browser load scales with sprites and sound, whether the p5.js build needs paid infrastructure, and how `GameManager`, wave logic, map data, and combat code stay separable. We used SusAF to organise those angles.
+Sustainability in Defend London is about keeping the tower-defence loop fair and maintainable as levels and systems grow. In practice that covers how London is represented, how players learn the rules and adjust audio and display, how browser load scales with sprites and sound, whether the `p5.js` build needs paid infrastructure, and how `GameManager`, wave logic, map data, and combat code stay separable. We used SusAF to organise those angles.
 
 ### SusAD Diagram
 
@@ -660,7 +634,7 @@ Running in the browser avoids a dedicated save server for the single-player loop
 
 ### Economic Sustainability
 
-Defend London ships as static p5.js and JavaScript, so there is no paid hosting or custom API requirement for the current design—appropriate for a module budget. Splitting enemies, towers, economy, waves, and map data across files keeps maintenance scoped, provided balance numbers are gradually centralised so tuning does not sprawl.
+Defend London ships as static `p5.js` and JavaScript, so there is no paid hosting or custom API requirement for the current design—appropriate for a module budget. Splitting enemies, towers, economy, waves, and map data across files keeps maintenance scoped, provided balance numbers are gradually centralised so tuning does not sprawl.
 
 ### Technical Sustainability
 
@@ -674,10 +648,6 @@ Defend London already has a sound base on these fronts; the largest gaps are acc
 
 ## Conclusion
 
-### Project Summary
-
-Defend London grew from a London-themed concept into a playable browser tower-defence with three levels, multiple enemy and tower types, wave-based progression, economy and UI, sound, and local progress. The hardest work was not adding features in isolation, but integrating combat, paths, waves, and feedback into one coherent experience.
-
 ### Limitations and honest reflection
 
 **Scope we chose not to deliver in full.** Design documents once described **in-place tower upgrades** (stat tiers on the same placement). We **prioritised** six distinct tower types, **gold economy**, and **sell/refund** instead: that preserved strategic choice while avoiding an extra upgrade UI, balance matrix, and regression surface in the closing weeks. **Cloud accounts or leaderboards** were never planned for this module build—**local-only progress** was a deliberate boundary (see Sustainability, Ethics and Accessibility).
@@ -688,11 +658,13 @@ Defend London grew from a London-themed concept into a playable browser tower-de
 
 ### Course concepts in practice
 
-Taken together, the course ideas showed up in how we actually worked, not only in the syllabus labels. **Requirements** were grounded in user stories, epics, and stakeholder stories ([stakeholders & user stories](./design/stakeholders_and_user_stories.md)), which steered scope before implementation churn. **Design** was supported by UML (class and sequence diagrams) so towers, waves, economy, and UI were discussed with a **shared vocabulary**. **Iterative delivery** over twelve weeks—tracked on the GitHub board and described under Process—meant grid alignment, pathing, and balance were refined in increments rather than fixed up front. **Version control** relied on feature branches, pull requests, and a written [`workflow.md`](./workflow.md), which mattered with six people merging in parallel. **Evaluation** (think-aloud, heuristics, NASA-TLX, and SUS; see Evaluation) made a distinction we could not ignore: behaviour that is fine in code can still feel wrong to players, and structured testing exposed that. **Sustainability (SusAF)** is treated in Sustainability, Ethics and Accessibility; we do not repeat the SusAD detail here, but that section records how we argued about privacy, accessibility, and technical footprint. In short, the module’s process vocabulary matched our day-to-day trade-offs: specify, design, build in loops, branch safely, test with users, and reflect on longer-term impact.
+Course concepts were most valuable when they became operating habits rather than checklist items. **Requirements engineering** (stakeholders, user stories, epics) gave us a stable scope boundary before implementation churn ([stakeholders & user stories](./design/stakeholders_and_user_stories.md)). **Design modelling** (class and sequence diagrams) helped the team reason about interfaces early, reducing integration ambiguity between towers, waves, UI, and economy. **Iterative delivery** over twelve weeks, supported by GitHub Project tracking and our documented [`workflow.md`](./workflow.md), turned large risks (grid/path alignment, balancing, UI flow) into smaller reviewable increments. **Evaluation methods** (think-aloud, heuristics, NASA-TLX, SUS) changed design priorities with evidence: we learned to separate gameplay difficulty from interface usability, then tune each with different interventions. **Sustainability framing** (SusAF) broadened our definition of quality beyond “it runs” to include accessibility, privacy transparency, maintainability, and runtime footprint.
 
-### Team reflection
+### Learning gains and mindset shifts
 
-Working as a six-person team, we found that communication and clear ownership mattered as much as code. Hand-offs that were left implicit led to duplicated work and merge friction; adopting a shared Git guide (see Process), a visible GitHub board, and regular syncs reduced that. Playtesting was a collaboration skill in its own right: when feedback showed that a feature we liked confused new players, treating that as data—not defending the first design—led to better HUD, tutorial, and wave presentation.
+Several unexpected gains came from friction points. First, we entered the project assuming “feature completeness” would dominate outcomes; in practice, **integration quality and clarity of feedback** mattered more than raw feature count. Second, we expected balancing to be mostly intuition-driven; instead, lightweight formulas plus structured playtest evidence gave faster and more defendable decisions. Third, we underestimated how much team process shapes technical quality: once ownership, branch discipline, and review expectations were explicit, merge conflicts dropped and debugging became more localised.  
+
+Our biggest mindset shift was from **defending initial ideas** to **treating user feedback as design data**. When players struggled with wave information, menu flow, or readability, we stopped framing issues as “user error” and started redesigning communication cues in HUD/tutorial/settings. That shift improved both the product and our engineering judgement: good software is not only correct internally, but also understandable under real player pressure.
 
 ### Future directions
 
@@ -711,6 +683,10 @@ Working as a six-person team, we found that communication and clear ownership ma
 | Jingjing Liu | Designed levels and produced visual assets used in the game. |
 | Zejun Zhang | Built the user interface and menu systems (screens, navigation, and in-game UI flow). |
 | Mingshu Zhang | Implemented the grid system and integrated subsystems into a coherent game loop. |
+
+### AI Usage Statement
+
+Some visual assets used in this game project were generated with Gemini. AI tools were also used for grammar checking and language polishing in the report text.
 
 ## Additional Marks
 
