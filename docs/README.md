@@ -19,12 +19,12 @@ Folder layout for this repo: [`STRUCTURE.md`](./STRUCTURE.md).
 <br>
 
 <p>
-  <a href="./demo/demo.mp4" target="_blank">
-    <img src="./images/demo-video-poster.jpg" alt="Demo video — thumbnail frame from demo.mp4" width="720">
+  <a href="https://youtu.be/wFAuruqRcDY?si=YoTJHjLVyXZf_86o" target="_blank">
+    <img src="https://img.youtube.com/vi/wFAuruqRcDY/maxresdefault.jpg" alt="Demo video cover on YouTube" width="720">
   </a>
 </p>
 <p>
-  <a href="./demo/demo.mp4" target="_blank">Watch Video</a>
+  <a href="https://youtu.be/wFAuruqRcDY?si=YoTJHjLVyXZf_86o" target="_blank">Watch Video</a>
 </p>
 
 </div>
