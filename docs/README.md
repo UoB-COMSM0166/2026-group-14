@@ -638,9 +638,9 @@ Looking ahead, we would improve player experience with more keyboard and display
 | Jiaxi You | Led project management and coordination of evaluation activities; set up the testing framework and initialised the game engine for the team baseline. |
 | Shasha Tang | Produced requirements documentation; designed core gameplay mechanics and developed user stories to guide implementation. |
 | Junjie Wang | Implemented the tower-defence systems and combat mechanics (towers, waves, and related in-battle behaviour). |
-| Jingjing Liu | Designed levels and produced visual assets used in the game. |
+| Jingjing Liu | Designed levels and integrated subsystems into a coherent game loop. |
 | Zejun Zhang | Built the user interface and menu systems (screens, navigation, and in-game UI flow). |
-| Mingshu Zhang | Implemented the grid system and integrated subsystems into a coherent game loop. |
+| Mingshu Zhang | Implemented the grid system. |
 
 ### AI Usage Statement
 
