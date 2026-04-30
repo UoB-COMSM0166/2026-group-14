@@ -88,11 +88,17 @@ Folder layout for this repo: [`STRUCTURE.md`](./STRUCTURE.md).
 
 ### Introduction
 
-Defend London is a fast-paced, city-themed tower defense experience where strategy meets style. Players are challenged to protect iconic London landmarks from relentless enemy waves by building smart defenses, managing limited resources, and making split-second tactical decisions across increasingly intense levels.
+Defend London is an immersive, city-themed tower defense game that challenges players to protect iconic London landmarks across increasingly demanding waves. At its core, the game combines classic placement-and-upgrade strategy with real-time decision-making: where to build, when to spend, and how to adapt before the next enemy push overwhelms the map.
 
-Inspired by two beloved classics — **Carrot Fantasy** and **Plants vs. Zombies** — the game combines approachable core mechanics with deeper strategic layers, from tower synergy and positioning to wave-by-wave adaptation under pressure.
+The project draws direct inspiration from two strategy classics, **Carrot Fantasy (保卫萝卜)** and **Plants vs. Zombies (植物大战僵尸)**. From these influences, we kept the accessible "easy to start, hard to master" loop, then reinterpreted it through a British urban theme shaped by our own experience studying in the UK. Landmarks, pacing, and level atmosphere are designed as a playable reflection of places and city impressions we encountered after arriving here.
 
-What gives Defend London its identity is our own journey in the UK. As international students, the streets, landmarks, and atmosphere we encountered became creative fuel for the project. The result is not just a tower defense game, but a playable tribute to our British experience: familiar places reimagined as dynamic battlegrounds where every choice can turn the tide.
+#### The Twist: Strategy Under Pressure
+
+What distinguishes Defend London from a passive tower-placement loop is how survival pressure and tactical trade-offs are layered into every round:
+
+- **Hostile wave pressure:** Enemy types have distinct behaviours and scaling strength, so players must continuously rebalance layout, damage coverage, and resource spending rather than rely on one fixed build.
+- **Economy risk vs. reward:** Gold is limited and decisions are irreversible in the short term, making each placement, sell/refund choice, and timing window a strategic commitment.
+- **Guided-to-advanced progression:** The onboarding flow lowers entry barriers for new players, but later waves demand tighter positioning, synergy planning, and quicker adaptation under stress.
 
 ---
 
