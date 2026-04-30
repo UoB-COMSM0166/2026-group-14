@@ -240,7 +240,7 @@ The tower roster is a role-based system: basic towers provide stable single-targ
 | <img src="../game/assets/tower_basic.png" width="40" alt="Basic tower"> | Basic Tower | 60 | 15 | Balanced baseline |
 | <img src="../game/assets/tower_slow.png" width="40" alt="Slow tower"> | Slow Tower | 85 | 12 | 45% slow effect |
 | <img src="../game/assets/tower_area.png" width="40" alt="Area tower"> | Area Tower | 130 | 13 | Pulsing AoE damage |
-| <img src="../game/assets/tower_crystal.png" width="40" alt="Crystal tower"> | Crystal Tower | 120 | 15 | +25% damage to nearby towers |
+| <img src="../game/assets/tower3.png" width="40" alt="Crystal tower"> | Crystal Tower | 120 | 15 | +25% damage to nearby towers |
 | <img src="../game/assets/tower_steam.png" width="40" alt="Steam cannon"> | Steam Cannon | 180 | 55 | Piercing (up to 3 targets) |
 | <img src="../game/assets/tower_alchemist.png" width="40" alt="Alchemist tower"> | Alchemist Tower | 150 | 20 | Random potion effects |
 
