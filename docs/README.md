@@ -88,7 +88,11 @@ Folder layout for this repo: [`STRUCTURE.md`](./STRUCTURE.md).
 
 ### Introduction
 
-Defend London is a tower defense game where players protect iconic London landmarks from waves of invading enemies by building towers, managing resources, and surviving increasingly challenging waves across three beautifully illustrated levels; what makes it stand out is its authentic London setting, diverse enemy roster with distinct behaviors, and a guided onboarding flow that helps new players learn core mechanics quickly.
+Defend London is a fast-paced, city-themed tower defense experience where strategy meets style. Players are challenged to protect iconic London landmarks from relentless enemy waves by building smart defenses, managing limited resources, and making split-second tactical decisions across increasingly intense levels.
+
+Inspired by two beloved classics — **Carrot Fantasy** and **Plants vs. Zombies** — the game combines approachable core mechanics with deeper strategic layers, from tower synergy and positioning to wave-by-wave adaptation under pressure.
+
+What gives Defend London its identity is our own journey in the UK. As international students, the streets, landmarks, and atmosphere we encountered became creative fuel for the project. The result is not just a tower defense game, but a playable tribute to our British experience: familiar places reimagined as dynamic battlegrounds where every choice can turn the tide.
 
 ---
 
@@ -633,14 +637,14 @@ Looking ahead, we would improve player experience with more keyboard and display
 
 ## Contribution Statement
 
-| Contributor | Contribution |
-|---|---|
-| Jiaxi You | Led project management and coordination of evaluation activities; set up the testing framework and initialised the game engine for the team baseline. |
-| Shasha Tang | Produced requirements documentation; designed core gameplay mechanics and developed user stories to guide implementation. |
-| Junjie Wang | Implemented the tower-defence systems and combat mechanics (towers, waves, and related in-battle behaviour). |
-| Jingjing Liu | Designed levels and integrated subsystems into a coherent game loop. |
-| Zejun Zhang | Built the user interface and menu systems (screens, navigation, and in-game UI flow). |
-| Mingshu Zhang | Implemented the grid system. |
+| Contributor | Contribution | Percentage |
+|---|---|---|
+| Jiaxi You | Led project management and coordination of evaluation activities; set up the testing framework and initialised the game engine for the team baseline. | 1 |
+| Shasha Tang | Produced requirements documentation; designed core gameplay mechanics and developed user stories to guide implementation. | 1 |
+| Junjie Wang | Implemented the tower-defence systems and combat mechanics (towers, waves, and related in-battle behaviour), and contributed to project video production and editing. | 1 |
+| Jingjing Liu | Designed levels and integrated subsystems into a coherent game loop, and produced the project video script. | 1 |
+| Zejun Zhang | Built the user interface and menu systems (screens, navigation, and in-game UI flow), and added in-game sound effects integration. | 1 |
+| Mingshu Zhang | Implemented the grid system, and contributed to the design and implementation support of the Evaluation section. | 1 |
 
 ### AI Usage Statement
 
