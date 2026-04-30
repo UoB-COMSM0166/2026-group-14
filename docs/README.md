@@ -90,7 +90,7 @@ Folder layout for this repo: [`STRUCTURE.md`](./STRUCTURE.md).
 
 Defend London is an immersive, city-themed tower defense game that challenges players to protect iconic London landmarks across increasingly demanding waves. At its core, the game combines classic placement-and-upgrade strategy with real-time decision-making: where to build, when to spend, and how to adapt before the next enemy push overwhelms the map.
 
-The project draws direct inspiration from two strategy classics, **Carrot Fantasy (保卫萝卜)** and **Plants vs. Zombies (植物大战僵尸)**. From these influences, we kept the accessible "easy to start, hard to master" loop, then reinterpreted it through a British urban theme shaped by our own experience studying in the UK. Landmarks, pacing, and level atmosphere are designed as a playable reflection of places and city impressions we encountered after arriving here.
+The project draws direct inspiration from two strategy classics, **Carrot Fantasy** and **Plants vs. Zombies**. From these influences, we kept the accessible "easy to start, hard to master" loop, then reinterpreted it through a British urban theme shaped by our own experience studying in the UK. Landmarks, pacing, and level atmosphere are designed as a playable reflection of places and city impressions we encountered after arriving here.
 
 #### The Twist: Strategy Under Pressure
 
