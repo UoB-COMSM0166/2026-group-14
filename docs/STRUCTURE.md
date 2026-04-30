@@ -6,7 +6,7 @@ Top-level layout for **2026-group-14** (Defend London).
 |------|---------|
 | [`game/`](../game/) | Playable game: `index.html`, `js/`, `assets/`, `soundtrack/`, `libraries/`. GitHub Pages entry: `game/index.html`. |
 | [`docs/`](../docs/) | Project report, design notes, images, demos, and weekly submissions. |
-| [`tests/`](../tests/) | Automated tests (if present). |
+| [`tests/`](../tests/) | Automated tests. |
 | [`.vscode/`](../.vscode/) | Editor settings for the team. |
 
 ## Under `docs/`
